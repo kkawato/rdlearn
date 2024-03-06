@@ -16,7 +16,7 @@
 #' @importFrom nnet multinom
 #' @import tidyverse
 #'
-#' @references Yi Zheng ...
+#' @references Yi Zhang ...
 #'
 #' @examples
 #'
@@ -24,10 +24,13 @@
 #'
 #'
 #' @export
+
+
 rdlearn <- function(
     y,
     x,
     c,
+    groupname = NULL, #もしgroupnameがNULLであれば小さい方から順に番号をつける、そうでなければGroupnameを追加する
     data,
     fold = 20,
     M = 1,
@@ -351,6 +354,8 @@ rdlearn <- function(
     call = cl, #the matched call to the rdlearn function.
     variables = varnames, #outcome, running variable, cutoff, pretreatment covariates (for calculating propensity score)
     sample = n, #sample sizes withnin baseline cutoffs(like the left side of Table 1)
+    numgroup = q, # the number of groups
+    groupname =
     # ps_model = #model for estimating propensity score
     # psout_model: #model for group specific regression
     # lip_model: #Any generic nonparametric regression methods
@@ -359,13 +364,11 @@ rdlearn <- function(
     cost = cost, #cost for calculating regret
     #rdestimates: and standard error within conventional RD framework(like the right side of Table 1) # todo
     basecut = c.vec, #baseline cutoffs
-    optcut = c.all, #learned optimal cutoffs
+    safecut = c.all, #learned optimal cutoffs
     changecut = c.vec - c.all, #change in cutoff (like the M=1 column in the Figure 2)
     regret = regret_sum #regret of optimal policy
   )
 
   class(out) <- "rdlearn"
-  out
-}
-
+  out}
 

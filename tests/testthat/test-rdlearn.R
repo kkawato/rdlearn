@@ -1,7 +1,7 @@
-library("tidyverse")
-library("nprobust")
-library("nnet")
-
+library(tidyverse)
+library(nprobust)
+library(nnet)
+library(ggplot2)
 
 ##########################################################################
 ### Empirical Data ######################################################
@@ -9,7 +9,7 @@ library("nnet")
 
 data(colombia_acces)
 result <- RDDPackage::rdlearn(y="acces", x="saber11", c="cutoff", data = colombia_acces, fold = 20)
-result$changecut
+plot(result)
 
 # WHY??? -> it worked for some reason
 # Probably the number of fold was small
