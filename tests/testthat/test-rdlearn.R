@@ -8,8 +8,10 @@ library(ggplot2)
 ##########################################################################
 
 data(colombia_acces)
-result <- RDDPackage::rdlearn(y="acces", x="saber11", c="cutoff", data = colombia_acces, fold = 20)
+result <- rdlearn(y="acces", x="saber11", c="cutoff", data = colombia_acces, fold = 20)
+result <- rdlearn(y="acces", x="saber11", c="cutoff", groupname = "department", data = colombia_acces, fold = 20)
 plot(result)
+plot.rdlearn(result)
 
 # WHY??? -> it worked for some reason
 # Probably the number of fold was small

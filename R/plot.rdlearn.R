@@ -18,10 +18,11 @@ plot.rdlearn <- function(x){
   # x$numgroup
 
   q <- x$numgroup
+
   dataall <- data.frame(y=rev(1:q),
                         org.c = x$basecut,
                         safe.c = x$safecut,
-                        type = paste0("M=",x$M))
+                        type = paste0("M=",x$M)) #ここもMがベクトルである場合に対応させなければいけない
 
   ggplot(data = dataall, aes(type, y)) +
     geom_tile(aes(fill = safe.c - org.c), color = "white") +
@@ -32,8 +33,7 @@ plot.rdlearn <- function(x){
     geom_text(aes(label = safe.c - org.c), color = "black", size = 3,
               position = position_dodge(width = 1)) +
     scale_y_continuous(breaks = seq(1, q, 1),
-                       # labels = rev(groupname) #group nameをどこでインプットするべきだろうか…
-                       # groupnameがなかった場合には、自動的に1から番号を振るっていうコードを書けばいいのでは？
+                      labels = rev(x$groupname)
                        ) +
     xlab("Smoothness factor") +
     ylab("") +

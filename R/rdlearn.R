@@ -10,6 +10,7 @@
 #' @param fold number of folds
 #' @param M multiplicative smoothness factor
 #' @param cost cost for calculating regret
+#' @param groupname
 #'
 #' @return
 #' @importFrom nprobust lprobust
@@ -20,30 +21,26 @@
 #'
 #' @examples
 #'
-#'
-#'
-#'
 #' @export
-
-
 rdlearn <- function(
     y,
     x,
     c,
-    groupname = NULL, #もしgroupnameがNULLであれば小さい方から順に番号をつける、そうでなければGroupnameを追加する
+    groupname = NULL,
     data,
     fold = 20,
     M = 1,
-    cost =0 # Cost should be scaled by the range of the outcome Y.
-    # automatically scale the cost according to the range of Y?
-    # In our application, Y is an indicator, so C is within [0,1].
-
-    ####### models #######
-    # ps_model, # nnet
-    # psout_model, # local linear/polynomial regressionzl, lprobust
-    # lip_model # fix this lprobust(... ,deriv = 1, p=2, bwselect="mse-dpi")
-    # b_model, # fix this lprobust(... ,deriv = 1, p=2, bwselect="mse-dpi")
-    ){
+    cost = 0
+      # Cost should be scaled by the range of the outcome Y.
+      # automatically scale the cost according to the range of Y?
+      # In our application, Y is an indicator, so C is within [0,1].
+      ### models ###
+      # ps_model, # nnet
+      # psout_model, # local linear/polynomial regressionzl, lprobust
+      # lip_model # fix this lprobust(... ,deriv = 1, p=2, bwselect="mse-dpi")
+      # b_model, # fix this lprobust(... ,deriv = 1, p=2, bwselect="mse-dpi")
+    )
+{
   #######################################################################
   # Get function call
   cl <- match.call()
@@ -72,6 +69,10 @@ rdlearn <- function(
   if (anyNA(data[[c]]))
     stop("the column 'c' contains NA.")
 
+  #check M and cost
+  if ()
+    stop("both M and cost are vectors.")
+
   ########## cleaning data #############
   Y <- data[[y]]
   X <- data[[x]]
@@ -83,6 +84,19 @@ rdlearn <- function(
 
   G = match(C,c.vec)  # Group index
   D = as.numeric(X>=C) # Treatment index
+
+  # make groupname
+  if(is.null(groupname)) {
+    groupname <- character(q)
+    for (k in 1:q) {
+      groupname[k] <- paste0("Group", k)
+    }
+  }
+  else{
+    grouplist <- data[[groupname]]
+    dict <- setNames(grouplist, C)
+    groupname <- sapply(c.vec, function(x) dict[[as.character(x)]])
+  }
 
   K = fold
 
@@ -176,6 +190,9 @@ rdlearn <- function(
 
   }
 
+  print("Cross-fitting finished")
+  print("Extrapolation Started")
+
   #################################################################################
   ## Second, (1) estimate cross-group differences B
   ## (2) choose the value of smoothness parameter Lip
@@ -223,16 +240,14 @@ rdlearn <- function(
       temp.dat = data_all %>% filter(D==0 & X<min(c.vec[g.pr],c.vec[g]))
 
       temp.vc = data.frame("psout"=temp.dat[,paste0("pseudo.",g)]-temp.dat[,paste0("pseudo.",g.pr)]+
-                             with(temp.dat,I(G==g)*(Y-eval(parse(text =paste0("pseudo.",g))))/eval(parse(text =paste0("pseudo.ps",g))) )-
-                             with(temp.dat,I(G==g.pr)*(Y-eval(parse(text =paste0("pseudo.",g.pr))))/eval(parse(text =paste0("pseudo.ps",g.pr))) ),   temp.dat $X,g,g.pr)
+                             with(temp.dat,I(G==g)*(Y-eval(parse(text =paste0("pseudo.",g))))/eval(parse(text = paste0("pseudo.ps",g))) )-
+                             with(temp.dat,I(G==g.pr)*(Y-eval(parse(text =paste0("pseudo.",g.pr))))/eval(parse(text = paste0("pseudo.ps",g.pr))) ),   temp.dat $X,g,g.pr)
       names(temp.vc)[1:2]=c("psout","X")
-      psd_dat0=rbind(psd_dat0,   temp.vc )
+      psd_dat0=rbind(psd_dat0, temp.vc )
 
-      Lip_0[g,g.pr]=abs(lprobust(temp.vc[,"psout"],temp.vc[,"X"],eval = min(c.vec[g.pr],c.vec[g]),deriv = 1,p=2,bwselect="mse-dpi")$Estimate[,5])
-      B.0m[g,g.pr]=lprobust(temp.vc[,"psout"],temp.vc[,"X"],eval = min(c.vec[g.pr],c.vec[g]),bwselect="mse-dpi")$Estimate[,5]
-
-    }
-
+      Lip_0[g,g.pr]=abs(lprobust(temp.vc[,"psout"],temp.vc[,"X"],eval = min(c.vec[g.pr],c.vec[g]), deriv = 1,p=2, bwselect="mse-dpi")$Estimate[,5])
+      B.0m[g,g.pr]=lprobust(temp.vc[,"psout"],temp.vc[,"X"],eval = min(c.vec[g.pr],c.vec[g]), bwselect="mse-dpi")$Estimate[,5]
+}
 
   Lip_1 = Lip_1 + t(Lip_1) ; Lip_0 = Lip_0 + t(Lip_0)
   B.1m = B.1m + t(-B.1m) ; B.0m = B.0m + t(-B.0m)
@@ -262,8 +277,11 @@ rdlearn <- function(
     return(list(upper = upper, lower = lower ))
   }
 
+  print("Alorithm 1 finished")
+  print("Calculating Regret Started")
+
   #############################################################################
-  ############### caluculating regret
+  ############### calculating regret
   #############################################################################
 
   # Without loop of M and cost
@@ -355,7 +373,7 @@ rdlearn <- function(
     variables = varnames, #outcome, running variable, cutoff, pretreatment covariates (for calculating propensity score)
     sample = n, #sample sizes withnin baseline cutoffs(like the left side of Table 1)
     numgroup = q, # the number of groups
-    groupname =
+    groupname = groupname, # the name of group in the order of cutoffs from low to high (default is Group1, Group2,... from low to high)
     # ps_model = #model for estimating propensity score
     # psout_model: #model for group specific regression
     # lip_model: #Any generic nonparametric regression methods
@@ -369,6 +387,7 @@ rdlearn <- function(
     regret = regret_sum #regret of optimal policy
   )
 
-  class(out) <- "rdlearn"
-  out}
+ class(out) <- "rdlearn"
 
+ out
+}
