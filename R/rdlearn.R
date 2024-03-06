@@ -4,7 +4,7 @@
 #' RDD Policy learning
 #'
 #'
-#' @param data
+#' @param data data
 #' @param fold
 #' @param M
 #' @param cost
