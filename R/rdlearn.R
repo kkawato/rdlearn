@@ -15,13 +15,15 @@
 #' @importFrom nprobust lprobust
 #' @importFrom nnet multinom
 #' @import tidyverse
-#' @export
 #'
 #' @references Yi Zheng ...
 #'
-#'
-#'
 #' @examples
+#'
+#'
+#'
+#'
+#' @export
 rdlearn <- function(
     y,
     x,
@@ -38,9 +40,7 @@ rdlearn <- function(
     # psout_model, # local linear/polynomial regressionzl, lprobust
     # lip_model # fix this lprobust(... ,deriv = 1, p=2, bwselect="mse-dpi")
     # b_model, # fix this lprobust(... ,deriv = 1, p=2, bwselect="mse-dpi")
-    )
-
-{
+    ){
   #######################################################################
   # Get function call
   cl <- match.call()
@@ -57,7 +57,9 @@ rdlearn <- function(
   varnames <- list(y, x, c)
 
   # Check if all variables are in 'data'
-  if(any(varnames %notin% names(data))) stop("all variables must be in 'data'.")
+  if (!all(varnames %in% names(data))) {
+    stop("all variables must be in 'data'.")
+  }
 
   # check NA
   if (anyNA(data[[y]]))
@@ -74,13 +76,24 @@ rdlearn <- function(
 
   c.vec = sort(unique(C)) #cutoffs from min to max
   n = length(Y) # sample size
-  q = length(length(unique(C))) # number of groups
+  q = length(unique(C)) # number of groups
+
   G = match(C,c.vec)  # Group index
   D = as.numeric(X>=C) # Treatment index
 
+  K = fold
 
   datall = data.frame(Y=Y,X=X,C=C,D=D,G=G)
-  data_split = datall %>% mutate(fold_id=sample(1:K,size=dim(datall)[1],replace=T)) %>% group_by(fold_id) %>% nest() %>% arrange(fold_id) #split data
+  data_split <- datall %>%
+    mutate(fold_id = sample(1:K, size = dim(datall)[1], replace = TRUE)) %>%
+    group_by(fold_id) %>%
+    nest() %>%
+    arrange(fold_id) #split data
+  # `[`(., order(names(.)$fold_id))　# Order the resulting list based on fold_id names (numerically)
+  # Error in `arrange(., fold_id)`: could not find function "arrange"
+  # Error in `nest(.)`: could not find function "nest"
+  # Why?
+
   data_all = data_split %>% unnest(data) %>% ungroup()
 
   #################################################################################
@@ -92,6 +105,7 @@ rdlearn <- function(
   #################################################################################
   ######### Appendix A.2. Step.1(a)(b)
   #################################################################################
+
   for(k in 1:K){
     data_train = data_split %>% filter(fold_id!=k) %>% unnest(data) %>% ungroup() %>% select(-fold_id)
     data_test = data_split %>% filter(fold_id==k) %>% unnest(data) %>% ungroup() %>% select(-fold_id)
@@ -109,7 +123,10 @@ rdlearn <- function(
       # psout_model
       # fix this model for now
       # refere to (14) \hat\tilda m ^ {-k[i]}
-      mu.fit1 = lprobust(data_train$Y[data_train$D==1 & data_train$G==g],data_train$X[data_train$D==1 & data_train$G==g],eval = eval.dat1.all,bwselect="imse-dpi")$Estimate[,5]
+
+      # nprobust::lprobust(...) at RDDPackage/R/rdlearn.R:127:7
+      # Error in `seq.default(x.min, x.max, length.out = imsegrid)`: 'from' must be a finite number
+      mu.fit1 = lprobust(data_train$Y[data_train$D==1 & data_train$G==g], data_train$X[data_train$D==1 & data_train$G==g],eval = eval.dat1.all,bwselect="imse-dpi")$Estimate[,5]
 
       tryCatch( { data_all[  data_all$fold_id==k & data_all$X>=c.vec[g] & data_all$X<c.vec[min(g+1,q)] & data_all$D==0, paste0("mu",".m")]= mu.fit1[1:length(eval.dat1.m)] },error=function(e) return(0))
       tryCatch( { data_all[  data_all$fold_id==k & data_all$X>=c.vec[g] & data_all$X<c.vec[min(g+1,q)] & data_all$G==g, paste0("mu",".aug")]= mu.fit1[(length(eval.dat1.m)+1):(length(eval.dat1.m)+length(eval.dat1.aug))] },error=function(e) return(0))
@@ -123,7 +140,7 @@ rdlearn <- function(
       # psout_model
       # fix this model for now
       # refere to (14) \hat\tilda m ^ {-k[i]}
-      mu.fit0 = lprobust(data_train$Y[data_train$D==0 & data_train$G==g],data_train$X[data_train$D==0 & data_train$G==g],eval = eval.dat0.all,bwselect="imse-dpi")$Estimate[,5]
+      mu.fit0 = lprobust(data_train$Y[data_train$D==0 & data_train$G==g], data_train$X[data_train$D==0 & data_train$G==g], eval = eval.dat0.all, bwselect="imse-dpi")$Estimate[,5]
 
       tryCatch( { data_all[  data_all$fold_id==k & data_all$X>=c.vec[max(g-1,1)] & data_all$X<c.vec[g] & data_all$D==1, paste0("mu",".m")]= mu.fit0[1:length(eval.dat0.m)] },error=function(e) return(0))
       tryCatch( { data_all[  data_all$fold_id==k & data_all$X>=c.vec[max(g-1,1)] & data_all$X<c.vec[g] & data_all$G==g, paste0("mu",".aug")]= mu.fit0[(length(eval.dat0.m)+1):(length(eval.dat0.m)+length(eval.dat0.aug))] },error=function(e) return(0))
@@ -164,6 +181,9 @@ rdlearn <- function(
   Lip_1 = Lip_0=matrix(0,q,q) # storing the value of smoothness parameter;  1/0: treatment/control
   B.1m = B.0m = matrix(0,nrow=q,ncol=q) # storing the value of estimated cross-group differences at cutoff point
 
+  # Error in `eval(parse(text = paste0("pseudo.ps", g)))`: object 'pseudo.ps1' not found
+  # for the case where q = 2 (two cutoffs) this part should be modified
+
   for(g in seq(1,q-1,1))
     for(g.pr in seq(g+1,q,1)){
 
@@ -172,10 +192,10 @@ rdlearn <- function(
       #########################
       temp.dat = data_all %>% filter(D==1 & X>=max(c.vec[g.pr],c.vec[g]))
       # Construct the pseudo-outcome
-      temp.vc = data.frame( temp.dat[,paste0("pseudo.",g)]-temp.dat[,paste0("pseudo.",g.pr)]+
-                      with(temp.dat,I(G==g)*(Y-eval(parse(text =paste0("pseudo.",g))))/eval(parse(text =paste0("pseudo.ps",g))) )-
-                      with(temp.dat,I(G==g.pr)*(Y-eval(parse(text =paste0("pseudo.",g.pr))))/eval(parse(text =paste0("pseudo.ps",g.pr))) )
-                    , temp.dat $X,g,g.pr)
+      temp.vc = data.frame(temp.dat[ ,paste0("pseudo.", g)] - temp.dat[, paste0("pseudo.", g.pr)] +
+                      with(temp.dat,I(G==g)*(Y-eval(parse(text =paste0("pseudo.", g))))/eval(parse(text =paste0("pseudo.ps", g))) )-
+                      with(temp.dat,I(G==g.pr)*(Y-eval(parse(text =paste0("pseudo.", g.pr))))/eval(parse(text =paste0("pseudo.ps", g.pr))) )
+                    ,temp.dat $X,g,g.pr)
 
       names(temp.vc)[1:2] = c("psout","X")
       psd_dat1 = rbind(psd_dat1, temp.vc )
@@ -243,9 +263,9 @@ rdlearn <- function(
   ############### caluculating regret
   #############################################################################
 
-  # Without loop of kk and cost
+  # Without loop of M and cost
 
-  Lip_1 = kk * Lip_1temp ; Lip_0 = kk * Lip_0temp
+  Lip_1 = M * Lip_1temp ; Lip_0 = M * Lip_0temp
 
   c.all= rep(0,length(c.vec))
 
@@ -328,23 +348,24 @@ rdlearn <- function(
   }
 
   out <- list(
-    call = cl#the matched call to the rdlearn function.
-    variables = varnames #outcome, running variable, cutoff, pretreatment covariates (for calculating propensity score)
-    sample = n #sample sizes withnin baseline cutoffs(like the left side of Table 1)
+    call = cl, #the matched call to the rdlearn function.
+    variables = varnames, #outcome, running variable, cutoff, pretreatment covariates (for calculating propensity score)
+    sample = n, #sample sizes withnin baseline cutoffs(like the left side of Table 1)
     # ps_model = #model for estimating propensity score
     # psout_model: #model for group specific regression
     # lip_model: #Any generic nonparametric regression methods
     # b_model: #Any generic nonparametric regression methods with the running variable as the only predictor to construct the DR pseudo outcome for the actual observed difference
-    M = M: #multiplicative smoothness factor
-    cost = cost #cost for calculating regret
+    M = M, #multiplicative smoothness factor
+    cost = cost, #cost for calculating regret
     #rdestimates: and standard error within conventional RD framework(like the right side of Table 1) # todo
-
-    basecut = c.vec #baseline cutoffs
-    optcut = c.all #learned optimal cutoffs
-    changecut = c.vec - c.all #change in cutoff (like the M=1 column in the Figure 2)
+    basecut = c.vec, #baseline cutoffs
+    optcut = c.all, #learned optimal cutoffs
+    changecut = c.vec - c.all, #change in cutoff (like the M=1 column in the Figure 2)
     regret = regret_sum #regret of optimal policy
   )
 
   class(out) <- "rdlearn"
   out
 }
+
+
