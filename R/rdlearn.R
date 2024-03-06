@@ -3,14 +3,13 @@
 #####################################################
 #' RDD Policy learning
 #'
-#'
-#' @param data data
-#' @param fold
-#' @param M
-#' @param cost
-#' @param y
-#' @param x
-#' @param c
+#' @param y outcome variable
+#' @param x running variable
+#' @param c cutoff variable
+#' @param data data frame containing all variables
+#' @param fold number of folds
+#' @param M multiplicative smoothness factor
+#' @param cost cost for calculating regret
 #'
 #' @return
 #' @importFrom nprobust lprobust
