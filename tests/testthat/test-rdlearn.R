@@ -56,12 +56,11 @@ library(ggplot2)
 
 
 ##########################################################################
-### Simulation Data ######################################################
+### Simulation Data (A) ##################################################
 ##########################################################################
+set.seed(1234)
 
-
-n <- 1000
-
+n <- 2000
 sig=10
 c0 = -850 ; c1 = -571
 coef0=c(-1.992230e+00 ,-1.004582e-02 ,-1.203897e-05 ,-4.587072e-09)
@@ -94,14 +93,44 @@ Y = Y0*(1-D) + Y1*D - delta*(1-G) - exp(0.01*X)*(1-G) - dif *(1-G)*(1-D)
 # G=1,D=1
 # G=1,D=0
 
-input <- data.frame(
+simdata_1 <- data.frame(
   X = X,
   C = C,
   Y = Y
 )
-colnames(input) <- c("Run", "Cut", "Out")
+colnames(simdata_1) <- c("run", "cut", "out")
 
-# result <- rdlearn(y="Out",x="Run",c="Cut", data = input, fold = 10)
-result <- rdlearn_a1(y="Out",x="Run",c="Cut", data = input, fold = 10)
+simresult_1 <- rdlearn(y="out",x="run",c="cut", data = simdata_1, fold = 10)
 
+##########################################################################
+### Simulation Data (B) ##################################################
+##########################################################################
 
+sig=10
+n <- 2000
+c0 = -850 ; c1 = -571
+coef0=c( -1.992230e+00 ,-1.004582e-02 ,-1.203897e-05 ,-4.587072e-09)
+coef1=c(9.584361e-01, 5.308251e-04 ,1.103375e-06 , 1.146033e-09 )
+
+X = runif(n,-1000,-1)
+G= as.numeric(I(0.01*X+rnorm(n,5,sig)>0)) #strong overlap
+C= ifelse(G==1,c1,c0) ; D = as.numeric(X>=C)  ; W = as.numeric(X<c1 & X>=c0)
+
+Px = poly(X,degree=3,raw=TRUE)
+Px = cbind(rep(1,nrow(Px)),Px)
+EY0 = Px%*%coef0
+EY1 = Px%*%coef1
+
+delta = -0.2
+Y0 = EY0 + rnorm(n,sd=.3)
+Y1 = EY1 + rnorm(n,sd=.3)
+Y = Y0*(1-D) + Y1*D + delta*(1-G) - exp(0.01*X)*(1-G) + 0.1*(1-G)*(1-D)
+
+simdata_2 <- data.frame(
+  X = X,
+  C = C,
+  Y = Y
+)
+colnames(simdata_2) <- c("run", "cut", "out")
+
+simresult_2 <- rdlearn(y="out",x="run",c="cut", data = simdata_2, fold = 10)

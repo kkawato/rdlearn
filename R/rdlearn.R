@@ -42,7 +42,7 @@ rdlearn <- function(
     )
 {
   #######################################################################
-  set.seed(12345)
+  set.seed(1234)
 
   # Get function call
   cl <- match.call()
@@ -191,7 +191,6 @@ rdlearn <- function(
       if(dim(pred)[1]!=1){
         data_all[data_all$fold_id==k & data_all$D==0,paste0("pseudo.ps",seq(1,q,1))] = pred
       }},error=function(e) return(0))
-
   }
 
   data_all <- as_tibble(data_all)
@@ -253,8 +252,12 @@ rdlearn <- function(
       names(temp.vc)[1:2]=c("psout","X")
       psd_dat0=rbind(psd_dat0, temp.vc )
 
-      Lip_0[g,g.pr]=abs(lprobust(temp.vc[,"psout"],temp.vc[,"X"],eval = min(c.vec[g.pr],c.vec[g]), deriv = 1,p=2, bwselect="mse-dpi")$Estimate[,5])
-      B.0m[g,g.pr]=lprobust(temp.vc[,"psout"],temp.vc[,"X"],eval = min(c.vec[g.pr],c.vec[g]), bwselect="mse-dpi")$Estimate[,5]
+      Lip_0[g,g.pr]=abs(lprobust(temp.vc[,"psout"],temp.vc[,"X"],
+                                 eval = min(c.vec[g.pr],c.vec[g]),
+                                 deriv = 1,p=2, bwselect="mse-dpi")$Estimate[,5])
+      B.0m[g,g.pr]=lprobust(temp.vc[,"psout"],temp.vc[,"X"],
+                            eval = min(c.vec[g.pr],c.vec[g]),
+                            bwselect="mse-dpi")$Estimate[,5]
 }
 
   Lip_1 = Lip_1 + t(Lip_1) ; Lip_0 = Lip_0 + t(Lip_0)
@@ -271,17 +274,18 @@ rdlearn <- function(
       B.m=B.1m[g,g.prim];
       eval.main = unique(C[G == max(g,g.prim)])
     }
+
     if(group=="B0"){ #B1 G=1
       d=0;Lip=Lip_0[g,g.prim]
       B.m=B.0m[g,g.prim];
       eval.main = unique(C[G == min(g,g.prim)])
     }
 
-    B.up=  B.m
-    B.low= B.m
+    B.up =  B.m
+    B.low = B.m
 
     upper = sapply(x.train,function(x_prime) min(1, min( B.m + Lip * abs(x_prime - eval.main)) ))
-    lower= sapply(x.train,function(x_prime) max(-1, max( B.m - Lip * abs(x_prime - eval.main) )) )
+    lower = sapply(x.train,function(x_prime) max(-1, max( B.m - Lip * abs(x_prime - eval.main) )) )
     return(list(upper = upper, lower = lower ))
   }
 
@@ -368,6 +372,7 @@ rdlearn <- function(
         }
         regret_sum=c(regret_sum, max(regret))
       }
+
       # create dataframe
       group <- groupname
       c.all_df <- data.frame(c.all, group)
