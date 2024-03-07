@@ -42,6 +42,8 @@ rdlearn <- function(
     )
 {
   #######################################################################
+  set.seed(12345)
+
   # Get function call
   cl <- match.call()
 
@@ -112,6 +114,7 @@ rdlearn <- function(
   # Why?
 
   data_all = data_split %>% unnest(data) %>% ungroup()
+  data_all = as.data.frame(data_all)
 
   #################################################################################
   ########## Choosing the smoothness parameter (Section 4.3 & Appendix A.2)
@@ -132,9 +135,9 @@ rdlearn <- function(
     gamfit = multinom(formula = G ~ X, data = data_train)
 
     for(g in seq(1,q,1)){
-      eval.dat1.m = c( data_test %>% filter(X>=c.vec[g],X<c.vec[min(g+1,q)],D==0) %>% select(X))$X
-      eval.dat1.aug = c( data_test %>% filter(X>=c.vec[g],X<c.vec[min(g+1,q)],G==g) %>% select(X))$X
-      eval.dat1.pseudo = c( data_test %>% filter(D==1, X>=c.vec[g]) %>% select(X))$X
+      eval.dat1.m = c(data_test %>% filter(X>=c.vec[g],X<c.vec[min(g+1,q)],D==0) %>% select(X))$X
+      eval.dat1.aug = c(data_test %>% filter(X>=c.vec[g],X<c.vec[min(g+1,q)],G==g) %>% select(X))$X
+      eval.dat1.pseudo = c(data_test %>% filter(D==1, X>=c.vec[g]) %>% select(X))$X
       eval.dat1.all = c(eval.dat1.m,eval.dat1.aug, eval.dat1.pseudo)
 
       # psout_model
@@ -158,36 +161,40 @@ rdlearn <- function(
       # refere to (14) \hat\tilda m ^ {-k[i]}
       mu.fit0 = lprobust(data_train$Y[data_train$D==0 & data_train$G==g], data_train$X[data_train$D==0 & data_train$G==g], eval = eval.dat0.all, bwselect="imse-dpi")$Estimate[,5]
 
-      tryCatch( { data_all[  data_all$fold_id==k & data_all$X>=c.vec[max(g-1,1)] & data_all$X<c.vec[g] & data_all$D==1, paste0("mu",".m")]= mu.fit0[1:length(eval.dat0.m)] },error=function(e) return(0))
-      tryCatch( { data_all[  data_all$fold_id==k & data_all$X>=c.vec[max(g-1,1)] & data_all$X<c.vec[g] & data_all$G==g, paste0("mu",".aug")]= mu.fit0[(length(eval.dat0.m)+1):(length(eval.dat0.m)+length(eval.dat0.aug))] },error=function(e) return(0))
-      tryCatch( { data_all[  data_all$fold_id==k & data_all$D==0 & data_all$X<c.vec[g], paste0("pseudo.",g)]= mu.fit0[c((length(eval.dat0.m)+length(eval.dat0.aug)+1):length(eval.dat0.all))]} ,error=function(e) return(0))
+      tryCatch( { data_all[data_all$fold_id==k & data_all$X>=c.vec[max(g-1,1)] & data_all$X<c.vec[g] & data_all$D==1, paste0("mu",".m")]= mu.fit0[1:length(eval.dat0.m)] },error=function(e) return(0))
+      tryCatch( { data_all[data_all$fold_id==k & data_all$X>=c.vec[max(g-1,1)] & data_all$X<c.vec[g] & data_all$G==g, paste0("mu",".aug")]= mu.fit0[(length(eval.dat0.m)+1):(length(eval.dat0.m)+length(eval.dat0.aug))] },error=function(e) return(0))
+      tryCatch( { data_all[data_all$fold_id==k & data_all$D==0 & data_all$X<c.vec[g], paste0("pseudo.",g)]= mu.fit0[c((length(eval.dat0.m)+length(eval.dat0.aug)+1):length(eval.dat0.all))]} ,error=function(e) return(0))
     }
 
     # propensity score
     # gamfit = multinom(formula = G ~ X, data = data_train)
-
     eval.dat1.p = data_test %>% filter(D==1)
     tryCatch(
-      { pred = predict(gamfit, newdata = eval.dat1.p, "probs")
+      {pred = predict(gamfit, newdata = eval.dat1.p, "probs")
+      pred = data.frame(pred)
 
-      if(dim( pred)[1]==1){
+      if(dim(pred)[1]==1){
         data_all[data_all$fold_id==k & data_all$D==1, paste0("pseudo.ps",seq(1,q,1))] = t(as.matrix(pred, byrow=F))
       }
-      if(dim( pred)[1]!=1){
+      if(dim(pred)[1]!=1){
         data_all[data_all$fold_id==k & data_all$D==1, paste0("pseudo.ps",seq(1,q,1))] = pred
       }},error=function(e) return(0))
+
     eval.dat0.p = data_test %>% filter(D==0)
     tryCatch(
-      { pred = predict(gamfit, newdata = eval.dat0.p, "probs")
+      {pred = predict(gamfit, newdata = eval.dat0.p, "probs")
+      pred = data.frame(pred)
 
-      if(dim( pred)[1]==1){
-        data_all[data_all$fold_id==k & data_all$D==0,paste0("pseudo.ps",seq(1,q,1))]= t(as.matrix(pred, byrow=F))
+      if(dim(pred)[1]==1){
+        data_all[data_all$fold_id==k & data_all$D==0,paste0("pseudo.ps",seq(1,q,1))] = t(as.matrix(pred, byrow=F))
       }
-      if(dim( pred)[1]!=1){
-        data_all[data_all$fold_id==k & data_all$D==0,paste0("pseudo.ps",seq(1,q,1))]=pred
+      if(dim(pred)[1]!=1){
+        data_all[data_all$fold_id==k & data_all$D==0,paste0("pseudo.ps",seq(1,q,1))] = pred
       }},error=function(e) return(0))
 
   }
+
+  data_all <- as_tibble(data_all)
 
   print("Cross-fitting finished")
   print("Extrapolation Started")
@@ -196,9 +203,10 @@ rdlearn <- function(
   ## Second, (1) estimate cross-group differences B
   ## (2) choose the value of smoothness parameter Lip
   #################################################################################
-  psd_dat1 = psd_dat0 =NULL;
-  Lip_1 = Lip_0=matrix(0,q,q) # storing the value of smoothness parameter;  1/0: treatment/control
-  B.1m = B.0m = matrix(0,nrow=q,ncol=q) # storing the value of estimated cross-group differences at cutoff point
+
+  psd_dat1 = psd_dat0 = NULL;
+  Lip_1 = Lip_0 = matrix(0,q,q) # storing the value of smoothness parameter;  1/0: treatment/control
+  B.1m = B.0m = matrix(0, nrow=q, ncol=q) # storing the value of estimated cross-group differences at cutoff point
 
   # Error in `eval(parse(text = paste0("pseudo.ps", g)))`: object 'pseudo.ps1' not found
   # for the case where q = 2 (two cutoffs) this part should be modified
@@ -210,6 +218,7 @@ rdlearn <- function(
       # for D==1
       #########################
       temp.dat = data_all %>% filter(D==1 & X>=max(c.vec[g.pr],c.vec[g]))
+
       # Construct the pseudo-outcome
       temp.vc = data.frame(temp.dat[ ,paste0("pseudo.", g)] - temp.dat[, paste0("pseudo.", g.pr)] +
                       with(temp.dat,I(G==g)*(Y-eval(parse(text =paste0("pseudo.", g))))/eval(parse(text =paste0("pseudo.ps", g))) )-
@@ -224,13 +233,13 @@ rdlearn <- function(
       # compute the absolute value of the estimated first-order derivative
       # at a grid of points in the region of overlapping policies between the two groups
       Lip_1[g,g.pr]=abs(lprobust(temp.vc[,"psout"],temp.vc[,"X"],
-                                 eval = max(c.vec[g.pr],c.vec[g]), # it should be quantiles
+                                 eval = max(c.vec[g.pr],c.vec[g]), # it should be quantiles or test samples?
                                  deriv=1, p=2, bwselect="mse-dpi")$Estimate[,5])
 
       # Algorithm 1 (Appendix.A.2.)
       # regress pseudo-outcome on covariates X
       B.1m[g,g.pr]=lprobust(temp.vc[,"psout"],temp.vc[,"X"],
-                            eval = max(c.vec[g.pr],c.vec[g]), # it should be quantiles
+                            eval = max(c.vec[g.pr],c.vec[g]),# it should be quantiles or test samples?
                             deriv=0, p=1, bwselect="mse-dpi")$Estimate[,5]
 
       #########################
@@ -285,10 +294,8 @@ rdlearn <- function(
 
   group <- groupname
   safecut_all <- data.frame(group)
-  M_vec <- M
-  cost_vec <- cost
-  for(ll in cost_vec){
-    for(kk in M_vec){
+  for(ll in cost){
+    for(kk in M){
       Lip_1 = kk*Lip_1temp ; Lip_0 = kk*Lip_0temp
       c.all = rep(0,length(c.vec))
       for(g in seq(1,q,1)){
@@ -392,177 +399,3 @@ rdlearn <- function(
  out
 }
 
-
-# if (length(M) > 1 & length(cost) == 1){
-# M_vec <- M
-# for(kk in M_vec){
-#   Lip_1 = kk*Lip_1temp ; Lip_0 = kk*Lip_0temp
-#   c.all = rep(0,length(c.vec))
-#   for(g in seq(1,q,1)){
-#
-#     eval.dat1 = c(data_all %>% filter(G==g, X>=c.vec[1], X<c.vec[q],X<c.vec[g]) %>% select(X))$X #d(1)
-#     IND.1 = sapply(eval.dat1, function(x) sum(c.vec<x))
-#     eval.dat0 = c(data_all %>% filter(G==g,  X>=c.vec[1], X<c.vec[q],X>=c.vec[g]) %>% select(X))$X #d(0)
-#     IND.0 = sapply(eval.dat0, function(x) sum(c.vec<x))
-#
-#     tryCatch(
-#       {  data_all[data_all$G==g &  data_all$X>=c.vec[1] & data_all$X<c.vec[q] & data_all$X<c.vec[g],paste0("d",1)]=
-#         apply( cbind(eval.dat1,IND.1),1, function(x) sum(unlist(sapply(x[2]:x[2],function(g.temp) lip_extra(x.train=x[1],group="B1",g=g,g.prim = g.temp))[2,])))
-#       },error=function(e) return(0))
-#     tryCatch(
-#       {  data_all[data_all$G==g &  data_all$X>=c.vec[1] & data_all$X<c.vec[q] & data_all$X>=c.vec[g],paste0("d",0)]=
-#         apply( cbind(eval.dat0,IND.0),1, function(x) sum(unlist(sapply((x[2]+1):(x[2]+1),function(g.temp) lip_extra(x.train=x[1],group="B0",g=g,g.prim = g.temp))[2,])) )
-#       },error=function(e) return(0))
-#
-#   }
-#   data_mid = data_all %>% filter(X>=min(c.vec),X<max(c.vec))
-#   regret_sum=NULL
-#   for(g in seq(1,q,1)){
-#     regret=NULL
-#     for(c.alt in unique(X[X>=c.vec[1]&X<c.vec[q]]) ){
-#       if(c.alt>=c.vec[g]){
-#         temp1= tryCatch(-sum(data_mid[data_mid $X>=c.vec[g] & data_mid $X<c.alt & data_mid $G==g,"Y"])/n, error=function(e) return(0))
-#         ###########
-#         dat.temp = data_mid %>% filter(G==g, X<c.alt, X>=c.vec[g])
-#
-#         tempDB1=
-#           tryCatch( sum( dat.temp[,"mu.m"] )  /n, error=function(e) return(0))
-#
-#         tempd =   tryCatch( sum( dat.temp[,paste0("d",0)])/n, error=function(e) return(0))
-#         ###########
-#         dat.temp = data_mid %>% filter( X<c.alt, X>=c.vec[g], X>=c.vec[ifelse(G==1,1,G-1)],X<c.vec[G] )  #& X>=c.vec[G-1] & X<c.vec[G]
-#
-#         tempDB2=
-#           tryCatch( sum( with(dat.temp, eval(parse(text =paste0("pseudo.ps",g)))/eval(parse(text =paste0("pseudo.ps",G)))*(Y-eval(parse(text ="mu.aug"))) )
-#           )/n, error=function(e) return(0))
-#
-#         tempcost = tryCatch(cost*dim(data_mid[data_mid $X>=c.vec[g] & data_mid $X<c.alt & data_mid $G==g,"Y"])[1]/n, error=function(e) return(0))
-#
-#         temp.reg = temp1 + tempDB1 + tempd + tempDB2 + tempcost
-#       }
-#       if(c.alt<c.vec[g]){
-#         temp1= tryCatch(-sum(data_mid[data_mid $X<c.vec[g] & data_mid $X>=c.alt & data_mid $G==g,"Y"])/n, error=function(e) return(0))
-#         ###########
-#         dat.temp = data_mid %>% filter(G==g, X>=c.alt, X<c.vec[g])
-#
-#
-#         tempDB1=
-#           tryCatch( sum( dat.temp[,"mu.m"] )/n, error=function(e) return(0))
-#
-#         tempd = tryCatch( sum( dat.temp[,paste0("d",1)])/n, error=function(e) return(0))
-#
-#         dat.temp = data_mid %>% filter( X>=c.alt, X<c.vec[g], X>=c.vec[G],X<c.vec[ifelse(G==q,q,G+1)] )
-#
-#         tempDB2 = tryCatch( sum( with(dat.temp, eval(parse(text =paste0("pseudo.ps",g)))/eval(parse(text =paste0("pseudo.ps",G)))*(Y-eval(parse(text ="mu.aug"))) ) )/n, error=function(e) return(0))
-#
-#         tempcost = tryCatch(cost*dim(data_mid[data_mid $X<c.vec[g] & data_mid $X>=c.alt & data_mid $G==g,"Y"])[1]/n, error=function(e) return(0))
-#
-#         temp.reg = temp1 + tempDB1 + tempd + tempDB2 - tempcost
-#
-#       }
-#       regret=c(regret,temp.reg)
-#
-#     }
-#
-#     if(max(regret)==0){
-#       c.all[g]=c.vec[g]
-#     }else{
-#       c.all[g]= unique(X[X>=c.vec[1]&X<c.vec[q]])[which(regret==max(regret))[1]]
-#     }
-#     regret_sum=c(regret_sum,max(regret))
-# }
-#
-# # create dataframe
-# group <- groupname
-# c.all_df <- data.frame(c.all, group)
-# colname <- paste0("M=",kk,",","C=",cost)
-# names(c.all_df)[1] <- colname
-# safecut_all <- full_join(safecut_all, c.all_df, by=("group" = "group"))
-# }
-# }
-# if(length(M) == 1 & length(cost) > 1){
-# cost_vec <- cost
-# for(l in cost_vec){
-#   Lip_1 = M * Lip_1temp ; Lip_0 = M * Lip_0temp
-#   c.all= rep(0,length(c.vec))
-#   for(g in seq(1,q,1)){
-#
-#     eval.dat1 = c(data_all %>% filter(G==g, X>=c.vec[1], X<c.vec[q],X<c.vec[g]) %>% select(X))$X #d(1)
-#     IND.1 = sapply(eval.dat1, function(x) sum(c.vec<x))
-#     eval.dat0 = c(data_all %>% filter(G==g,  X>=c.vec[1], X<c.vec[q],X>=c.vec[g]) %>% select(X))$X #d(0)
-#     IND.0 = sapply(eval.dat0, function(x) sum(c.vec<x))
-#
-#     tryCatch(
-#       { data_all[data_all$G==g &  data_all$X>=c.vec[1] & data_all$X<c.vec[q] & data_all$X<c.vec[g],paste0("d",1)]=
-#         apply( cbind(eval.dat1,IND.1),1, function(x) sum(unlist(sapply(x[2]:x[2],function(g.temp) lip_extra(x.train=x[1],group="B1",g=g,g.prim = g.temp))[2,])))
-#       },error=function(e) return(0))
-#     tryCatch(
-#       { data_all[data_all$G==g &  data_all$X>=c.vec[1] & data_all$X<c.vec[q] & data_all$X>=c.vec[g],paste0("d",0)]=
-#         apply( cbind(eval.dat0,IND.0),1, function(x) sum(unlist(sapply((x[2]+1):(x[2]+1),function(g.temp) lip_extra(x.train=x[1],group="B0",g=g,g.prim = g.temp))[2,])) )
-#       },error=function(e) return(0))
-#
-#   }
-#   data_mid = data_all %>% filter(X>=min(c.vec),X<max(c.vec))
-#   regret_sum=NULL
-#   for(g in seq(1,q,1)){
-#     regret=NULL
-#     for(c.alt in unique(X[X>=c.vec[1]&X<c.vec[q]]) ){
-#       if(c.alt>=c.vec[g]){
-#         temp1= tryCatch(-sum(data_mid[data_mid $X>=c.vec[g] & data_mid $X<c.alt & data_mid $G==g,"Y"])/n, error=function(e) return(0))
-#         ###########
-#         dat.temp = data_mid %>% filter(G==g, X<c.alt, X>=c.vec[g])
-#
-#         tempDB1 = tryCatch( sum( dat.temp[,"mu.m"] )  /n, error=function(e) return(0))
-#
-#         tempd = tryCatch( sum( dat.temp[,paste0("d",0)])/n, error=function(e) return(0))
-#         ###########
-#         dat.temp = data_mid %>% filter( X<c.alt, X>=c.vec[g], X>=c.vec[ifelse(G==1,1,G-1)],X<c.vec[G] )  #& X>=c.vec[G-1] & X<c.vec[G]
-#
-#         tempDB2=
-#           tryCatch( sum( with(dat.temp, eval(parse(text =paste0("pseudo.ps",g)))/eval(parse(text =paste0("pseudo.ps",G)))*(Y-eval(parse(text ="mu.aug"))) )
-#           )/n, error=function(e) return(0))
-#
-#         tempcost = tryCatch(l * dim(data_mid[data_mid $X>=c.vec[g] & data_mid $X<c.alt & data_mid $G==g,"Y"])[1]/n, error=function(e) return(0))
-#
-#         temp.reg = temp1 + tempDB1 + tempd + tempDB2 + tempcost
-#       }
-#       if(c.alt<c.vec[g]){
-#         temp1= tryCatch(-sum(data_mid[data_mid $X<c.vec[g] & data_mid $X>=c.alt & data_mid $G==g,"Y"])/n, error=function(e) return(0))
-#         ###########
-#         dat.temp = data_mid %>% filter(G==g, X>=c.alt, X<c.vec[g])
-#
-#
-#         tempDB1 = tryCatch( sum( dat.temp[,"mu.m"] )/n, error=function(e) return(0))
-#
-#         tempd = tryCatch( sum( dat.temp[,paste0("d",1)])/n, error=function(e) return(0))
-#
-#         dat.temp = data_mid %>% filter( X>=c.alt, X<c.vec[g], X>=c.vec[G],X<c.vec[ifelse(G==q,q,G+1)] )
-#
-#         tempDB2 = tryCatch( sum( with(dat.temp, eval(parse(text =paste0("pseudo.ps",g)))/eval(parse(text =paste0("pseudo.ps",G)))*(Y-eval(parse(text ="mu.aug"))) ) )/n, error=function(e) return(0))
-#
-#         tempcost = tryCatch(l * dim(data_mid[data_mid $X<c.vec[g] & data_mid $X>=c.alt & data_mid $G==g,"Y"])[1]/n, error=function(e) return(0))
-#
-#         temp.reg = temp1 + tempDB1 + tempd + tempDB2 - tempcost
-#
-#       }
-#
-#       regret=c(regret,temp.reg)
-#
-#     }
-#
-#     if(max(regret)==0){
-#       c.all[g]=c.vec[g]
-#     }else{
-#       c.all[g]= unique(X[X>=c.vec[1]&X<c.vec[q]])[which(regret==max(regret))[1]]
-#     }
-#     regret_sum=c(regret_sum,max(regret))
-#   }
-#
-# # create dataframe
-# group <- groupname
-# c.all_df <- data.frame(c.all, group)
-# colname <- paste0("M=",M,",","C=",l)
-# names(c.all_df)[1] <- colname
-# safecut_all <- full_join(safecut_all, c.all_df, by=("group" = "group"))
-# }
-# }

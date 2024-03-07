@@ -59,6 +59,7 @@ library(ggplot2)
 ### Simulation Data ######################################################
 ##########################################################################
 
+
 n <- 1000
 
 sig=10
@@ -98,8 +99,9 @@ input <- data.frame(
   C = C,
   Y = Y
 )
-
 colnames(input) <- c("Run", "Cut", "Out")
-# result <- rdlearn(y="Out",x="Run",c="Cut", data = input)
+
+# result <- rdlearn(y="Out",x="Run",c="Cut", data = input, fold = 10)
+result <- rdlearn_a1(y="Out",x="Run",c="Cut", data = input, fold = 10)
 
 
