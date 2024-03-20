@@ -6,16 +6,24 @@
 #' @export
 #'
 #' @examples
-plot.rdlearn <- function(result, xlab="", ylab=""){
+plot.rdlearn <- function(result, xlab="", ylab="", safecut = NULL){
+
+  if(is.null(safecut)){
+  safecut = result$safecut
+  }
+  else{
+    print("new safecut is inserted")
+  }
+
   q <- result$numgroup
   dataall <- data.frame()
 
-  for (k in 1:(ncol(result$safecut)-1)) {
+  for (k in 1:(ncol(safecut)-1)) {
     tempdf <- data.frame(
       y = rev(1:q),
       org.c = result$basecut,
-      safe.c = result$safecut[k+1],
-      type = names(result$safecut)[k+1]
+      safe.c = safecut[k+1],
+      type = names(safecut)[k+1]
     )
     names(tempdf)[3] <- "safe.c"
     dataall <- rbind(dataall, tempdf)

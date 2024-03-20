@@ -164,7 +164,6 @@ rdlearn_a1 <- function(
     # filter(fold_id == k & D == 1) %>%
     # mutate(new_column = paste0("pseudo.ps", seq(1, q, 1)))
 
-
     eval.dat0.p = data_test %>% filter(D==0)
     pred = predict(gamfit, newdata = eval.dat0.p, "probs")
     print(dim(pred)[1])
