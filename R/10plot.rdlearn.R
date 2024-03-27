@@ -1,18 +1,22 @@
 #' plot.rdlearn
 #'
-#' @param x
+#' @param result
+#' @param xlab
+#' @param ylab
+#' @param safecut
 #'
 #' @return
 #' @export
 #'
 #' @examples
+
 plot.rdlearn <- function(result, xlab="", ylab="", safecut = NULL){
 
   if(is.null(safecut)){
   safecut = result$safecut
   }
   else{
-    print("new safecut is inserted")
+    print("new safecut")
   }
 
   q <- result$numgroup

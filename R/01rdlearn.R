@@ -1,35 +1,18 @@
 #####################################################
 # Primary function
 #####################################################
-#' RDD Policy learning
-#'
-#' @param y outcome variable
-#' @param x running variable
-#' @param c cutoff variable
+
+#' @param y column name of outcome variable.
+#' @param x column name of running variable.
+#' @param c column name of cutoff.
+#' @param groupname column name of each cutoff group's name (e.g. department name of ACCES program).
+#' If no argument is entered, the names "Group 1", "Group 2", ... are automatically assigned from the group with most smallest cutoff.
 #' @param data data frame containing all variables
-#' @param fold number of folds
-#' @param M multiplicative smoothness factor
-#' @param cost cost for calculating regret
-#' @param groupname
+#' @param fold number of folds for cross-fitting.
+#' @param M multiplicative smoothness factor. Default is 1.
+#' @param cost cost for calculating regret. Default is 0.
 #'
 #' @return
-#'  call = cl, #the matched call to the rdlearn function.
-#'  variables = varnames, #outcome, running variable, cutoff, pretreatment covariates (for calculating propensity score)
-#'  sample = n, #sample sizes withnisn baseline cutoffs(like the left side of Table 1)
-#'  numgroup = q, # the number of groups
-#'  groupname = groupname, # the name of group in the order of cutoffs from low to high (default is Group1, Group2,... from low to high)
-#'  M = M, #multiplicative smoothness factor
-#'  cost = cost, #cost for calculating regret
-#'  rdestimates: and standard error within conventional RD framework(like the right side of Table 1) # todo
-#'  basecut = c.vec, #baseline cutoffs
-#'  safecut = safecut_all, #learned optimal cutoffs
-#'  regret = regret_sum, #regret of optimal policy
-#'  #### just for sensitivity analysis ###
-#'  Lip_1 = Lip_1_sens,
-#'  Lip_0 = Lip_0_sens,
-#'  B.1m = B.1m_sens,
-#'  B.0m = B.0m_sens,
-#'  data_all = data_all_sens
 #'
 #' @importFrom nprobust lprobust
 #' @importFrom nnet multinom
@@ -38,6 +21,8 @@
 #' @references Yi Zhang ...
 #'
 #' @examples
+#' result <- rdlearn(y = "acces", x = "saber11", c = "cutoff", groupname = "department", data = colombia_acces, fold = 20, M = c(0,1,2,4), cost = 0)
+#' # use "plot.rdlearn" to visualize the result.
 #'
 #' @export
 rdlearn <- function(
@@ -88,6 +73,11 @@ rdlearn <- function(
   if (anyNA(data[[c]]))
     stop("the column 'c' contains NA.")
 
+  # check M and cost
+  if (length(M) > 1 && length(cost) > 1) {
+    stop("Both M and cost are vectors.")
+  }
+
   ########### cleaning data #############
 
   Y = data[[y]] ; X = data[[x]] ; C = data[[c]]
@@ -95,7 +85,6 @@ rdlearn <- function(
   c.vec = sort(unique(C)) #cutoffs from min to max
   n = length(Y) # sample size
   q = length(unique(C)) # number of groups
-
   G = match(C,c.vec)  # Group index
   D = as.numeric(X>=C) # Treatment index
 
@@ -112,8 +101,6 @@ rdlearn <- function(
     groupname <- sapply(c.vec, function(x) dict[[as.character(x)]])
   }
 
-  set.seed(1) #一旦確認のためにシードを設定する
-
   tempdata = data.frame(Y=Y,X=X,C=C,D=D,G=G)
   data_split <- tempdata %>%
     mutate(fold_id = sample(1:fold, size = dim(tempdata)[1], replace = TRUE)) %>%
@@ -121,79 +108,71 @@ rdlearn <- function(
     nest() %>%
     arrange(fold_id)
   data_all = data_split %>% unnest(data) %>% ungroup()
+  data_temp_1 = data_all
   data_all = as.data.frame(data_all)
 
-  #これまで定義した変数
-  # Y
-  # X
-  # C
-  # c.vec
-  # n
-  # q
-  # G
-  # D
-  # fold
-  # data_split
-  # data_all
-  # これらを変数とするのは汚くないか？
-  # まとめたほうがいいの？
+  psout_ps <- crossfit(
+                       c.vec = c.vec,
+                       Y = Y,
+                       X = X,
+                       C = C,
+                       G = G,
+                       D = D,
+                       n = n,
+                       q = q,
+                       fold = fold,
+                       data_split = data_split,
+                       data_all = data_all)
 
-  pseudoout_and_ps <- pseudoout_ps(Y = Y,
-                           X = X,
-                           C = C,
-                           c.vec = c.vec,
-                           n = n,
-                           q = q,
-                           G = G,
-                           D = D,
-                           fold = fold,
-                           data_split = data_split,
-                           data_all = data_all)
-  data_all <- pseudoout_and_ps$data_all_temp
-  Lip_1 <- pseudoout_and_ps$Lip_1_temp
-  Lip_0 <- pseudoout_and_ps$Lip_0_temp
-  B.1m <- pseudoout_and_ps$B.1m_temp
-  B.0m <- pseudoout_and_ps$B.0m_temp
+  data_all = psout_ps$data_all_temp
+  Lip_1 = psout_ps$Lip_1_temp
+  Lip_0 = psout_ps$Lip_0_temp
+  B.1m = psout_ps$B.1m_temp
+  B.0m = psout_ps$B.0m_temp
 
-  ##ここまで計算して結果としてLip_1, Lip_0, B.1m, B.0m, data_all を出しておけばOKって感じかな?
-  data_all_sens = data_all
-  Lip_1_sens = Lip_1
-  Lip_0_sens = Lip_0
-  B.1m_sens = B.1m
-  B.0m_sens = B.0m
-
-  safecut_all = cut_learn(
-    cost,
-    M,
-    q,
-    c.vec,
-    groupname,
-    Lip_1,
-    Lip_0,
-    B.1m,
-    B.0m,
-    data_all
+  safecut_all = safelearn(
+    c.vec = c.vec,
+    Y = Y,
+    X = X,
+    C = C,
+    G = G,
+    D = D,
+    n = n,
+    q = q,
+    cost = cost,
+    M = M,
+    groupname = groupname,
+    Lip_1 = Lip_1,
+    Lip_0 = Lip_0,
+    B.1m = B.1m,
+    B.0m = B.0m,
+    data_all = data_all
   )
 
   out <- list(
     call = cl,
     variables = varnames,
+    basecut = c.vec,
     sample = n,
     numgroup = q,
-    groupname = groupname,
+
+    Y = Y,
+    X = X,
+    C = C,
+    G = G,
+    D = D,
+
     M = M,
     cost = cost,
-    basecut = c.vec,
+    groupname = groupname,
+
     safecut = safecut_all,
-    #### just for sensitivity analysis ###
-    Lip_1 = Lip_1_sens,
-    Lip_0 = Lip_0_sens,
-    B.1m = B.1m_sens,
-    B.0m = B.0m_sens,
-    data_all = data_all_sens,
-    pseudoout_and_ps = pseudoout_and_ps #今これと上のSensitivity analysisのために用意された変数は同じになっている
+    data_all = data_all,
+    psout_ps = psout_ps
   )
 
  class(out) <- "rdlearn"
  out
 }
+
+

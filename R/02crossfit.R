@@ -2,19 +2,18 @@
 ######### Appendix A.2. Step.1(a)(b)
 #################################################################################
 
-pseudoout_ps <- function(
-  Y = Y,
-  X = X,
-  C = C,
-  c.vec = c.vec,
-  n = n,
-  q = q,
-  G = G,
-  D = D,
-  fold = fold,
-  data_split = data_split,
-  data_all = data_all
-)
+crossfit <- function(
+  c.vec,
+  Y,
+  X,
+  C,
+  G,
+  D,
+  n,
+  q,
+  fold,
+  data_split,
+  data_all)
 {
   mu.fit = NULL
   for(k in 1:fold){
@@ -93,66 +92,45 @@ pseudoout_ps <- function(
   ## (2) choose the value of smoothness parameter Lip
   #################################################################################
 
-  psd_dat1 = psd_dat0 = NULL;
-  Lip_1 = Lip_0 = matrix(0,q,q) # storing the value of smoothness parameter;  1/0: treatment/control
-  B.1m = B.0m = matrix(0, nrow=q, ncol=q) # storing the value of estimated cross-group differences at cutoff point
-
-  # Error in `eval(parse(text = paste0("pseudo.ps", g)))`: object 'pseudo.ps1' not found
-  # for the case where q = 2 (two cutoffs) this part should be modified
+  psd_dat1 = psd_dat0 =NULL;
+  Lip_1=Lip_0=matrix(0,q,q) # storing the value of smoothness parameter;  1/0: treatment/control
+  B.1m=B.0m=matrix(0,nrow=q,ncol=q) # storing the value of estimated cross-group differences at cutoff point
 
   for(g in seq(1,q-1,1))
     for(g.pr in seq(g+1,q,1)){
 
-      #########################
-      # for D==1
-      #########################
       temp.dat = data_all %>% filter(D==1 & X>=max(c.vec[g.pr],c.vec[g]))
+      temp.vc =
+        data.frame( temp.dat[,paste0("pseudo.",g)]-temp.dat[,paste0("pseudo.",g.pr)]+
+                      with(temp.dat,I(G==g)*(Y-eval(parse(text =paste0("pseudo.",g))))/eval(parse(text =paste0("pseudo.ps",g))) )-
+                      with(temp.dat,I(G==g.pr)*(Y-eval(parse(text =paste0("pseudo.",g.pr))))/eval(parse(text =paste0("pseudo.ps",g.pr))) )
+                    ,  temp.dat $X,g,g.pr)
 
-      # Construct the pseudo-outcome
-      temp.vc = data.frame(temp.dat[ ,paste0("pseudo.", g)] - temp.dat[, paste0("pseudo.", g.pr)] +
-                             with(temp.dat,I(G==g)*(Y-eval(parse(text =paste0("pseudo.", g))))/eval(parse(text =paste0("pseudo.ps", g))) )-
-                             with(temp.dat,I(G==g.pr)*(Y-eval(parse(text =paste0("pseudo.", g.pr))))/eval(parse(text =paste0("pseudo.ps", g.pr))) )
-                           ,temp.dat $X,g,g.pr)
+      names(temp.vc)[1:2]=c("psout","X")
+      psd_dat1=rbind(psd_dat1,   temp.vc )
 
-      names(temp.vc)[1:2] = c("psout","X")
-      psd_dat1 = rbind(psd_dat1, temp.vc )
 
       # Section 4.3
-      # compute the absolute value of the estimated first-order derivative
-      # at a grid of points in the region of overlapping policies between the two groups
-      Lip_1[g,g.pr]=abs(lprobust(temp.vc[,"psout"],temp.vc[,"X"],
-                                 eval = max(c.vec[g.pr],c.vec[g]), # it should be quantiles or test samples?
-                                 deriv=1, p=2, bwselect="mse-dpi")$Estimate[,5])
+      Lip_1[g,g.pr]=abs(lprobust(temp.vc[,"psout"],temp.vc[,"X"],eval = max(c.vec[g.pr],c.vec[g]),deriv = 1,p=2,bwselect="mse-dpi")$Estimate[,5])
+      # Algorithm 1
+      B.1m[g,g.pr]=lprobust(temp.vc[,"psout"],temp.vc[,"X"],eval = max(c.vec[g.pr],c.vec[g]),bwselect="mse-dpi")$Estimate[,5]
 
-
-      # Algorithm 1 (Appendix.A.2.)
-      # regress pseudo-outcome on covariates X
-      B.1m[g,g.pr]=lprobust(temp.vc[,"psout"],temp.vc[,"X"],
-                            eval = max(c.vec[g.pr],c.vec[g]),# it should be quantiles or test samples?
-                            deriv=0, p=1, bwselect="mse-dpi")$Estimate[,5]
-
-      #########################
-      # same procedure for D==0
-      #########################
       temp.dat = data_all %>% filter(D==0 & X<min(c.vec[g.pr],c.vec[g]))
 
       temp.vc = data.frame("psout"=temp.dat[,paste0("pseudo.",g)]-temp.dat[,paste0("pseudo.",g.pr)]+
-                             with(temp.dat,I(G==g)*(Y-eval(parse(text =paste0("pseudo.",g))))/eval(parse(text = paste0("pseudo.ps",g))) )-
-                             with(temp.dat,I(G==g.pr)*(Y-eval(parse(text =paste0("pseudo.",g.pr))))/eval(parse(text = paste0("pseudo.ps",g.pr))) ),   temp.dat $X,g,g.pr)
+                             with(temp.dat,I(G==g)*(Y-eval(parse(text =paste0("pseudo.",g))))/eval(parse(text =paste0("pseudo.ps",g))) )-
+                             with(temp.dat,I(G==g.pr)*(Y-eval(parse(text =paste0("pseudo.",g.pr))))/eval(parse(text =paste0("pseudo.ps",g.pr))) ),   temp.dat $X,g,g.pr)
       names(temp.vc)[1:2]=c("psout","X")
-      psd_dat0=rbind(psd_dat0, temp.vc )
+      psd_dat0=rbind(psd_dat0,   temp.vc )
 
-      Lip_0[g,g.pr]=abs(lprobust(temp.vc[,"psout"],temp.vc[,"X"],
-                                 eval = min(c.vec[g.pr],c.vec[g]),
-                                 deriv = 1,p=2, bwselect="mse-dpi")$Estimate[,5])
-
-      B.0m[g,g.pr]=lprobust(temp.vc[,"psout"],temp.vc[,"X"],
-                            eval = min(c.vec[g.pr],c.vec[g]),
-                            bwselect="mse-dpi")$Estimate[,5]
+      Lip_0[g,g.pr]=abs(lprobust(temp.vc[,"psout"],temp.vc[,"X"],eval = min(c.vec[g.pr],c.vec[g]),deriv = 1,p=2,bwselect="mse-dpi")$Estimate[,5])
+      B.0m[g,g.pr]=lprobust(temp.vc[,"psout"],temp.vc[,"X"],eval = min(c.vec[g.pr],c.vec[g]),bwselect="mse-dpi")$Estimate[,5]
     }
 
-  Lip_1 = Lip_1 + t(Lip_1) ; Lip_0 = Lip_0 + t(Lip_0)
-  B.1m = B.1m + t(-B.1m) ; B.0m = B.0m + t(-B.0m)
+  Lip_1 = Lip_1 + t(Lip_1)
+  Lip_0 = Lip_0 + t(Lip_0)
+  B.1m = B.1m + t(-B.1m)
+  B.0m = B.0m + t(-B.0m)
 
   out = list(
     data_all_temp = data_all,
