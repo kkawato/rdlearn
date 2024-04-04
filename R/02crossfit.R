@@ -85,7 +85,7 @@ crossfit <- function(
       }},error=function(e) return(0))
   }
 
-  data_all <- as_tibble(data_all)
+  data_all <- as_tibble(data_all) #fix this later
 
   #################################################################################
   ## Second, (1) estimate cross-group differences B

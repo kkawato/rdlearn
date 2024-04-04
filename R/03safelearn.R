@@ -42,8 +42,9 @@ safelearn = function(
     return(list(upper = upper, lower = lower ))
   }
 
-group = groupname #ここは冗長だが下で問題を起こす、
-safecut_all = data.frame(group)
+# group = groupname #fix this later
+# safecut_all = data.frame(group)
+safecut_all = data.frame(groupname)
 
 Lip_1temp = Lip_1
 Lip_0temp = Lip_0
@@ -128,11 +129,11 @@ for(temp_M in M){
     }
     regret_sum=c(regret_sum, max(regret))
   }
-  group = groupname #確かここを変えるとなぜかまずかった記憶がある
-  c.all_df = data.frame(c.all, group)
   colname = paste0("M=",temp_M,",","C=",temp_cost)
+  # group = groupname #fix this later
+  c.all_df = data.frame(c.all, groupname)
   names(c.all_df)[1] = colname
-  safecut_all <- full_join(safecut_all, c.all_df, by=("group" = "group"))
+  safecut_all <- full_join(safecut_all, c.all_df, by=("groupname" = "groupname"))
   }
   }
   safecut_all

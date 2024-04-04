@@ -10,6 +10,10 @@
 #'
 #' @examples
 
+# plot <- function(x) {
+#   UseMethod("plot", x)
+# }
+
 plot.rdlearn <- function(result, xlab="", ylab="", safecut = NULL){
 
   if(is.null(safecut)){

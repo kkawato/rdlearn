@@ -1,3 +1,7 @@
+# sens <- function(x) {
+#   UseMethod("sens", x)
+# }
+
 sens.rdlearn <- function (
     result,
     M = NULL,
