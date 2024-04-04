@@ -6,8 +6,12 @@ library(nnet)
 library(ggplot2)
 
 result <- rdlearn(y = "acces", x = "saber11", c = "cutoff", groupname = "department",
-                  data = colombia_acces, fold = 20, M = c(0,1,2,4), cost = 0)
+                  data = colombia_acces, fold = 20, M = c(0,1), cost = 0)
+plot.rdlearn(result)
 
+
+result <- rdlearn(y = "acces", x = "saber11", c = "cutoff", groupname = "department",
+                  data = colombia_acces, fold = 20, M = c(0,1,2,4), cost = 0)
 plot.rdlearn(result)
 # Figure 2
 # use "plot.rdlearn" to visualize the result.

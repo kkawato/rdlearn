@@ -4,7 +4,6 @@ safelearn = function(
     X,
     C,
     G,
-    D,
     n,
     q,
     cost,
@@ -44,7 +43,7 @@ safelearn = function(
 
 group = groupname #-------------------------------------------fix this later
 safecut_all = data.frame(group)
-safecut_all = data.frame(groupname)
+# safecut_all = data.frame(groupname)
 
 Lip_1temp = Lip_1
 Lip_0temp = Lip_0
@@ -76,13 +75,13 @@ for(temp_M in M){
   }
 
   data_mid = data_all %>% filter(X>=min(c.vec), X<max(c.vec))
-  regret_sum=NULL
+  regret_sum = NULL
 
   for(g in seq(1,q,1)){
     regret=NULL
     for(c.alt in unique(X[X>=c.vec[1]&X<c.vec[q]])){
-      if(c.alt>=c.vec[g]){
-        temp1 = tryCatch(-sum(data_mid[data_mid $X>=c.vec[g] & data_mid $X<c.alt & data_mid $G==g,"Y"])/n, error=function(e) return(0))
+      if(c.alt >= c.vec[g]){
+        temp1 = tryCatch(-sum(data_mid[data_mid$X>=c.vec[g] & data_mid$X<c.alt & data_mid$G==g, "Y"]) / n, error = function(e) return(0))
         ###########
         dat.temp = data_mid %>% filter(G==g, X<c.alt, X>=c.vec[g])
 
@@ -101,7 +100,7 @@ for(temp_M in M){
         temp.reg = temp1 + tempDB1 + tempd + tempDB2 + tempcost
       }
       if(c.alt<c.vec[g]){
-        temp1= tryCatch(-sum(data_mid[data_mid $X<c.vec[g] & data_mid $X>=c.alt & data_mid $G==g,"Y"])/n, error=function(e) return(0))
+        temp1= tryCatch(-sum(data_mid[data_mid$X<c.vec[g] & data_mid$X>=c.alt & data_mid$G==g,"Y"])/n, error=function(e) return(0))
         ###########
         dat.temp = data_mid %>% filter(G==g, X>=c.alt, X<c.vec[g])
 
@@ -112,7 +111,7 @@ for(temp_M in M){
         dat.temp = data_mid %>% filter(X>=c.alt, X<c.vec[g], X>=c.vec[G], X<c.vec[ifelse(G==q, q, G+1)])
 
         tempDB2 = tryCatch(sum(with(dat.temp, eval(parse(text = paste0("pseudo.ps",g))) /
-                                      eval(parse(text =paste0("pseudo.ps",G))) * (Y - eval(parse(text ="mu.aug")))))/n, error=function(e) return(0))
+                                      eval(parse(text =paste0("pseudo.ps", G))) * (Y - eval(parse(text ="mu.aug")))))/n, error=function(e) return(0))
 
         tempcost = tryCatch(temp_cost * dim(data_mid[data_mid$X<c.vec[g] & data_mid$X>=c.alt & data_mid$G==g, "Y"])[1]/n, error=function(e) return(0))
 
@@ -127,13 +126,13 @@ for(temp_M in M){
     }else{
       c.all[g] = unique(X[X>=c.vec[1]&X<c.vec[q]])[which(regret==max(regret))[1]]
     }
-    regret_sum=c(regret_sum, max(regret))
+    regret_sum = c(regret_sum, max(regret))
   }
-  group = groupname #-------------------------------------------fix this later]
-  colname = paste0("M=", temp_M, ",", "C=", temp_cost)
-  c.all_df = data.frame(c.all, groupname)
+  group = groupname #-------------------------------------------fix this later
+  c.all_df = data.frame(c.all, group)
+  colname = paste0("M=",temp_M,",","C=",temp_cost)
   names(c.all_df)[1] = colname
-  safecut_all <- full_join(safecut_all, c.all_df, by=("groupname" = "groupname"))
+  safecut_all = full_join(safecut_all, c.all_df, by=("group" = "group"))
   }
   }
   safecut_all
