@@ -42,8 +42,8 @@ safelearn = function(
     return(list(upper = upper, lower = lower ))
   }
 
-# group = groupname #fix this later
-# safecut_all = data.frame(group)
+group = groupname #-------------------------------------------fix this later
+safecut_all = data.frame(group)
 safecut_all = data.frame(groupname)
 
 Lip_1temp = Lip_1
@@ -75,29 +75,28 @@ for(temp_M in M){
       },error=function(e) return(0))
   }
 
-  data_mid = data_all %>% filter(X>=min(c.vec),X<max(c.vec))
+  data_mid = data_all %>% filter(X>=min(c.vec), X<max(c.vec))
   regret_sum=NULL
 
   for(g in seq(1,q,1)){
     regret=NULL
     for(c.alt in unique(X[X>=c.vec[1]&X<c.vec[q]])){
       if(c.alt>=c.vec[g]){
-        temp1= tryCatch(-sum(data_mid[data_mid $X>=c.vec[g] & data_mid $X<c.alt & data_mid $G==g,"Y"])/n, error=function(e) return(0))
+        temp1 = tryCatch(-sum(data_mid[data_mid $X>=c.vec[g] & data_mid $X<c.alt & data_mid $G==g,"Y"])/n, error=function(e) return(0))
         ###########
         dat.temp = data_mid %>% filter(G==g, X<c.alt, X>=c.vec[g])
 
-        tempDB1=
-          tryCatch( sum( dat.temp[,"mu.m"] )  /n, error=function(e) return(0))
+        tempDB1 = tryCatch(sum(dat.temp[,"mu.m"])/n, error=function(e) return(0))
 
-        tempd =   tryCatch( sum( dat.temp[,paste0("d",0)])/n, error=function(e) return(0))
+        tempd = tryCatch(sum(dat.temp[,paste0("d",0)])/n, error=function(e) return(0))
         ###########
-        dat.temp = data_mid %>% filter( X<c.alt, X>=c.vec[g], X>=c.vec[ifelse(G==1,1,G-1)],X<c.vec[G] )  #& X>=c.vec[G-1] & X<c.vec[G]
+        dat.temp = data_mid %>% filter(X<c.alt, X>=c.vec[g], X>=c.vec[ifelse(G==1,1,G-1)],X<c.vec[G])  #& X>=c.vec[G-1] & X<c.vec[G]
 
-        tempDB2=
-          tryCatch( sum( with(dat.temp, eval(parse(text =paste0("pseudo.ps",g)))/eval(parse(text =paste0("pseudo.ps",G)))*(Y-eval(parse(text ="mu.aug"))) )
-          )/n, error=function(e) return(0))
+        tempDB2 = tryCatch(sum(with(dat.temp, eval(parse(text=paste0("pseudo.ps",g))) /
+                                      eval(parse(text = paste0("pseudo.ps",G))) * (Y - eval(parse(text ="mu.aug")))))/n, error=function(e) return(0))
+        #この部分のYは簡略化できる
 
-        tempcost = tryCatch(temp_cost*dim(data_mid[data_mid $X>=c.vec[g] & data_mid $X<c.alt & data_mid $G==g,"Y"])[1]/n, error=function(e) return(0))
+        tempcost = tryCatch(temp_cost * dim(data_mid[data_mid$X>=c.vec[g] & data_mid$X<c.alt & data_mid$G==g, "Y"])[1]/n, error=function(e) return(0))
 
         temp.reg = temp1 + tempDB1 + tempd + tempDB2 + tempcost
       }
@@ -106,31 +105,32 @@ for(temp_M in M){
         ###########
         dat.temp = data_mid %>% filter(G==g, X>=c.alt, X<c.vec[g])
 
-        tempDB1= tryCatch( sum( dat.temp[,"mu.m"] )/n, error=function(e) return(0))
+        tempDB1= tryCatch(sum(dat.temp[,"mu.m"] )/n, error=function(e) return(0))
 
-        tempd = tryCatch( sum( dat.temp[,paste0("d",1)])/n, error=function(e) return(0))
+        tempd = tryCatch(sum(dat.temp[,paste0("d",1)])/n, error=function(e) return(0))
 
-        dat.temp = data_mid %>% filter( X>=c.alt, X<c.vec[g], X>=c.vec[G],X<c.vec[ifelse(G==q,q,G+1)] )
+        dat.temp = data_mid %>% filter(X>=c.alt, X<c.vec[g], X>=c.vec[G], X<c.vec[ifelse(G==q, q, G+1)])
 
-        tempDB2 = tryCatch( sum( with(dat.temp, eval(parse(text =paste0("pseudo.ps",g)))/eval(parse(text =paste0("pseudo.ps",G)))*(Y-eval(parse(text ="mu.aug"))) ) )/n, error=function(e) return(0))
+        tempDB2 = tryCatch(sum(with(dat.temp, eval(parse(text = paste0("pseudo.ps",g))) /
+                                      eval(parse(text =paste0("pseudo.ps",G))) * (Y - eval(parse(text ="mu.aug")))))/n, error=function(e) return(0))
 
-        tempcost = tryCatch(temp_cost*dim(data_mid[data_mid $X<c.vec[g] & data_mid $X>=c.alt & data_mid $G==g,"Y"])[1]/n, error=function(e) return(0))
+        tempcost = tryCatch(temp_cost * dim(data_mid[data_mid$X<c.vec[g] & data_mid$X>=c.alt & data_mid$G==g, "Y"])[1]/n, error=function(e) return(0))
 
         temp.reg = temp1 + tempDB1 + tempd + tempDB2 - tempcost
 
       }
-      regret=c(regret,temp.reg)
+      regret=c(regret, temp.reg)
     }
 
     if(max(regret)==0){
-      c.all[g]=c.vec[g]
+      c.all[g] = c.vec[g]
     }else{
-      c.all[g]= unique(X[X>=c.vec[1]&X<c.vec[q]])[which(regret==max(regret))[1]]
+      c.all[g] = unique(X[X>=c.vec[1]&X<c.vec[q]])[which(regret==max(regret))[1]]
     }
     regret_sum=c(regret_sum, max(regret))
   }
-  colname = paste0("M=",temp_M,",","C=",temp_cost)
-  # group = groupname #fix this later
+  group = groupname #-------------------------------------------fix this later]
+  colname = paste0("M=", temp_M, ",", "C=", temp_cost)
   c.all_df = data.frame(c.all, groupname)
   names(c.all_df)[1] = colname
   safecut_all <- full_join(safecut_all, c.all_df, by=("groupname" = "groupname"))

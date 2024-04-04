@@ -110,7 +110,7 @@ rdlearn <- function(
   data_all = data_split %>% unnest(data) %>% ungroup()
   data_temp_1 = data_all
 
-  data_all = as.data.frame(data_all) #fix this later
+  data_all = as.data.frame(data_all) #-------------------------------------------fix this later
 
   psout_ps <- crossfit(
                        c.vec = c.vec,

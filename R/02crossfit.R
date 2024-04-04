@@ -85,7 +85,7 @@ crossfit <- function(
       }},error=function(e) return(0))
   }
 
-  data_all <- as_tibble(data_all) #fix this later
+  data_all <- as_tibble(data_all) #-------------------------------------------fix this later
 
   #################################################################################
   ## Second, (1) estimate cross-group differences B
@@ -111,9 +111,9 @@ crossfit <- function(
 
 
       # Section 4.3
-      Lip_1[g,g.pr]=abs(lprobust(temp.vc[,"psout"],temp.vc[,"X"],eval = max(c.vec[g.pr],c.vec[g]),deriv = 1,p=2,bwselect="mse-dpi")$Estimate[,5])
+      Lip_1[g,g.pr] = abs(lprobust(temp.vc[,"psout"],temp.vc[,"X"],eval = max(c.vec[g.pr],c.vec[g]),deriv = 1,p=2,bwselect="mse-dpi")$Estimate[,5])
       # Algorithm 1
-      B.1m[g,g.pr]=lprobust(temp.vc[,"psout"],temp.vc[,"X"],eval = max(c.vec[g.pr],c.vec[g]),bwselect="mse-dpi")$Estimate[,5]
+      B.1m[g,g.pr] = lprobust(temp.vc[,"psout"],temp.vc[,"X"],eval = max(c.vec[g.pr],c.vec[g]),bwselect="mse-dpi")$Estimate[,5]
 
       temp.dat = data_all %>% filter(D==0 & X<min(c.vec[g.pr],c.vec[g]))
 
