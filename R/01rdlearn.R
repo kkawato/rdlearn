@@ -95,6 +95,7 @@ rdlearn <- function(
       groupname[k] <- paste0("Group", k)
     }
   }
+
   else{
     grouplist <- data[[groupname]]
     dict <- setNames(grouplist, C)
@@ -108,9 +109,6 @@ rdlearn <- function(
     nest() %>%
     arrange(fold_id)
   data_all = data_split %>% unnest(data) %>% ungroup()
-  data_temp_1 = data_all
-
-  # data_all = as.data.frame(data_all) #-------------------------------------------fix this later
 
   psout_ps <- crossfit(c.vec = c.vec,
                        Y = Y,

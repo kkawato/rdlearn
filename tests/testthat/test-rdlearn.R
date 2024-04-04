@@ -9,7 +9,6 @@ result <- rdlearn(y = "acces", x = "saber11", c = "cutoff", groupname = "departm
                   data = colombia_acces, fold = 20, M = c(0,1), cost = 0)
 plot.rdlearn(result)
 
-
 result <- rdlearn(y = "acces", x = "saber11", c = "cutoff", groupname = "department",
                   data = colombia_acces, fold = 20, M = c(0,1,2,4), cost = 0)
 plot.rdlearn(result)
@@ -26,6 +25,3 @@ result_simA <- rdlearn(y = "out", x = "run", c = "cut",
                        data = simdata_A, fold = 10, M=1, cost=0)
 plot.rdlearn(result_simA)
 # This worked with the simulation data in the appendix.
-colombia_acces
-
-

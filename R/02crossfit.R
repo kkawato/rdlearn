@@ -55,34 +55,28 @@ crossfit <- function(
     ##### propensity score #####
     ############################
 
-    eval.dat1.p = data_test %>% filter(D==1)
-    tryCatch(
-      {pred = predict(gamfit, newdata = eval.dat1.p, "probs") # gamfit = multinom(formula = G ~ X, data = data_train)
-      pred = data.frame(pred) #make this simple
+      eval.dat1.p = data_test %>% filter(D==1)
+      tryCatch({pred = predict(gamfit, newdata = eval.dat1.p, "probs")
+        if(is.null(dim(pred)[1])){
+          data_all <- as.data.frame(data_all) #-----------------------------------------------------------------fix this later
+          pred <- as.data.frame(pred)
+          data_all[data_all$fold_id==k & data_all$D==1, paste0("pseudo.ps",seq(1,q,1))] = pred
+          data_all <- as_tibble(data_all)
+        }
+        else{data_all[data_all$fold_id==k & data_all$D==1, paste0("pseudo.ps",seq(1,q,1))] = pred}
+        },error=function(e) return(0))
 
-      if(dim(pred)[1]==1){
-        data_all[data_all$fold_id==k & data_all$D==1, paste0("pseudo.ps",seq(1,q,1))] = t(as.matrix(pred, byrow=F))
-      }
-      if(dim(pred)[1]!=1){
-        data_all[data_all$fold_id==k & data_all$D==1, paste0("pseudo.ps",seq(1,q,1))] = pred
-      }}
-      ,error=function(e) return(0))
-
-    eval.dat0.p = data_test %>% filter(D==0)
-    tryCatch(
-      {pred = predict(gamfit, newdata = eval.dat0.p, "probs")
-      pred = data.frame(pred) #make this simple
-
-      if(dim(pred)[1]==1){
-        data_all[data_all$fold_id==k & data_all$D==0, paste0("pseudo.ps",seq(1,q,1))] = t(as.matrix(pred, byrow=F))
-      }
-      if(dim(pred)[1]!=1){
-        data_all[data_all$fold_id==k & data_all$D==0, paste0("pseudo.ps",seq(1,q,1))] = pred
-      }}
-      ,error=function(e) return(0))
-  }
-
-  # data_all <- as_tibble(data_all) #-------------------------------------------fix this later
+      eval.dat0.p = data_test %>% filter(D==0)
+      tryCatch({pred = predict(gamfit, newdata = eval.dat0.p, "probs")
+        if(is.null(dim(pred)[1])){
+          data_all <- as.data.frame(data_all) #-----------------------------------------------------------------fix this later
+          pred <- as.data.frame(pred)
+          data_all[data_all$fold_id==k & data_all$D==0, paste0("pseudo.ps",seq(1,q,1))] = pred
+          data_all <- as_tibble(data_all)
+        }
+        else{data_all[data_all$fold_id==k & data_all$D==0, paste0("pseudo.ps",seq(1,q,1))] = pred}
+        },error=function(e) return(0))
+    }
 
   #################################################################################
   ## Second, (1) estimate cross-group differences B
