@@ -20,3 +20,4 @@ result_simA <- rdlearn(y = "out", x = "run", c = "cut",
                        data = simdata_A, fold = 10, M=1, cost=0)
 plot.rdlearn(result_simA)
 # This worked with the simulation data in the appendix.
+colombia_acces
