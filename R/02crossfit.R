@@ -32,10 +32,10 @@ crossfit <- function(
       if(is.null(dim(ps1)[1])){
         data_all = as.data.frame(data_all) #-----------------------------------------------------------------fix this later
         ps1 = as.data.frame(ps1)
-        data_all[data_all $ fold_id==k & data_all $ D==1, paste0("pseudo.ps",seq(1,q,1))] = ps1
+        data_all[data_all $ fold_id == k & data_all $ D == 1, paste0("pseudo.ps", seq(1, q, 1))] = ps1
         data_all = as_tibble(data_all)
       } else {
-        data_all[data_all $ fold_id==k & data_all $ D==1, paste0("pseudo.ps",seq(1,q,1))] = ps1
+        data_all[data_all $ fold_id == k & data_all $ D == 1, paste0("pseudo.ps", seq(1, q, 1))] = ps1
       }
 
       # control group
@@ -44,10 +44,10 @@ crossfit <- function(
       if(is.null(dim(ps0)[1])){
         data_all = as.data.frame(data_all) #-----------------------------------------------------------------fix this later
         ps0 = as.data.frame(ps0)
-        data_all[data_all $ fold_id==k & data_all $ D==0, paste0("pseudo.ps",seq(1,q,1))] = ps0
+        data_all[data_all $ fold_id == k & data_all $ D == 0, paste0("pseudo.ps", seq(1, q, 1))] = ps0
         data_all = as_tibble(data_all)
       } else {
-        data_all[data_all $ fold_id==k & data_all $ D==0, paste0("pseudo.ps",seq(1,q,1))] = ps0
+        data_all[data_all $ fold_id == k & data_all $ D == 0, paste0("pseudo.ps", seq(1, q, 1))] = ps0
       }
 
       # ====================================================================== #
@@ -59,7 +59,7 @@ crossfit <- function(
       eval.dat1.m = data_test %>%
         filter(X >= c.vec[g],
                X < c.vec[min(g + 1, q)],
-               G == min(g + 1, q)) %>% # D == 0
+               D == 0) %>% # G == min(g + 1, q) # D == 0
         pull(X)
 
       # aug is for DR estimator (14) in Section 4.1.
@@ -102,7 +102,7 @@ crossfit <- function(
         data_all[data_all $ fold_id == k
                  & data_all $ X >= c.vec[g]
                  & data_all $ X < c.vec[min(g + 1, q)]
-                 & data_all $ G == min(g + 1, q),
+                 & data_all $ D == 0, # D == 0 # G == min(g + 1, q)
                  paste0("mu",".m")] = mu.m1
         }, error=function(e) return(0))
 
@@ -123,7 +123,7 @@ crossfit <- function(
       eval.dat0.m = data_test %>%
         filter(X >= c.vec[max(g - 1, 1)],
                X < c.vec[g],
-               G == max(g - 1, 1)) %>% #D == 1
+               D == 1) %>% #D == 1, G == max(g - 1, 1)
         pull(X)
 
       # aug is for DR estimator (14) in Section 4.1.
@@ -148,6 +148,7 @@ crossfit <- function(
                          bwselect="imse-dpi") $ Estimate[,5]
 
       pseudo0 = mu.fit0[(length(eval.dat0.m) + length(eval.dat0.aug) + 1) : length(eval.dat0.all)]
+
       tryCatch({
         data_all[data_all $ fold_id == k
                  & data_all $ D == 0
@@ -162,16 +163,16 @@ crossfit <- function(
       mu.aug0 = mu.fit0[(length(eval.dat0.m) + 1) : (length(eval.dat0.m) + length(eval.dat0.aug))]
 
       tryCatch({
-        data_all[data_all $ fold_id==k
-                 & data_all $ X >= c.vec[max(g-1,1)]
+        data_all[data_all $ fold_id == k
+                 & data_all $ X >= c.vec[max(g - 1, 1)]
                  & data_all $ X < c.vec[g]
-                 & data_all $ G == max(g - 1, 1),
+                 & data_all $ D == 1, #D == 1, G == max(g - 1, 1)
                  paste0("mu",".m")] = mu.m0
         }, error=function(e) return(0))
 
       tryCatch({
-        data_all[data_all $ fold_id==k
-                 & data_all $ X >= c.vec[max(g-1,1)]
+        data_all[data_all $ fold_id == k
+                 & data_all $ X >= c.vec[max(g - 1, 1)]
                  & data_all $ X < c.vec[g]
                  & data_all $ G == g,
                  paste0("mu",".aug")] = mu.aug0
@@ -190,8 +191,8 @@ crossfit <- function(
   Lip_1 = Lip_0 = matrix(0, q, q) # storing the value of smoothness parameter;  1/0: treatment/control
   dif.1m = dif.0m = matrix(0, nrow = q, ncol = q) # storing the value of estimated cross-group differences at cutoff point
 
-  for(g in seq(1,q-1,1)){
-    for(g.pr in seq(g+1,q,1)){
+  for(g in seq(1, q - 1, 1)){
+    for(g.pr in seq(g + 1, q, 1)){
 
       # ====================================================================== #
       # treatment group
@@ -220,8 +221,8 @@ crossfit <- function(
                               bwselect = "mse-dpi") $ Estimate[,5]
 
       # ---------------- Section 4.3 -------------------------------------------
-      Lip_1[g, g.pr] = abs(lprobust(temp.vc[,"psout"],
-                                    temp.vc[,"X"],
+      Lip_1[g, g.pr] = abs(lprobust(temp.vc[, "psout"],
+                                    temp.vc[, "X"],
                                     eval = c.vec[g.pr],
                                     deriv = 1,
                                     p = 2,
@@ -229,7 +230,7 @@ crossfit <- function(
 
       # ====================================================================== #
       # control group
-      temp.dat = data_all %>% filter(D==0 & X<c.vec[g])
+      temp.dat = data_all %>% filter(D == 0 & X < c.vec[g])
 
       # --------------- A.2. Step 2 Pseudo Outcome Regression - 1 --------------
       psout0 = temp.dat[, paste0("pseudo.", g)] -
@@ -243,20 +244,20 @@ crossfit <- function(
       names(temp.vc)[1:2] = c("psout", "X")
       psd_dat0 = rbind(psd_dat0, temp.vc)
 
-      dif.0m[g,g.pr] = lprobust(temp.vc[,"psout"],
-                              temp.vc[,"X"],
+      dif.0m[g, g.pr] = lprobust(temp.vc[, "psout"],
+                              temp.vc[, "X"],
                               eval = c.vec[g],
                               deriv = 0,
                               p = 1,
-                              bwselect = "mse-dpi") $ Estimate[,5]
+                              bwselect = "mse-dpi") $ Estimate[, 5]
 
       # ---------------- Section 4.3 -------------------------------------------
-      Lip_0[g,g.pr] = abs(lprobust(temp.vc[,"psout"],
+      Lip_0[g, g.pr] = abs(lprobust(temp.vc[,"psout"],
                                    temp.vc[,"X"],
                                    eval = c.vec[g],
                                    deriv = 1,
                                    p = 2,
-                                   bwselect = "mse-dpi") $ Estimate[,5])
+                                   bwselect = "mse-dpi") $ Estimate[, 5])
     }
     }
 
@@ -264,7 +265,6 @@ crossfit <- function(
   dif.0m = dif.0m + t(-dif.0m)
   Lip_1 = Lip_1 + t(Lip_1)
   Lip_0 = Lip_0 + t(Lip_0)
-
 
   out = list(
     data_all_temp = data_all,
