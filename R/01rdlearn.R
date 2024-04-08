@@ -80,68 +80,60 @@ rdlearn <- function(
 
   ########### cleaning data #############
 
+  # prepare important variables
   Y = data[[y]] ; X = data[[x]] ; C = data[[c]]
-
   c.vec = sort(unique(C)) #cutoffs from min to max
   n = length(Y) # sample size
   q = length(unique(C)) # number of groups
-  G = match(C,c.vec)  # Group index
+  G = match(C,c.vec)  # Group index, from min cutoff to max cutoff
   D = as.numeric(X>=C) # Treatment index
 
   # make groupname
   if(is.null(groupname)) {
-    groupname <- character(q)
+    groupname = character(q)
     for (k in 1:q) {
-      groupname[k] <- paste0("Group", k)
+      groupname[k] = paste0("Group", k)
     }
   }
-
   else{
-    grouplist <- data[[groupname]]
-    dict <- setNames(grouplist, C)
-    groupname <- sapply(c.vec, function(x) dict[[as.character(x)]])
+    grouplist = data[[groupname]]
+    dict = setNames(grouplist, C)
+    groupname = sapply(c.vec, function(x) dict[[as.character(x)]])
   }
 
-  tempdata = data.frame(Y=Y,X=X,C=C,D=D,G=G)
-  data_split <- tempdata %>%
+  # add fold_id to data
+  tempdata = data.frame(Y=Y, X=X, C=C, D=D, G=G)
+
+  data_split = tempdata %>%
     mutate(fold_id = sample(1:fold, size = dim(tempdata)[1], replace = TRUE)) %>%
     group_by(fold_id) %>%
     nest() %>%
     arrange(fold_id)
+
   data_all = data_split %>% unnest(data) %>% ungroup()
 
-  psout_ps <- crossfit(c.vec = c.vec,
-                       Y = Y,
+  # cross fitting
+  temp_result = crossfit(c.vec = c.vec,
                        q = q,
                        fold = fold,
                        data_split = data_split,
                        data_all = data_all)
 
-  data_all = psout_ps$data_all_temp
-  Lip_1 = psout_ps$Lip_1_temp
-  Lip_0 = psout_ps$Lip_0_temp
-  B.1m = psout_ps$B.1m_temp
-  B.0m = psout_ps$B.0m_temp
-
   safecut_all = safelearn(
     c.vec = c.vec,
-    Y = Y,
-    X = X,
-    C = C,
-    G = G,
     n = n,
     q = q,
     cost = cost,
     M = M,
     groupname = groupname,
-    Lip_1 = Lip_1,
-    Lip_0 = Lip_0,
-    B.1m = B.1m,
-    B.0m = B.0m,
-    data_all = data_all
+    dif.1m = temp_result$dif.1m_temp,
+    dif.0m = temp_result$dif.0m_temp,
+    Lip_1 = temp_result$Lip_1_temp,
+    Lip_0 = temp_result$Lip_0_temp,
+    data_all = temp_result$data_all_temp
   )
 
-  out <- list(
+  out = list(
     call = cl,
     variables = varnames,
     basecut = c.vec,
@@ -160,7 +152,7 @@ rdlearn <- function(
 
     safecut = safecut_all,
     data_all = data_all,
-    psout_ps = psout_ps
+    temp_result = temp_result
   )
 
  class(out) <- "rdlearn"

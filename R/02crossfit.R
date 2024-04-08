@@ -1,134 +1,277 @@
-#################################################################################
-######### Appendix A.2. Step.1(a)(b)
-#################################################################################
-
 crossfit <- function(
   c.vec,
-  Y,
   q,
   fold,
   data_split,
   data_all)
 {
+  ################################################################################
+  # please refer to
+  # Appendix A.2. A double robust estimator for heterogeneous cross-group differences
+  # Section 4.1. Doubly robust estimation
+  # Section 4.3. Choosing the smoothness parameter
+  ################################################################################
   mu.fit = NULL
-  for(k in 1:fold){
+  Y = data_all['Y']
+
+  for(k in 1 : fold){
     data_train = data_split %>% filter(fold_id!=k) %>% unnest(data) %>% ungroup() %>% select(-fold_id)
     data_test = data_split %>% filter(fold_id==k) %>% unnest(data) %>% ungroup() %>% select(-fold_id)
 
     # conditional prob
-    # for now fix this model as nnet
     gamfit = multinom(formula = G ~ X, data = data_train)
 
     for(g in seq(1,q,1)){
-      eval.dat1.m = c(data_test %>% filter(X>=c.vec[g], X<c.vec[min(g+1,q)], D==0) %>% select(X))$X
-      eval.dat1.aug = c(data_test %>% filter(X>=c.vec[g], X<c.vec[min(g+1,q)], G==g) %>% select(X))$X
-      eval.dat1.pseudo = c(data_test %>% filter(D==1, X>=c.vec[g]) %>% select(X))$X
+      # ====================================================================== #
+      # Appendix A.2. Step 1. (a)
+      # Constructing the estimates of group propensity score
+
+      # treatment group
+      eval.dat1.p = data_test %>% filter(D==1)
+      ps1 = predict(gamfit, newdata = eval.dat1.p, "probs")
+      if(is.null(dim(ps1)[1])){
+        data_all = as.data.frame(data_all) #-----------------------------------------------------------------fix this later
+        ps1 = as.data.frame(ps1)
+        data_all[data_all $ fold_id==k & data_all $ D==1, paste0("pseudo.ps",seq(1,q,1))] = ps1
+        data_all = as_tibble(data_all)
+      } else {
+        data_all[data_all $ fold_id==k & data_all $ D==1, paste0("pseudo.ps",seq(1,q,1))] = ps1
+      }
+
+      # control group
+      eval.dat0.p = data_test %>% filter(D==0)
+      ps0 = predict(gamfit, newdata = eval.dat0.p, "probs")
+      if(is.null(dim(ps0)[1])){
+        data_all = as.data.frame(data_all) #-----------------------------------------------------------------fix this later
+        ps0 = as.data.frame(ps0)
+        data_all[data_all $ fold_id==k & data_all $ D==0, paste0("pseudo.ps",seq(1,q,1))] = ps0
+        data_all = as_tibble(data_all)
+      } else {
+        data_all[data_all $ fold_id==k & data_all $ D==0, paste0("pseudo.ps",seq(1,q,1))] = ps0
+      }
+
+      # ====================================================================== #
+      # Appendix A.2. Step 1. (b)
+      # Constructing the estimates of the group-specific regression functions
+      # treatment group
+
+      # m is for DR estimator (14) in Section 4.1.
+      eval.dat1.m = data_test %>%
+        filter(X >= c.vec[g],
+               X < c.vec[min(g + 1, q)],
+               G == min(g + 1, q)) %>% # D == 0
+        pull(X)
+
+      # aug is for DR estimator (14) in Section 4.1.
+      eval.dat1.aug = data_test %>%
+        filter(X >= c.vec[g],
+               X < c.vec[min(g + 1, q)],
+               G == g) %>%
+        pull(X)
+
+      # pseudo is for Appendix A.2.
+      eval.dat1.pseudo = data_test %>%
+        filter(D == 1,
+               X >= c.vec[g]) %>%
+        pull(X)
+
       eval.dat1.all = c(eval.dat1.m, eval.dat1.aug, eval.dat1.pseudo)
 
-      # psout_model
-      # fix this model for now
-      # refere to (14) \hat\tilda m ^ {-k[i]}
+      # local linear regression
+      mu.fit1 = lprobust(data_train$Y[data_train$D==1 & data_train$G==g],
+                         data_train$X[data_train$D==1 & data_train$G==g],
+                         eval = eval.dat1.all,
+                         bwselect = "imse-dpi") $ Estimate[,5]
 
-      # Error in `seq.default(x.min, x.max, length.out = imsegrid)`: 'from' must be a finite number
-      mu.fit1 = lprobust(data_train$Y[data_train$D==1 & data_train$G==g], data_train$X[data_train$D==1 & data_train$G==g],eval = eval.dat1.all,bwselect="imse-dpi")$Estimate[,5]
+      pseudo1 = mu.fit1[(length(eval.dat1.m) + length(eval.dat1.aug) + 1) : length(eval.dat1.all)]
 
-      tryCatch( { data_all[  data_all$fold_id==k & data_all$X>=c.vec[g] & data_all$X<c.vec[min(g+1,q)] & data_all$D==0, paste0("mu",".m")]= mu.fit1[1:length(eval.dat1.m)] },error=function(e) return(0))
-      tryCatch( { data_all[  data_all$fold_id==k & data_all$X>=c.vec[g] & data_all$X<c.vec[min(g+1,q)] & data_all$G==g, paste0("mu",".aug")]= mu.fit1[(length(eval.dat1.m)+1):(length(eval.dat1.m)+length(eval.dat1.aug))] },error=function(e) return(0))
-      tryCatch( { data_all[  data_all$fold_id==k & data_all$D==1 & data_all$X>=c.vec[g], paste0("pseudo.",g)]= mu.fit1[c((length(eval.dat1.m)+length(eval.dat1.aug)+1):length(eval.dat1.all))]} ,error=function(e) return(0))
+      tryCatch({
+        data_all[data_all $ fold_id==k
+                 & data_all $ D==1
+                 & data_all $ X>=c.vec[g],
+                 paste0("pseudo.",g)] = pseudo1
+      }, error=function(e) return(0))
 
-      eval.dat0.m = c( data_test %>% filter(X>=c.vec[max(g-1,1)],X<c.vec[g],D==1) %>% select(X))$X
-      eval.dat0.aug = c( data_test %>% filter(X>=c.vec[max(g-1,1)],X<c.vec[g],G==g) %>% select(X))$X
-      eval.dat0.pseudo = c( data_test %>% filter(D==0, X<c.vec[g]) %>% select(X))$X
-      eval.dat0.all = c(eval.dat0.m,eval.dat0.aug, eval.dat0.pseudo)
+      # ====================================================================== #
+      # Section 4.1. Doubly robust estimation
 
-      # psout_model
-      # fix this model for now
-      # refere to (14) \hat\tilda m ^ {-k[i]}
-      mu.fit0 = lprobust(data_train$Y[data_train$D==0 & data_train$G==g], data_train$X[data_train$D==0 & data_train$G==g], eval = eval.dat0.all, bwselect="imse-dpi")$Estimate[,5]
+      mu.m1 = mu.fit1[1 : length(eval.dat1.m)]
+      mu.aug1 = mu.fit1[(length(eval.dat1.m) + 1) : (length(eval.dat1.m) + length(eval.dat1.aug))]
 
-      tryCatch( { data_all[data_all$fold_id==k & data_all$X>=c.vec[max(g-1,1)] & data_all$X<c.vec[g] & data_all$D==1, paste0("mu",".m")] = mu.fit0[1:length(eval.dat0.m)] }, error=function(e) return(0))
-      tryCatch( { data_all[data_all$fold_id==k & data_all$X>=c.vec[max(g-1,1)] & data_all$X<c.vec[g] & data_all$G==g, paste0("mu",".aug")] = mu.fit0[(length(eval.dat0.m)+1):(length(eval.dat0.m)+length(eval.dat0.aug))] }, error=function(e) return(0))
-      tryCatch( { data_all[data_all$fold_id==k & data_all$D==0 & data_all$X<c.vec[g], paste0("pseudo.",g)] = mu.fit0[c((length(eval.dat0.m) + length(eval.dat0.aug)+1):length(eval.dat0.all))]}, error=function(e) return(0))
+      tryCatch({
+        data_all[data_all $ fold_id == k
+                 & data_all $ X >= c.vec[g]
+                 & data_all $ X < c.vec[min(g + 1, q)]
+                 & data_all $ G == min(g + 1, q),
+                 paste0("mu",".m")] = mu.m1
+        }, error=function(e) return(0))
+
+      tryCatch({
+        data_all[data_all $ fold_id == k
+                 & data_all $ X >= c.vec[g]
+                 & data_all $ X < c.vec[min(g + 1,q)]
+                 & data_all $ G == g,
+                 paste0("mu",".aug")] = mu.aug1
+        }, error=function(e) return(0))
+
+      # ====================================================================== #
+      # Appendix A.2. Step 1. (b)
+      # Constructing the estimates of the group-specific regression functions
+      # control group
+
+      # m is for DR estimator (14) in Section 4.1.
+      eval.dat0.m = data_test %>%
+        filter(X >= c.vec[max(g - 1, 1)],
+               X < c.vec[g],
+               G == max(g - 1, 1)) %>% #D == 1
+        pull(X)
+
+      # aug is for DR estimator (14) in Section 4.1.
+      eval.dat0.aug = data_test %>%
+        filter(X >= c.vec[max(g - 1, 1)],
+               X < c.vec[g],
+               G == g) %>%
+        pull(X)
+
+      # pseudo is for Appendix A.2.
+      eval.dat0.pseudo = data_test %>%
+        filter(D == 0,
+               X < c.vec[g]) %>%
+        pull(X)
+
+      eval.dat0.all = c(eval.dat0.m, eval.dat0.aug, eval.dat0.pseudo)
+
+      # local linear regression
+      mu.fit0 = lprobust(data_train$Y[data_train$D==0 & data_train$G==g],
+                         data_train$X[data_train$D==0 & data_train$G==g],
+                         eval = eval.dat0.all,
+                         bwselect="imse-dpi") $ Estimate[,5]
+
+      pseudo0 = mu.fit0[(length(eval.dat0.m) + length(eval.dat0.aug) + 1) : length(eval.dat0.all)]
+      tryCatch({
+        data_all[data_all $ fold_id == k
+                 & data_all $ D == 0
+                 & data_all $ X < c.vec[g],
+                 paste0("pseudo.",g)] = pseudo0
+      }, error=function(e) return(0))
+
+      # ====================================================================== #
+      # Section 4.1. Doubly robust estimation
+
+      mu.m0 = mu.fit0[1 : length(eval.dat0.m)]
+      mu.aug0 = mu.fit0[(length(eval.dat0.m) + 1) : (length(eval.dat0.m) + length(eval.dat0.aug))]
+
+      tryCatch({
+        data_all[data_all $ fold_id==k
+                 & data_all $ X >= c.vec[max(g-1,1)]
+                 & data_all $ X < c.vec[g]
+                 & data_all $ G == max(g - 1, 1),
+                 paste0("mu",".m")] = mu.m0
+        }, error=function(e) return(0))
+
+      tryCatch({
+        data_all[data_all $ fold_id==k
+                 & data_all $ X >= c.vec[max(g-1,1)]
+                 & data_all $ X < c.vec[g]
+                 & data_all $ G == g,
+                 paste0("mu",".aug")] = mu.aug0
+        }, error=function(e) return(0))
     }
+  }
 
-    ############################
-    ##### propensity score #####
-    ############################
+  ##############################################################################
+  # A.2. Step 2 Pseudo Outcome Regression
+  # Constructing the pseudo outcome
+  # Estimating cross-group differences dif
+  # Choosing the value of smoothness parameter Lip
+  ##############################################################################
 
-      eval.dat1.p = data_test %>% filter(D==1)
-      tryCatch({pred = predict(gamfit, newdata = eval.dat1.p, "probs")
-        if(is.null(dim(pred)[1])){
-          data_all <- as.data.frame(data_all) #-----------------------------------------------------------------fix this later
-          pred <- as.data.frame(pred)
-          data_all[data_all$fold_id==k & data_all$D==1, paste0("pseudo.ps",seq(1,q,1))] = pred
-          data_all <- as_tibble(data_all)
-        }
-        else{data_all[data_all$fold_id==k & data_all$D==1, paste0("pseudo.ps",seq(1,q,1))] = pred}
-        },error=function(e) return(0))
-
-      eval.dat0.p = data_test %>% filter(D==0)
-      tryCatch({pred = predict(gamfit, newdata = eval.dat0.p, "probs")
-        if(is.null(dim(pred)[1])){
-          data_all <- as.data.frame(data_all) #-----------------------------------------------------------------fix this later
-          pred <- as.data.frame(pred)
-          data_all[data_all$fold_id==k & data_all$D==0, paste0("pseudo.ps",seq(1,q,1))] = pred
-          data_all <- as_tibble(data_all)
-        }
-        else{data_all[data_all$fold_id==k & data_all$D==0, paste0("pseudo.ps",seq(1,q,1))] = pred}
-        },error=function(e) return(0))
-    }
-
-  #################################################################################
-  ## Second, (1) estimate cross-group differences B
-  ## (2) choose the value of smoothness parameter Lip
-  #################################################################################
-
-  psd_dat1 = psd_dat0 = NULL;
+  psd_dat1 = psd_dat0 = NULL # storing the pseudo outcome (A.2. Step 2 Pseudo Outcome Regression)
   Lip_1 = Lip_0 = matrix(0, q, q) # storing the value of smoothness parameter;  1/0: treatment/control
-  B.1m = B.0m = matrix(0, nrow = q, ncol = q) # storing the value of estimated cross-group differences at cutoff point
+  dif.1m = dif.0m = matrix(0, nrow = q, ncol = q) # storing the value of estimated cross-group differences at cutoff point
 
-  for(g in seq(1,q-1,1))
+  for(g in seq(1,q-1,1)){
     for(g.pr in seq(g+1,q,1)){
 
-      temp.dat = data_all %>% filter(D==1 & X>=max(c.vec[g.pr],c.vec[g]))
-      temp.vc = data.frame(temp.dat[,paste0("pseudo.",g)] - temp.dat[,paste0("pseudo.",g.pr)] +
-                      with(temp.dat, I(G==g) * (Y - eval(parse(text =paste0("pseudo.",g)))) / eval(parse(text =paste0("pseudo.ps",g)))) -
-                      with(temp.dat, I(G==g.pr) * (Y - eval(parse(text =paste0("pseudo.",g.pr)))) / eval(parse(text =paste0("pseudo.ps",g.pr))))
-                      ,temp.dat$X,g,g.pr)
+      # ====================================================================== #
+      # treatment group
+      temp.dat = data_all %>% filter(D==1 & X>=c.vec[g.pr])
 
+      # --------------- A.2. Step 2 Pseudo Outcome Regression - 1 --------------
+
+      psout1 = temp.dat[, paste0("pseudo.", g)] -
+        temp.dat[, paste0("pseudo.", g.pr)] +
+        with(temp.dat, I(G == g) *
+               (Y - eval(parse(text = paste0("pseudo.", g)))) /
+               eval(parse(text = paste0("pseudo.ps", g)))) -
+        with(temp.dat, I(G == g.pr) *
+               (Y - eval(parse(text = paste0("pseudo.", g.pr)))) /
+               eval(parse(text = paste0("pseudo.ps", g.pr))))
+
+      temp.vc = data.frame(psout1, temp.dat$X, g, g.pr)
       names(temp.vc)[1:2] = c("psout","X")
-      psd_dat1 = rbind(psd_dat1, temp.vc )
+      psd_dat1 = rbind(psd_dat1, temp.vc)
 
+      dif.1m[g, g.pr] = lprobust(temp.vc[,"psout"],
+                              temp.vc[,"X"],
+                              eval = c.vec[g.pr],
+                              deriv = 0,
+                              p = 1,
+                              bwselect = "mse-dpi") $ Estimate[,5]
 
-      # Section 4.3
-      Lip_1[g,g.pr] = abs(lprobust(temp.vc[,"psout"], temp.vc[,"X"], eval = max(c.vec[g.pr], c.vec[g]), deriv = 1, p=2, bwselect="mse-dpi")$Estimate[,5])
-      # Algorithm 1
-      B.1m[g,g.pr] = lprobust(temp.vc[,"psout"], temp.vc[,"X"], eval = max(c.vec[g.pr], c.vec[g]), bwselect="mse-dpi")$Estimate[,5]
+      # ---------------- Section 4.3 -------------------------------------------
+      Lip_1[g, g.pr] = abs(lprobust(temp.vc[,"psout"],
+                                    temp.vc[,"X"],
+                                    eval = c.vec[g.pr],
+                                    deriv = 1,
+                                    p = 2,
+                                    bwselect = "mse-dpi") $ Estimate[,5])
 
-      temp.dat = data_all %>% filter(D==0 & X<min(c.vec[g.pr],c.vec[g]))
+      # ====================================================================== #
+      # control group
+      temp.dat = data_all %>% filter(D==0 & X<c.vec[g])
 
-      temp.vc = data.frame("psout"=temp.dat[,paste0("pseudo.",g)] - temp.dat[,paste0("pseudo.",g.pr)] +
-                             with(temp.dat, I(G==g) * (Y - eval(parse(text =paste0("pseudo.",g)))) / eval(parse(text = paste0("pseudo.ps",g)))) -
-                             with(temp.dat, I(G==g.pr) * (Y - eval(parse(text =paste0("pseudo.",g.pr)))) / eval(parse(text = paste0("pseudo.ps",g.pr))))
-                            ,temp.dat$X,g,g.pr)
+      # --------------- A.2. Step 2 Pseudo Outcome Regression - 1 --------------
+      psout0 = temp.dat[, paste0("pseudo.", g)] -
+        temp.dat[, paste0("pseudo.", g.pr)] +
+        with(temp.dat, I(G == g) * (Y - eval(parse(text = paste0("pseudo.", g)))) /
+               eval(parse(text = paste0("pseudo.ps", g)))) -
+        with(temp.dat, I(G == g.pr) * (Y - eval(parse(text = paste0("pseudo.", g.pr)))) /
+               eval(parse(text = paste0("pseudo.ps", g.pr))))
+
+      temp.vc = data.frame(psout0, temp.dat$X, g, g.pr)
       names(temp.vc)[1:2] = c("psout", "X")
-      psd_dat0 = rbind(psd_dat0, temp.vc )
+      psd_dat0 = rbind(psd_dat0, temp.vc)
 
-      Lip_0[g,g.pr] = abs(lprobust(temp.vc[,"psout"], temp.vc[,"X"],eval = min(c.vec[g.pr], c.vec[g]),deriv = 1,p=2,bwselect="mse-dpi")$Estimate[,5])
-      B.0m[g,g.pr] = lprobust(temp.vc[,"psout"], temp.vc[,"X"],eval = min(c.vec[g.pr], c.vec[g]),bwselect="mse-dpi")$Estimate[,5]
+      dif.0m[g,g.pr] = lprobust(temp.vc[,"psout"],
+                              temp.vc[,"X"],
+                              eval = c.vec[g],
+                              deriv = 0,
+                              p = 1,
+                              bwselect = "mse-dpi") $ Estimate[,5]
+
+      # ---------------- Section 4.3 -------------------------------------------
+      Lip_0[g,g.pr] = abs(lprobust(temp.vc[,"psout"],
+                                   temp.vc[,"X"],
+                                   eval = c.vec[g],
+                                   deriv = 1,
+                                   p = 2,
+                                   bwselect = "mse-dpi") $ Estimate[,5])
+    }
     }
 
+  dif.1m = dif.1m + t(-dif.1m)
+  dif.0m = dif.0m + t(-dif.0m)
   Lip_1 = Lip_1 + t(Lip_1)
   Lip_0 = Lip_0 + t(Lip_0)
-  B.1m = B.1m + t(-B.1m)
-  B.0m = B.0m + t(-B.0m)
+
 
   out = list(
     data_all_temp = data_all,
+    dif.1m_temp = dif.1m,
+    dif.0m_temp = dif.0m,
     Lip_1_temp = Lip_1,
-    Lip_0_temp = Lip_0,
-    B.1m_temp = B.1m,
-    B.0m_temp = B.0m
+    Lip_0_temp = Lip_0
   )
   out
  }

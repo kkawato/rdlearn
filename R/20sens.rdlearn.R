@@ -22,21 +22,16 @@ sens.rdlearn <- function (
 
   safecut_new = safelearn(
     c.vec = result$basecut,
-    Y = result$Y,
-    X = result$X,
-    C = result$C,
-    G = result$G,
-    D = result$D,
     n = result$sample,
     q = result$numgroup,
     cost = cost,
     M = M,
     groupname = result$groupname,
-    Lip_1 = result$psout_ps$Lip_1_temp,
-    Lip_0 = result$psout_ps$Lip_0_temp,
-    B.1m = result$psout_ps$B.1m_temp,
-    B.0m = result$psout_ps$B.0m_temp,
-    data_all = result$psout_ps$data_all_temp
+    Lip_1 = result$temp_result$Lip_1_temp,
+    Lip_0 = result$temp_result$Lip_0_temp,
+    dif.1m = result$temp_result$dif.1m_temp,
+    dif.0m = result$temp_result$dif.0m_temp,
+    data_all = result$temp_result$data_all_temp
   )
 
   ########### create a new plot #############

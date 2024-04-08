@@ -15,7 +15,6 @@
 # }
 
 plot.rdlearn <- function(result, xlab="", ylab="", safecut = NULL){
-
   if(is.null(safecut)){
   safecut = result$safecut
   }
@@ -23,31 +22,31 @@ plot.rdlearn <- function(result, xlab="", ylab="", safecut = NULL){
     print("new safecut")
   }
 
-  q <- result$numgroup
-  dataall <- data.frame()
+  q = result$numgroup
+  dataall = data.frame()
 
   for (k in 1:(ncol(safecut)-1)) {
-    tempdf <- data.frame(
+    tempdf = data.frame(
       y = rev(1:q),
       org.c = result$basecut,
       safe.c = safecut[k+1],
       type = names(safecut)[k+1]
     )
-    names(tempdf)[3] <- "safe.c"
-    dataall <- rbind(dataall, tempdf)
+    names(tempdf)[3] = "safe.c"
+    dataall = rbind(dataall, tempdf)
   }
 
   ggplot(data = dataall, aes(type, y)) +
     geom_tile(aes(fill = safe.c - org.c), color = "white") +
     scale_fill_gradient2(low = "purple", mid = "white", high = "orange",
                          name = "Change in cutoff"
-                         ) + # limits = c(-200, 200)) + # how can I scale this
+                         ) +
     geom_text(aes(label = safe.c - org.c), color = "black", size = 3,
               position = position_dodge(width = 1)) +
     scale_y_continuous(breaks = seq(1, q, 1),
                       labels = rev(result$groupname)
                        ) +
-    xlab(xlab) + # it can be cost
+    xlab(xlab) +
     ylab(ylab) +
     theme(
       panel.grid.major = element_blank(),
