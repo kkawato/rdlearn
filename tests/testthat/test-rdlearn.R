@@ -5,7 +5,7 @@ library(nprobust)
 library(nnet)
 library(ggplot2)
 
-result = rdlearn(y = "acces", x = "saber11", c = "cutoff", groupname = "department", data = colombia_acces, fold = 20, M = c(0,1), cost = 0)
+result <- rdlearn(y = "acces", x = "saber11", c = "cutoff", groupname = "department", data = colombia_acces, fold = 5, M = c(0,1), cost = 0)
 plot.rdlearn(result)
 sens.rdlearn(result, M = 1, cost = c(1, 2))
 sens.rdlearn(result, M = 1, cost = c(0, 1, 2, 4))

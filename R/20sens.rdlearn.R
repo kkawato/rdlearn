@@ -2,6 +2,8 @@
 #   UseMethod("sens", x)
 # }
 
+sens <- function(x, ...) UseMethod("sens")
+
 sens.rdlearn <- function (
     result,
     M = NULL,
@@ -20,7 +22,7 @@ sens.rdlearn <- function (
     stop("Both M and cost are vectors.")
   }
 
-  safecut_new = safelearn(
+  safecut_new <- safelearn(
     c.vec = result$basecut,
     n = result$sample,
     q = result$numgroup,

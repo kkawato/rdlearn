@@ -14,6 +14,8 @@
 #   UseMethod("plot", x)
 # }
 
+plot <- function(x, ...) UseMethod("plot")
+
 plot.rdlearn <- function(result, xlab="", ylab="", safecut = NULL){
   if(is.null(safecut)){
   safecut = result$safecut
