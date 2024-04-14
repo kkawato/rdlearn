@@ -81,59 +81,57 @@ rdlearn <- function(
   ########### cleaning data #############
 
   # prepare important variables
-  Y = data[[y]] ; X = data[[x]] ; C = data[[c]]
-  c.vec = sort(unique(C)) #cutoffs from min to max
-  n = length(Y) # sample size
-  q = length(unique(C)) # number of groups
-  G = match(C,c.vec)  # Group index, from min cutoff to max cutoff
-  D = as.numeric(X>=C) # Treatment index
+  Y <- data[[y]] ; X <- data[[x]] ; C <- data[[c]]
+  c.vec <- sort(unique(C)) #cutoffs from min to max
+  n <- length(Y) # sample size
+  q <- length(unique(C)) # number of groups
+  G <- match(C,c.vec)  # Group index, from min cutoff to max cutoff
+  D <- as.numeric(X>=C) # Treatment index
 
   # make groupname
-  if(is.null(groupname)) {
+  if (is.null(groupname)) {
     groupname = character(q)
     for (k in 1:q) {
       groupname[k] = paste0("Group", k)
     }
-  }
-  else{
+  } else {
     grouplist = data[[groupname]]
     dict = setNames(grouplist, C)
     groupname = sapply(c.vec, function(x) dict[[as.character(x)]])
   }
 
   # add fold_id to data
-  tempdata = data.frame(Y=Y, X=X, C=C, D=D, G=G)
-
-  data_split = tempdata %>%
+  tempdata <- data.frame(Y = Y, X = X, C = C, D = D, G = G)
+  data_split <- tempdata %>%
     mutate(fold_id = sample(1:fold, size = dim(tempdata)[1], replace = TRUE)) %>%
     group_by(fold_id) %>%
     nest() %>%
     arrange(fold_id)
 
-  data_all = data_split %>% unnest(data) %>% ungroup()
+  data_all <- data_split %>%
+    unnest(data) %>%
+    ungroup()
 
   # cross fitting
-  temp_result = crossfit(c.vec = c.vec,
-                       q = q,
-                       fold = fold,
-                       data_split = data_split,
-                       data_all = data_all)
+  temp_result <- crossfit(
+    c.vec = c.vec,
+    q = q,
+    fold = fold,
+    data_split = data_split,
+    data_all = data_all
+  )
 
-  safecut_all = safelearn(
+  safecut_all <- safelearn(
     c.vec = c.vec,
     n = n,
     q = q,
     cost = cost,
     M = M,
     groupname = groupname,
-    dif.1m = temp_result$dif.1m_temp,
-    dif.0m = temp_result$dif.0m_temp,
-    Lip_1 = temp_result$Lip_1_temp,
-    Lip_0 = temp_result$Lip_0_temp,
-    data_all = temp_result$data_all_temp
+    temp_result = temp_result
   )
 
-  out = list(
+  out <- list(
     call = cl,
     variables = varnames,
     basecut = c.vec,

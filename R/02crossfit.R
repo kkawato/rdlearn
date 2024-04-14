@@ -283,11 +283,11 @@ crossfit <- function(
   Lip_0 <- Lip_0 + t(Lip_0)
 
   out <- list(
-    data_all_temp = data_all,
     dif.1m_temp = dif.1m,
     dif.0m_temp = dif.0m,
     Lip_1_temp = Lip_1,
-    Lip_0_temp = Lip_0
+    Lip_0_temp = Lip_0,
+    data_all_temp = data_all
   )
 
   out

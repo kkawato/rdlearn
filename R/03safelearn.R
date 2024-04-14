@@ -5,21 +5,24 @@ safelearn = function(
     cost,
     M,
     groupname,
-    dif.1m,
-    dif.0m,
-    Lip_1,
-    Lip_0,
-    data_all)
+    temp_result)
 {
   ################################################################################
   # please refer to
   # Section 4.1. Doubly robust estimation
   # Section 4.2. Estimating the bounds
   ################################################################################
-  Y = data_all['Y']
-  X = data_all['X']
-  C = data_all['C']
-  G = data_all['G']
+
+  dif.1m <- temp_result$dif.1m_temp
+  dif.0m <- temp_result$dif.0m_temp
+  Lip_1 <- temp_result$Lip_1_temp
+  Lip_0 <- temp_result$Lip_0_temp
+  data_all <- temp_result$data_all_temp
+
+  Y <- data_all['Y']
+  X <- data_all['X']
+  C <- data_all['C']
+  G <- data_all['G']
 
   # ====================================================================== #
   # Section 4.2. Estimating the bounds
@@ -49,8 +52,7 @@ safelearn = function(
   }
   # ====================================================================== #
 
-  group <- groupname #------------------------------------------- - - - -- - - --- - - -- - - - -- - - -fix this later
-  safecut_all <- data.frame(group)
+  safecut_all <- data.frame(group = groupname)
 
   Lip_1temp <- Lip_1
   Lip_0temp <- Lip_0
@@ -76,7 +78,7 @@ safelearn = function(
                               X >= c.vec[1],
                               X < c.vec[q],
                               X < c.vec[g]) %>%
-                       select(X))$X #d(1)
+                       select(X))$X # d(1)
       IND.1 <- sapply(eval.dat1, function(x) sum(c.vec < x))
       tryCatch(
         {
@@ -95,7 +97,7 @@ safelearn = function(
                               X >= c.vec[1],
                               X < c.vec[q],
                               X >= c.vec[g]) %>%
-                       select(X))$X #d(0)
+                       select(X))$X # d(0)
       IND.0 <- sapply(eval.dat0, function(x) sum(c.vec < x))
       tryCatch(
         {
@@ -113,13 +115,13 @@ safelearn = function(
     #
     # ======================================================================== #
 
-    data_mid <- data_all %>% filter( X >= min(c.vec), X < max(c.vec))
+    data_mid <- data_all %>% filter(X >= min(c.vec), X < max(c.vec))
     regret_sum <- NULL
 
     for (g in seq(1, q, 1)) {
-      regret = NULL
+      regret <- NULL
       for (c.alt in unique(X[X >= c.vec[1] & X < c.vec[q]])) {
-        # ---------------------------------------------------------------------- #
+        # -------------------------------------------------------------------- #
         if (c.alt >= c.vec[g]) {
           temp1 <- tryCatch(-sum(data_mid[data_mid$X >= c.vec[g] & data_mid$X < c.alt & data_mid$G == g, "Y"]) / n,
                             error = function(e) return(0))
@@ -154,7 +156,7 @@ safelearn = function(
           temp.reg <- temp1 + tempDB1 + tempd + tempDB2 + tempcost
         }
 
-        # ---------------------------------------------------------------------- #
+        # -------------------------------------------------------------------- #
         if (c.alt < c.vec[g]) {
           temp1 <- tryCatch(-sum(data_mid[data_mid$X < c.vec[g] & data_mid$X >= c.alt & data_mid$G == g, "Y"]) / n,
                             error = function(e) return(0))
@@ -185,7 +187,7 @@ safelearn = function(
 
           temp.reg <- temp1 + tempDB1 + tempd + tempDB2 - tempcost
         }
-        # ---------------------------------------------------------------------- #
+        # -------------------------------------------------------------------- #
         regret <- c(regret, temp.reg)
       }
 
@@ -196,11 +198,9 @@ safelearn = function(
       }
       regret_sum <- c(regret_sum, max(regret))
     }
-    group <- groupname #-------------------------------------------fix this later
-    colname <- paste0("M=", temp_M, ",", "C=", temp_cost)
-    c.all_df <- data.frame(c.all, group)
-    names(c.all_df)[1] <- colname
-    safecut_all <- full_join(safecut_all, c.all_df, by=("group" = "group"))
+    c.all_df <- data.frame(c.all, groupname)
+    names(c.all_df)[1] <- paste0("M=", temp_M, ",", "C=", temp_cost)
+    safecut_all <- full_join(safecut_all, c.all_df, by = ("group" = "groupname"))
   }
   }
   safecut_all

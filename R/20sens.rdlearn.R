@@ -29,11 +29,7 @@ sens.rdlearn <- function (
     cost = cost,
     M = M,
     groupname = result$groupname,
-    Lip_1 = result$temp_result$Lip_1_temp,
-    Lip_0 = result$temp_result$Lip_0_temp,
-    dif.1m = result$temp_result$dif.1m_temp,
-    dif.0m = result$temp_result$dif.0m_temp,
-    data_all = result$temp_result$data_all_temp
+    temp_result = result$temp_result
   )
 
   ########### create a new plot #############
