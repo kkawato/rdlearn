@@ -1,30 +1,30 @@
-#ここもデータフレーム作るところはきれいに書きたいな
-#早く説明文を書く
-
 plot <- function(x, ...) UseMethod("plot")
-
-#' plot.rdlearn
+######################################################
+# Plot method for rdlearn objects
+######################################################
 #'
-#' @param result
-#' @param xlab
-#' @param ylab
-#' @param safecut
+#' Plot method for \code{rdlearn} objects
 #'
-#' @return
-#' @export
+#' \code{plot} plots the cutoff change relative to the baseline cutoff for each department (y-axis)
+#' under different smoothness multiplicative factor M and cost of treatment C (x-axis).
+#'
+#' @param result an object of class \code{rdlearn} returned by the \code{\link{rdlearn}}.
+#' @param xlab a label of x-axis.
+#' @param ylab a label of y-axis.
+#'
+#' @return a \code{ggplot2} plot of changes in cutoffs.
+#'
+#' @import ggplot2
 #'
 #' @examples
-#' result <- rdlearn(y = "acces", x = "saber11", c = "cutoff", groupname = "department", data = colombia_acces, fold = 20, M = c(0, 1), cost = 0)
-#' plot.rdlearn(result)
+#'
 #' @export
-
-plot.rdlearn <- function(result, xlab = "", ylab = "", safecut = NULL) {
-  if (is.null(safecut)) {
-    safecut <- result$safecut
-  } else {
-    print("new safecut")
-  }
-
+plot.rdlearn <- function(result,
+                         xlab = "",
+                         ylab = ""
+                         )
+{
+  safecut <- result$safecut
   q <- result$numgroup
   dataall <- data.frame()
 

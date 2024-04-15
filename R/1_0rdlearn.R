@@ -1,6 +1,11 @@
 #####################################################
-# Primary function
+# Primary function for learning safe policy under Regression Discontinuity Designs with multiple cutoffs
 #####################################################
+#'
+#' Primary function for learning safe policy under Regression Discontinuity Designs with multiple cutoffs
+#'
+#' \code{rdlearn} estimates
+#'
 #'
 #' @param y column name of outcome variable.
 #' @param x column name of running variable.
@@ -12,7 +17,7 @@
 #' @param M multiplicative smoothness factor. Default is 1.
 #' @param cost cost for calculating regret. Default is 0.
 #'
-#' @return An object
+#' @return an \code{rdlearn} object containing ...
 #'
 #' @importFrom nprobust lprobust
 #' @importFrom nnet multinom
@@ -21,9 +26,6 @@
 #' @references Yi Zhang ...
 #'
 #' @examples
-#' result <- rdlearn(y = "acces", x = "saber11", c = "cutoff", groupname = "department", data = colombia_acces, fold = 20, M = c(0, 1), cost = 0)
-#' plot.rdlearn(result)
-#' # use "plot.rdlearn" to visualize the result.
 #'
 #' @export
 rdlearn <- function(
@@ -32,7 +34,7 @@ rdlearn <- function(
     c,
     groupname = NULL,
     data,
-    fold = 20,
+    fold = 10,
     M = 1,
     cost = 0
       # Cost should be scaled by the range of the outcome Y.

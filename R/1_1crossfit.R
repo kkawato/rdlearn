@@ -90,8 +90,6 @@ crossfit <- function(
                             bwselect = "imse-dpi")$Estimate[, 5]
       }, error = function(e) return(0))
 
-
-
       pseudo1 <- mu.fit1[(length(eval.dat1.m) + length(eval.dat1.aug) + 1):length(eval.dat1.all)]
 
       tryCatch({

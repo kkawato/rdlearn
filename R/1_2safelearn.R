@@ -1,8 +1,5 @@
-# 最後のデータフレームを作るところをなんとかする
 # 一応場合分けの理解をする
 # apply関数の動き方を理解する、多分まだでてきない
-# それよりもデータセットを探してきた方が良いか？
-#
 
 safelearn = function(
     c.vec,
@@ -157,10 +154,9 @@ safelearn = function(
       for (c.alt in unique(X[X >= c.vec[1] & X < c.vec[q]])) {
         # -------------------------------------------------------------------- #
         if (c.alt >= c.vec[g]) {
+          base_regret <- sum(data_mid[data_mid$G == g, "Y"]) / n
 
           # (12) I_iden: Identified
-          Iden_base <- sum(data_mid[data_mid$G == g, "Y"]) / n
-
           Iden_alt <- (sum(data_mid[data_mid$X >= c.vec[g] & data_mid$X >= c.alt & data_mid$G == g, "Y"]) +
                     sum(data_mid[data_mid$X < c.vec[g] & data_mid$X < c.alt & data_mid$G == g, "Y"])) / n
 
@@ -196,14 +192,14 @@ safelearn = function(
                                                       & data_mid$G == g, "Y"])[1] / n, # the number of
                                error = function(e) return(0))
 
-          temp_reg <- (Iden_alt + DR_1 + DR_2 + Theta_2 + cost) - Iden_base
+          temp_reg <- (Iden_alt + DR_1 + DR_2 + Theta_2 + cost) - base_regret
         }
 
         # -------------------------------------------------------------------- #
         if (c.alt < c.vec[g]) {
-          # (12) I_iden: Identified
-          Iden_base <- sum(data_mid[data_mid$G == g, "Y"]) / n
+          base_regret <- sum(data_mid[data_mid$G == g, "Y"]) / n
 
+          # (12) I_iden: Identified
           Iden_alt <- (sum(data_mid[data_mid$X >= c.vec[g] & data_mid$X >= c.alt & data_mid$G == g, "Y"]) +
                          sum(data_mid[data_mid$X < c.vec[g] & data_mid$X < c.alt & data_mid$G == g, "Y"])) / n
 
@@ -236,7 +232,7 @@ safelearn = function(
           cost <- tryCatch(temp_cost * dim(data_mid[data_mid$X < c.vec[g] & data_mid$X >= c.alt & data_mid$G == g, "Y"])[1] / n,
                                error = function(e) return(0))
 
-          temp_reg <- (Iden_alt + DR_1 + DR_2 + Theta_2 + cost) - Iden_base
+          temp_reg <- (Iden_alt + DR_1 + DR_2 + Theta_2 + cost) - base_regret
         }
         # -------------------------------------------------------------------- #
         regret <- c(regret, temp_reg)
@@ -247,10 +243,10 @@ safelearn = function(
       } else {
         c.all[g] <- unique(X[X >= c.vec[1] & X < c.vec[q]])[which(regret == max(regret))[1]]
       }
+
       regret_sum <- c(regret_sum, max(regret))
     }
-    group <- groupname
-    c.all_df <- data.frame(c.all, group = group)
+    c.all_df <- data.frame(c.all, group = groupname)
     names(c.all_df)[1] <- paste0("M=", temp_M, ",", "C=", temp_cost)
     safecut_all <- full_join(safecut_all, c.all_df, by = ("group" = "group"))
   }
