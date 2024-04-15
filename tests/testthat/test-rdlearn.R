@@ -5,13 +5,15 @@ library(nprobust)
 library(nnet)
 library(ggplot2)
 
-result <- rdlearn(y = "acces", x = "saber11", c = "cutoff", groupname = "department", data = colombia_acces, fold = 20, M = c(0,1), cost = 0)
+result <- rdlearn(y = "acces", x = "saber11", c = "cutoff", groupname = "department", data = colombia_acces, fold = 20, M = c(0, 1), cost = 0)
 plot.rdlearn(result)
+
+sens.rdlearn(result, M = 1, cost = c(0, 0.2, 0.4, 0.6, 0.8, 1))
 sens.rdlearn(result, M = 1, cost = c(0, 1))
-sens.rdlearn(result, M = 1, cost = c(0, 1, 2, 4))
+sens.rdlearn(result, M = c(0,1), cost = 0)
 
 
-result <- rdlearn(y = "acces", x = "saber11", c = "cutoff", groupname = "department", data = colombia_acces, fold = 20, M = c(0,1,2,4), cost = 0)
+result <- rdlearn(y = "acces", x = "saber11", c = "cutoff", groupname = "department", data = colombia_acces, fold = 20, M = c(0, 1, 2, 4), cost = 0)
 plot.rdlearn(result)
 # Figure 2
 # use "plot.rdlearn" to visualize the result.

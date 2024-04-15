@@ -1,3 +1,8 @@
+#ここもデータフレーム作るところはきれいに書きたいな
+#早く説明文を書く
+
+plot <- function(x, ...) UseMethod("plot")
+
 #' plot.rdlearn
 #'
 #' @param result
@@ -9,18 +14,11 @@
 #' @export
 #'
 #' @examples
+#' result <- rdlearn(y = "acces", x = "saber11", c = "cutoff", groupname = "department", data = colombia_acces, fold = 20, M = c(0, 1), cost = 0)
+#' plot.rdlearn(result)
+#' @export
 
-# plot <- function(x) {
-#   UseMethod("plot", x)
-# }
-
-plot <- function(x, ...) UseMethod("plot")
-
-plot.rdlearn <- function(result,
-                         xlab = "",
-                         ylab = "",
-                         safecut = NULL)
-{
+plot.rdlearn <- function(result, xlab = "", ylab = "", safecut = NULL) {
   if (is.null(safecut)) {
     safecut <- result$safecut
   } else {
@@ -32,10 +30,10 @@ plot.rdlearn <- function(result,
 
   for (k in 1:(ncol(safecut) - 1)) {
     tempdf <- data.frame(
-      y <- rev(1:q),
-      org.c <- result$basecut,
-      safe.c <- safecut[k + 1],
-      type <- names(safecut)[k + 1]
+      y = rev(1:q),
+      org.c = result$basecut,
+      safe.c = safecut[k + 1],
+      type = names(safecut)[k + 1]
     )
     names(tempdf)[3] <- "safe.c"
     dataall <- rbind(dataall, tempdf)

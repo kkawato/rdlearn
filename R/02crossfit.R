@@ -41,8 +41,7 @@ crossfit <- function(
       }
 
       # control group
-      eval.dat0.p <- data_test %>%
-        filter(D == 0)
+      eval.dat0.p <- data_test %>% filter(D == 0)
 
       ps0 <- predict(gamfit, newdata = eval.dat0.p, "probs")
 

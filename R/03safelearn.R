@@ -1,3 +1,9 @@
+# 最後のデータフレームを作るところをなんとかする
+# 一応場合分けの理解をする
+# apply関数の動き方を理解する、多分まだでてきない
+# それよりもデータセットを探してきた方が良いか？
+#
+
 safelearn = function(
     c.vec,
     n,
@@ -26,6 +32,7 @@ safelearn = function(
 
   # ====================================================================== #
   # Section 4.2. Estimating the bounds
+  # please refer to (16)
 
   lip_extra <- function(x.train,
                         group,
@@ -68,9 +75,9 @@ safelearn = function(
 
     for(g in seq(1, q, 1)) {
     # ======================================================================== #
-    #
-    #
-    # ======================================================================== #
+    # Section 4.2. Estimating the bounds
+    # please refer to (15)
+
     # ---------------------------------------------------------------------- #
     # treatment group
       eval.dat1 <- c(data_all %>%
@@ -79,15 +86,27 @@ safelearn = function(
                               X < c.vec[q],
                               X < c.vec[g]) %>%
                        select(X))$X # d(1)
-      IND.1 <- sapply(eval.dat1, function(x) sum(c.vec < x))
+      IND.1 <- sapply(eval.dat1, function(x) sum(c.vec < x)) #the number of treated
+      temp_df1 <- cbind(eval.dat1, IND.1)
+
+      # tryCatch({
+      # results <- numeric(nrow(temp_df1))
+      # for (i in seq_len(nrow(temp_df1))) {
+      #   x <- temp_df1[i, ]
+      #   lip_extra_results <- sapply(x[2], function(g.temp) {
+      #     lip_extra(x.train = x[1], group = "dif1", g = g, g.pr = g.temp)[2, ]
+      #   })
+      #   results[i] <- sum(unlist(lip_extra_results))
+      # }
+      # }, error = function(e) return(0))
+
       tryCatch(
         {
           data_all[data_all$G == g
                    & data_all$X >= c.vec[1]
                    & data_all$X < c.vec[q]
                    & data_all$X < c.vec[g],
-                   paste0("d", 1)] <-
-            apply(cbind(eval.dat1, IND.1), 1, function(x) sum(unlist(sapply(x[2]:x[2], function(g.temp) lip_extra(x.train = x[1], group = "dif1", g = g, g.pr = g.temp))[2, ])))
+                   paste0("d", 1)] <- apply(temp_df1, 1, function(x) sum(unlist(sapply(x[2], function(g.temp) lip_extra(x.train = x[1], group = "dif1", g = g, g.pr = g.temp))[2, ])))
         }, error = function(e) return(0))
 
       # ---------------------------------------------------------------------- #
@@ -98,21 +117,36 @@ safelearn = function(
                               X < c.vec[q],
                               X >= c.vec[g]) %>%
                        select(X))$X # d(0)
-      IND.0 <- sapply(eval.dat0, function(x) sum(c.vec < x))
+      IND.0 <- sapply(eval.dat0, function(x) sum(c.vec < x)) #the number of untreated
+      temp_df0 <- cbind(eval.dat0, IND.0)
+
+      # tryCatch({
+      # results <- numeric(nrow(temp_df0))
+      # for (i in seq_len(nrow(temp_df0))) {
+      #   x <- temp_df0[i, ]
+      #   lip_extra_results <- sapply(x[2] + 1, function(g.temp) {
+      #     lip_extra(x.train = x[1], group = "dif0", g = g, g.pr = g.temp)[2, ]
+      #   })
+      #   results[i] <- sum(unlist(lip_extra_results))
+      # }
+      # }, error = function(e) return(0))
+
       tryCatch(
         {
           data_all[data_all$G == g
                    & data_all$X >= c.vec[1]
                    & data_all$X < c.vec[q]
                    & data_all$X >= c.vec[g],
-                   paste0("d", 0)] <-
-            apply(cbind(eval.dat0, IND.0), 1, function(x) sum(unlist(sapply((x[2] + 1):(x[2] + 1), function(g.temp) lip_extra(x.train = x[1], group = "dif0", g = g, g.pr = g.temp))[2, ])))
+                   paste0("d", 0)] <- apply(temp_df0, 1, function(x) sum(unlist(sapply(x[2] + 1, function(g.temp) lip_extra(x.train = x[1], group = "dif0", g = g, g.pr = g.temp))[2, ])))
+          # なんでここで+1しているのかもわからない…サンプルサイズを増やしている？
+          # すべてのEvaluationポイントについて
         }, error = function(e) return(0))
     }
 
     # ======================================================================== #
-    #
-    #
+    # Section 4.1. Doubly Robust Estimation
+    # Section 4.2. Estimating the bounds
+    # please refer to (12), (14), (15), (17)
     # ======================================================================== #
 
     data_mid <- data_all %>% filter(X >= min(c.vec), X < max(c.vec))
@@ -123,84 +157,102 @@ safelearn = function(
       for (c.alt in unique(X[X >= c.vec[1] & X < c.vec[q]])) {
         # -------------------------------------------------------------------- #
         if (c.alt >= c.vec[g]) {
-          temp1 <- tryCatch(-sum(data_mid[data_mid$X >= c.vec[g] & data_mid$X < c.alt & data_mid$G == g, "Y"]) / n,
-                            error = function(e) return(0))
 
-          ###########
-          dat.temp <- data_mid %>%
-            filter(G == g, X < c.alt, X >= c.vec[g])
+          # (12) I_iden: Identified
+          Iden_base <- sum(data_mid[data_mid$G == g, "Y"]) / n
 
-          tempDB1 <- tryCatch(sum(dat.temp[, "mu.m"]) / n,
+          Iden_alt <- (sum(data_mid[data_mid$X >= c.vec[g] & data_mid$X >= c.alt & data_mid$G == g, "Y"]) +
+                    sum(data_mid[data_mid$X < c.vec[g] & data_mid$X < c.alt & data_mid$G == g, "Y"])) / n
+
+
+          # (14) Theta_DR: first term and second term
+          data_temp1 <- data_mid %>%
+            filter(G == g,
+                   X < c.alt,
+                   X >= c.vec[g])
+
+          DR_1 <- tryCatch(sum(data_temp1[, "mu.m"]) / n,
                               error = function(e) return(0))
 
-          tempd <- tryCatch(sum(dat.temp[, paste0("d", 0)]) / n,
-                            error = function(e) return(0))
-
-          ###########
-
-          dat.temp <- data_mid %>%
+          data_temp2 <- data_mid %>%
             filter(X < c.alt,
                    X >= c.vec[g],
-                   X >= c.vec[ifelse(G == 1, 1, G - 1)],
-                   X < c.vec[G]) #& X>=c.vec[G-1] & X<c.vec[G]
+                   X >= c.vec[ifelse(G == 1, 1, G - 1)], # X >= c.vec[G-1]
+                   X < c.vec[G])
 
-          tempDB2 <- tryCatch(sum(with(dat.temp,
+          DR_2 <- tryCatch(sum(with(data_temp2,
                                        eval(parse(text = paste0("pseudo.ps", g))) /
                                          eval(parse(text = paste0("pseudo.ps", G))) *
                                          (Y - eval(parse(text = "mu.aug"))))) / n,
                               error = function(e) return(0))
 
-          tempcost <- tryCatch(temp_cost * dim(data_mid[data_mid$X >= c.vec[g] & data_mid$X < c.alt & data_mid$G == g, "Y"])[1] / n,
+          # (15) Theta_2:
+          Theta_2 <- tryCatch(sum(data_temp1[, paste0("d", 0)]) / n,
+                            error = function(e) return(0))
+
+          # cost
+          cost <- tryCatch(temp_cost * dim(data_mid[data_mid$X >= c.vec[g]
+                                                      & data_mid$X < c.alt
+                                                      & data_mid$G == g, "Y"])[1] / n, # the number of
                                error = function(e) return(0))
 
-          temp.reg <- temp1 + tempDB1 + tempd + tempDB2 + tempcost
+          temp_reg <- (Iden_alt + DR_1 + DR_2 + Theta_2 + cost) - Iden_base
         }
 
         # -------------------------------------------------------------------- #
         if (c.alt < c.vec[g]) {
-          temp1 <- tryCatch(-sum(data_mid[data_mid$X < c.vec[g] & data_mid$X >= c.alt & data_mid$G == g, "Y"]) / n,
-                            error = function(e) return(0))
+          # (12) I_iden: Identified
+          Iden_base <- sum(data_mid[data_mid$G == g, "Y"]) / n
 
-          dat.temp <- data_mid %>%
-            filter(G == g, X >= c.alt, X < c.vec[g])
+          Iden_alt <- (sum(data_mid[data_mid$X >= c.vec[g] & data_mid$X >= c.alt & data_mid$G == g, "Y"]) +
+                         sum(data_mid[data_mid$X < c.vec[g] & data_mid$X < c.alt & data_mid$G == g, "Y"])) / n
 
-          tempDB1 <- tryCatch(sum(dat.temp[, "mu.m"]) / n,
+          # (14) Theta_DR: first term and second term
+          data_temp1 <- data_mid %>%
+            filter(G == g,
+                   X >= c.alt,
+                   X < c.vec[g])
+
+          DR_1 <- tryCatch(sum(data_temp1[, "mu.m"]) / n,
                               error = function(e) return(0))
 
-          tempd <- tryCatch(sum(dat.temp[, paste0("d", 1)]) / n,
-                            error = function(e) return(0))
-
-          dat.temp <- data_mid %>%
+          data_temp2 <- data_mid %>%
             filter(X >= c.alt,
                    X < c.vec[g],
                    X >= c.vec[G],
-                   X < c.vec[ifelse(G == q, q, G + 1)])
+                   X < c.vec[ifelse(G == q, q, G + 1)]) # X < c.vec[G + 1]
 
-          tempDB2 <- tryCatch(sum(with(dat.temp,
+          DR_2 <- tryCatch(sum(with(data_temp2,
                                        eval(parse(text = paste0("pseudo.ps", g))) /
                                          eval(parse(text = paste0("pseudo.ps", G))) *
                                          (Y - eval(parse(text = "mu.aug"))))) / n,
                               error = function(e) return(0))
 
-          tempcost <- tryCatch(temp_cost * dim(data_mid[data_mid$X < c.vec[g] & data_mid$X >= c.alt & data_mid$G == g, "Y"])[1] / n,
+          # (15) Theta_2
+          Theta_2 <- tryCatch(sum(data_temp1[, paste0("d", 1)]) / n,
+                            error = function(e) return(0))
+
+          # cost
+          cost <- tryCatch(temp_cost * dim(data_mid[data_mid$X < c.vec[g] & data_mid$X >= c.alt & data_mid$G == g, "Y"])[1] / n,
                                error = function(e) return(0))
 
-          temp.reg <- temp1 + tempDB1 + tempd + tempDB2 - tempcost
+          temp_reg <- (Iden_alt + DR_1 + DR_2 + Theta_2 + cost) - Iden_base
         }
         # -------------------------------------------------------------------- #
-        regret <- c(regret, temp.reg)
+        regret <- c(regret, temp_reg)
       }
 
-      if (max(regret) == 0) {
+      if (max(regret) == 0) { # if baseline policy is the best policy
         c.all[g] <- c.vec[g]
       } else {
         c.all[g] <- unique(X[X >= c.vec[1] & X < c.vec[q]])[which(regret == max(regret))[1]]
       }
       regret_sum <- c(regret_sum, max(regret))
     }
-    c.all_df <- data.frame(c.all, groupname)
+    group <- groupname
+    c.all_df <- data.frame(c.all, group = group)
     names(c.all_df)[1] <- paste0("M=", temp_M, ",", "C=", temp_cost)
-    safecut_all <- full_join(safecut_all, c.all_df, by = ("group" = "groupname"))
+    safecut_all <- full_join(safecut_all, c.all_df, by = ("group" = "group"))
   }
   }
   safecut_all

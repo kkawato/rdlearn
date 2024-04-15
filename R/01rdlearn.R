@@ -1,18 +1,18 @@
 #####################################################
 # Primary function
 #####################################################
-
+#'
 #' @param y column name of outcome variable.
 #' @param x column name of running variable.
 #' @param c column name of cutoff.
-#' @param groupname column name of each cutoff group's name (e.g. department name of ACCES program).
+#' @param groupname column name of each cutoff group's name (e.g. department name).
 #' If no argument is entered, the names "Group 1", "Group 2", ... are automatically assigned from the group with most smallest cutoff.
-#' @param data data frame containing all variables
-#' @param fold number of folds for cross-fitting.
+#' @param data data frame containing all variables.
+#' @param fold number of folds for cross-fitting. Default is 10.
 #' @param M multiplicative smoothness factor. Default is 1.
 #' @param cost cost for calculating regret. Default is 0.
 #'
-#' @return
+#' @return An object
 #'
 #' @importFrom nprobust lprobust
 #' @importFrom nnet multinom
@@ -21,7 +21,8 @@
 #' @references Yi Zhang ...
 #'
 #' @examples
-#' result <- rdlearn(y = "acces", x = "saber11", c = "cutoff", groupname = "department", data = colombia_acces, fold = 20, M = c(0,1,2,4), cost = 0)
+#' result <- rdlearn(y = "acces", x = "saber11", c = "cutoff", groupname = "department", data = colombia_acces, fold = 20, M = c(0, 1), cost = 0)
+#' plot.rdlearn(result)
 #' # use "plot.rdlearn" to visualize the result.
 #'
 #' @export
