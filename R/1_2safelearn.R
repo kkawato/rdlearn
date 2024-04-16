@@ -1,6 +1,3 @@
-# 一応場合分けの理解をする
-# apply関数の動き方を理解する、多分まだでてきない
-
 safelearn = function(
     c.vec,
     n,
@@ -135,8 +132,6 @@ safelearn = function(
                    & data_all$X < c.vec[q]
                    & data_all$X >= c.vec[g],
                    paste0("d", 0)] <- apply(temp_df0, 1, function(x) sum(unlist(sapply(x[2] + 1, function(g.temp) lip_extra(x.train = x[1], group = "dif0", g = g, g.pr = g.temp))[2, ])))
-          # なんでここで+1しているのかもわからない…サンプルサイズを増やしている？
-          # すべてのEvaluationポイントについて
         }, error = function(e) return(0))
     }
 
@@ -232,7 +227,7 @@ safelearn = function(
           cost <- tryCatch(temp_cost * dim(data_mid[data_mid$X < c.vec[g] & data_mid$X >= c.alt & data_mid$G == g, "Y"])[1] / n,
                                error = function(e) return(0))
 
-          temp_reg <- (Iden_alt + DR_1 + DR_2 + Theta_2 + cost) - base_regret
+          temp_reg <- (Iden_alt + DR_1 + DR_2 + Theta_2 - cost) - base_regret
         }
         # -------------------------------------------------------------------- #
         regret <- c(regret, temp_reg)

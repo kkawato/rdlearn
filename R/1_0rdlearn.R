@@ -15,7 +15,7 @@
 #' @param data data frame containing all variables.
 #' @param fold number of folds for cross-fitting. Default is 10.
 #' @param M multiplicative smoothness factor. Default is 1.
-#' @param cost cost for calculating regret. Default is 0.
+#' @param cost cost for calculating regret. Default is 0.Cost should be scaled by the range of the outcome Y.
 #'
 #' @return an \code{rdlearn} object containing ...
 #'
@@ -37,18 +37,8 @@ rdlearn <- function(
     fold = 10,
     M = 1,
     cost = 0
-      # Cost should be scaled by the range of the outcome Y.
-      # automatically scale the cost according to the range of Y?
-      # In our application, Y is an indicator, so C is within [0,1].
-      ### models ###
-      # ps_model, # nnet
-      # psout_model, # local linear/polynomial regressionzl, lprobust
-      # lip_model # fix this lprobust(... ,deriv = 1, p=2, bwselect="mse-dpi")
-      # b_model, # fix this lprobust(... ,deriv = 1, p=2, bwselect="mse-dpi")
     )
 {
-  #######################################################################
-
   # Get function call
   cl <- match.call()
 
@@ -81,7 +71,7 @@ rdlearn <- function(
     stop("Both M and cost are vectors.")
   }
 
-  ########### cleaning data #############
+  # --------------------------- cleaning data -------------------------------- #
 
   # prepare important variables
   Y <- data[[y]] ; X <- data[[x]] ; C <- data[[c]]
@@ -140,17 +130,9 @@ rdlearn <- function(
     basecut = c.vec,
     sample = n,
     numgroup = q,
-
-    Y = Y,
-    X = X,
-    C = C,
-    G = G,
-    D = D,
-
     M = M,
     cost = cost,
     groupname = groupname,
-
     safecut = safecut_all,
     data_all = data_all,
     temp_result = temp_result
