@@ -1,3 +1,6 @@
+#' Implement cross-fitting for estimating cross-group differences
+#' 
+#' @noRd
 crossfit <- function(
   c.vec,
   q,
@@ -12,7 +15,7 @@ crossfit <- function(
   # Section 4.3. Choosing the smoothness parameter
   ################################################################################
   mu.fit <- NULL
-  Y <- data_all['Y']
+  Y <- data_all[['Y']]
 
   for(k in 1 : fold){
     data_train <- data_split %>% filter(fold_id!=k) %>% unnest(data) %>% ungroup() %>% select(-fold_id)
