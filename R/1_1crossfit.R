@@ -1,8 +1,9 @@
 #' Implement cross-fitting for estimating cross-group differences
 #'  
-#' @importFrom dplyr %>% filter ungroup select
+#' @importFrom dplyr %>% filter ungroup select arrange
 #' @importFrom tidyr unnest
 #' @importFrom nnet multinom
+#' @importFrom nprobust lprobust
 #' @noRd
 crossfit <- function(
   c.vec,
