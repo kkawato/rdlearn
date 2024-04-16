@@ -1,8 +1,4 @@
-#####################################################
-# Primary function for learning safe policy under Regression Discontinuity Designs with multiple cutoffs
-#####################################################
-#'
-#' Primary function for learning safe policy under Regression Discontinuity Designs with multiple cutoffs
+#' Safe policy learning under Regression Discontinuity Designs with multiple cutoffs
 #'
 #' \code{rdlearn} estimates
 #'
@@ -11,11 +7,13 @@
 #' @param x column name of running variable.
 #' @param c column name of cutoff.
 #' @param groupname column name of each cutoff group's name (e.g. department name).
-#' If no argument is entered, the names "Group 1", "Group 2", ... are automatically assigned from the group with most smallest cutoff.
+#'   If no argument is entered, the names "Group 1", "Group 2", ... are 
+#'   automatically assigned from the group with most smallest cutoff.
 #' @param data data frame containing all variables.
 #' @param fold number of folds for cross-fitting. Default is 10.
 #' @param M multiplicative smoothness factor. Default is 1.
-#' @param cost cost for calculating regret. Default is 0.Cost should be scaled by the range of the outcome Y.
+#' @param cost cost for calculating regret. 
+#'   Default is 0. Cost should be scaled by the range of the outcome Y.
 #'
 #' @return an \code{rdlearn} object containing ...
 #'
@@ -26,7 +24,6 @@
 #' @references Yi Zhang ...
 #'
 #' @examples
-#'
 #' @export
 rdlearn <- function(
     y,
@@ -36,19 +33,20 @@ rdlearn <- function(
     data,
     fold = 10,
     M = 1,
-    cost = 0
-    )
-{
+    cost = 0) {
   # Get function call
   cl <- match.call()
 
   # Check argument missingness and type
-  if(missing(y) || !is.character(y) || length(y) > 1)
+  if (missing(y) || !is.character(y) || length(y) > 1) {
     stop("'y' must be a character string of length one.")
-  if(missing(x) || !is.character(x) || length(x) > 1)
+  }
+  if (missing(x) || !is.character(x) || length(x) > 1) {
     stop("'x' must be a character string of length one.")
-  if(missing(c) || !is.character(c) || length(c) > 1)
+  }
+  if (missing(c) || !is.character(c) || length(c) > 1) {
     stop("'c' must be a character string of length one.")
+  }
 
   # Store all variable names in 'varnames'
   varnames <- list(y, x, c)
@@ -59,12 +57,15 @@ rdlearn <- function(
   }
 
   # check NA
-  if (anyNA(data[[y]]))
+  if (anyNA(data[[y]])) {
     stop("the column 'y' contains NA.")
-  if (anyNA(data[[x]]))
+  }
+  if (anyNA(data[[x]])) {
     stop("the column 'x' contains NA.")
-  if (anyNA(data[[c]]))
+  }
+  if (anyNA(data[[c]])) {
     stop("the column 'c' contains NA.")
+  }
 
   # check M and cost
   if (length(M) > 1 && length(cost) > 1) {
@@ -74,23 +75,25 @@ rdlearn <- function(
   # --------------------------- cleaning data -------------------------------- #
 
   # prepare important variables
-  Y <- data[[y]] ; X <- data[[x]] ; C <- data[[c]]
-  c.vec <- sort(unique(C)) #cutoffs from min to max
+  Y <- data[[y]]
+  X <- data[[x]]
+  C <- data[[c]]
+  c.vec <- sort(unique(C)) # cutoffs from min to max
   n <- length(Y) # sample size
   q <- length(unique(C)) # number of groups
-  G <- match(C,c.vec)  # Group index, from min cutoff to max cutoff
-  D <- as.numeric(X>=C) # Treatment index
+  G <- match(C, c.vec) # Group index, from min cutoff to max cutoff
+  D <- as.numeric(X >= C) # Treatment index
 
   # make groupname
   if (is.null(groupname)) {
-    groupname = character(q)
+    groupname <- character(q)
     for (k in 1:q) {
-      groupname[k] = paste0("Group", k)
+      groupname[k] <- paste0("Group", k)
     }
   } else {
-    grouplist = data[[groupname]]
-    dict = setNames(grouplist, C)
-    groupname = sapply(c.vec, function(x) dict[[as.character(x)]])
+    grouplist <- data[[groupname]]
+    dict <- setNames(grouplist, C)
+    groupname <- sapply(c.vec, function(x) dict[[as.character(x)]])
   }
 
   # add fold_id to data
@@ -138,8 +141,6 @@ rdlearn <- function(
     temp_result = temp_result
   )
 
- class(out) <- "rdlearn"
- out
+  class(out) <- "rdlearn"
+  out
 }
-
-
