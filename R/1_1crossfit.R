@@ -1,5 +1,8 @@
 #' Implement cross-fitting for estimating cross-group differences
-#' 
+#'  
+#' @importFrom dplyr %>% filter ungroup select
+#' @importFrom tidyr unnest
+#' @importFrom nnet multinom
 #' @noRd
 crossfit <- function(
   c.vec,
@@ -17,13 +20,14 @@ crossfit <- function(
   mu.fit <- NULL
   Y <- data_all[['Y']]
 
-  for(k in 1 : fold){
+  for (k in 1:fold) {
     data_train <- data_split %>% filter(fold_id!=k) %>% unnest(data) %>% ungroup() %>% select(-fold_id)
     data_test <- data_split %>% filter(fold_id==k) %>% unnest(data) %>% ungroup() %>% select(-fold_id)
 
     # conditional prob of group
     gamfit <- multinom(formula = G ~ X, data = data_train)
 
+    # The loop is over groups g = 1, ..., q
     for(g in seq(1,q,1)){
       # ====================================================================== #
       # Appendix A.2. Step 1. (a)
@@ -45,7 +49,6 @@ crossfit <- function(
 
       # control group
       eval.dat0.p <- data_test %>% filter(D == 0)
-
       ps0 <- predict(gamfit, newdata = eval.dat0.p, "probs")
 
       if (is.null(dim(ps0)[1])) {
