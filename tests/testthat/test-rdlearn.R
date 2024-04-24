@@ -10,8 +10,6 @@ plot.rdlearn(result)
 result2 <- sens.rdlearn(result, M = 1, cost = c(0, 0.2, 0.4, 0.6, 0.8, 1))
 plot.rdlearn(result2)
 
-
-
 result <- rdlearn(y = "elig", x = "saber11", c = "cutoff", groupname = "department", data = acces, fold = 20, M = c(0, 1, 2, 4), cost = 0)
 plot.rdlearn(result)
 # Figure 2

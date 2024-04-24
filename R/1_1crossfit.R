@@ -1,5 +1,5 @@
 #' Implement cross-fitting for estimating cross-group differences
-#'  
+#'
 #' @importFrom dplyr %>% filter ungroup select arrange
 #' @importFrom tidyr unnest
 #' @importFrom nnet multinom
@@ -25,48 +25,32 @@ crossfit <- function(
     data_train <- data_split %>% filter(fold_id!=k) %>% unnest(data) %>% ungroup() %>% select(-fold_id)
     data_test <- data_split %>% filter(fold_id==k) %>% unnest(data) %>% ungroup() %>% select(-fold_id)
 
+    # ====================================================================== #
+    # Appendix A.2. Step 1. (a)
+    # Constructing the estimates of group propensity score
+    # ====================================================================== #
+
     # conditional prob of group
     gamfit <- multinom(formula = G ~ X, data = data_train)
+    ps <- predict(gamfit, newdata = data_test, "probs")
+
+    if (is.null(dim(ps)[1])) {
+      data_all <- as.data.frame(data_all) # -----------------------------------------------------------------fix this later
+      ps <- as.data.frame(ps)
+      data_all[data_all$fold_id == k, paste0("pseudo.ps", seq(1, q, 1))] <- ps
+      data_all <- as_tibble(data_all)
+    } else {
+      data_all[data_all$fold_id == k, paste0("pseudo.ps", seq(1, q, 1))] <- ps
+    }
+
+    # ====================================================================== #
+    # Appendix A.2. Step 1. (b)
+    # Constructing the estimates of the group-specific regression functions
+    # treatment group
+    # ====================================================================== #
 
     # The loop is over groups g = 1, ..., q
     for(g in seq(1,q,1)){
-      # ====================================================================== #
-      # Appendix A.2. Step 1. (a)
-      # Constructing the estimates of group propensity score
-      # ====================================================================== #
-
-      # treatment group
-      eval.dat1.p <- data_test %>% filter(D == 1)
-      ps1 <- predict(gamfit, newdata = eval.dat1.p, "probs")
-
-      if (is.null(dim(ps1)[1])) {
-        data_all <- as.data.frame(data_all) # -----------------------------------------------------------------fix this later
-        ps1 <- as.data.frame(ps1)
-        data_all[data_all$fold_id == k & data_all$D == 1, paste0("pseudo.ps", seq(1, q, 1))] <- ps1
-        data_all <- as_tibble(data_all)
-      } else {
-        data_all[data_all$fold_id == k & data_all$D == 1, paste0("pseudo.ps", seq(1, q, 1))] <- ps1
-      }
-
-      # control group
-      eval.dat0.p <- data_test %>% filter(D == 0)
-      ps0 <- predict(gamfit, newdata = eval.dat0.p, "probs")
-
-      if (is.null(dim(ps0)[1])) {
-        data_all <- as.data.frame(data_all) # -----------------------------------------------------------------fix this later
-        ps0 <- as.data.frame(ps0)
-        data_all[data_all$fold_id == k & data_all$D == 0, paste0("pseudo.ps", seq(1, q, 1))] <- ps0
-        data_all <- as_tibble(data_all)
-      } else {
-        data_all[data_all$fold_id == k & data_all$D == 0, paste0("pseudo.ps", seq(1, q, 1))] <- ps0
-      }
-
-      # ====================================================================== #
-      # Appendix A.2. Step 1. (b)
-      # Constructing the estimates of the group-specific regression functions
-      # treatment group
-      # ====================================================================== #
-
       # m is for DR estimator (14) in Section 4.1.
       eval.dat1.m <- data_test %>%
         filter(X >= c.vec[g],
