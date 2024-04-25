@@ -22,8 +22,11 @@ crossfit <- function(
   Y <- data_all[['Y']]
 
   for (k in 1:fold) {
-    data_train <- data_split %>% filter(fold_id!=k) %>% unnest(data) %>% ungroup() %>% select(-fold_id)
-    data_test <- data_split %>% filter(fold_id==k) %>% unnest(data) %>% ungroup() %>% select(-fold_id)
+    # data_train <- data_split %>% filter(fold_id!=k) %>% unnest(data) %>% ungroup() %>% select(-fold_id)
+    # data_test <- data_split %>% filter(fold_id==k) %>% unnest(data) %>% ungroup() %>% select(-fold_id)
+
+    data_train <- data_all %>% filter(fold_id != k)
+    data_test <- data_all %>% filter(fold_id  == k)
 
     # ====================================================================== #
     # Appendix A.2. Step 1. (a)
@@ -88,7 +91,7 @@ crossfit <- function(
                      data_all$D == 1 &
                      data_all$X >= c.vec[g],
                    paste0("pseudo.", g)] <- pseudo1
-        }, error = function(e) return(0) )
+        }, error = function(e) return(0))
 
       # ====================================================================== #
       # Section 4.1. Doubly robust estimation
@@ -167,13 +170,13 @@ crossfit <- function(
       mu.m0 <- mu.fit0[1:length(eval.dat0.m)]
       mu.aug0 <- mu.fit0[(length(eval.dat0.m) + 1):(length(eval.dat0.m) + length(eval.dat0.aug))]
 
-      tryCatch({
+      # tryCatch({
           data_all[data_all$fold_id == k &
                      data_all$X >= c.vec[max(g - 1, 1)] &
                      data_all$X < c.vec[g] &
                      data_all$D == 1, # D == 1, G == max(g - 1, 1) → なんでこれで動かないのか
                    paste0("mu", ".m")] <- mu.m0
-        }, error = function(e) return(0) )
+        # }, error = function(e) return(0) )
 
       tryCatch({
           data_all[data_all$fold_id == k &
