@@ -1,8 +1,6 @@
+#' @export
 sens <- function(x, ...) UseMethod("sens")
-######################################################
-# Sensitivity analysis method for rdlearn objects
-######################################################
-#'
+
 #' Sensitivity analysis method for \code{rdlearn} objects
 #'
 #' \code{sens}
@@ -15,6 +13,7 @@ sens <- function(x, ...) UseMethod("sens")
 #' @export
 #'
 #' @examples
+#'
 #' @export
 sens.rdlearn <- function (
     result,

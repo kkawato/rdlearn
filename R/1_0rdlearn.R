@@ -2,17 +2,16 @@
 #'
 #' \code{rdlearn} estimates
 #'
-#'
 #' @param y column name of outcome variable.
 #' @param x column name of running variable.
 #' @param c column name of cutoff.
 #' @param groupname column name of each cutoff group's name (e.g. department name).
-#'   If no argument is entered, the names "Group 1", "Group 2", ... are 
+#'   If no argument is entered, the names "Group 1", "Group 2", ... are
 #'   assigned from the group with smallest cutoff.
 #' @param data data frame containing all variables.
 #' @param fold number of folds for cross-fitting. Default is 10.
 #' @param M multiplicative smoothness factor. Default is 1.
-#' @param cost cost for calculating regret. 
+#' @param cost cost for calculating regret.
 #'   Default is 0. Cost should be scaled by the range of the outcome Y.
 #'
 #' @return an \code{rdlearn} object containing ...
@@ -106,16 +105,24 @@ rdlearn <- function(
 
   # Add fold_id to data used for cross-fitting
   tempdata <- data.frame(Y = Y, X = X, C = C, D = D, G = G)
-  data_split <- tempdata %>%
-    mutate(
-      fold_id = sample(1:fold, size = n, replace = TRUE)) %>%
+
+  data_all <- tempdata %>%
+    mutate(fold_id = sample(1:fold, size = n, replace = TRUE))
+  data_split <- data_all %>%
     group_by(fold_id) %>%
     nest() %>%
     arrange(fold_id)
 
-  data_all <- data_split %>%
-    unnest(data) %>%
-    ungroup()
+  # data_split <- tempdata %>%
+  #   mutate(
+  #     fold_id = sample(1:fold, size = n, replace = TRUE)) %>%
+  #   group_by(fold_id) %>%
+  #   nest() %>%
+  #   arrange(fold_id)
+  #
+  # data_all <- data_split %>%
+  #   unnest(data) %>%
+  #   ungroup()
 
   # ------------------------- Apply Algorithms ------------------------------- #
   # Apply cross fitting

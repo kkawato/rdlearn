@@ -1,8 +1,6 @@
+#' @export
 plot <- function(x, ...) UseMethod("plot")
 
-######################################################
-# Plot method for rdlearn objects
-######################################################
 #'
 #' Plot method for \code{rdlearn} objects
 #'
@@ -18,7 +16,6 @@ plot <- function(x, ...) UseMethod("plot")
 #' @import ggplot2
 #'
 #' @examples
-#'
 #' @export
 plot.rdlearn <- function(result,
                          xlab = "",
