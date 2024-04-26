@@ -106,23 +106,29 @@ rdlearn <- function(
   # Add fold_id to data used for cross-fitting
   tempdata <- data.frame(Y = Y, X = X, C = C, D = D, G = G)
 
-  data_all <- tempdata %>%
-    mutate(fold_id = sample(1:fold, size = n, replace = TRUE))
-  data_split <- data_all %>%
+  # #これだと動かなかった
+  # data_all <- tempdata %>%
+  #   mutate(fold_id = sample(1:fold, size = n, replace = TRUE))
+
+  # data_all <- tempdata %>%
+  #   mutate(fold_id = sample(1:fold, size = n, replace = TRUE)) %>%
+  #   arrange(fold_id)
+  #
+  # data_split <- data_all %>%
+  #   group_by(fold_id) %>%
+  #   nest() %>%
+  #   arrange(fold_id)
+
+  data_split <- tempdata %>%
+    mutate(
+      fold_id = sample(1:fold, size = n, replace = TRUE)) %>%
     group_by(fold_id) %>%
     nest() %>%
     arrange(fold_id)
 
-  # data_split <- tempdata %>%
-  #   mutate(
-  #     fold_id = sample(1:fold, size = n, replace = TRUE)) %>%
-  #   group_by(fold_id) %>%
-  #   nest() %>%
-  #   arrange(fold_id)
-  #
-  # data_all <- data_split %>%
-  #   unnest(data) %>%
-  #   ungroup()
+  data_all <- data_split %>%
+    unnest(data) %>%
+    ungroup()
 
   # ------------------------- Apply Algorithms ------------------------------- #
   # Apply cross fitting

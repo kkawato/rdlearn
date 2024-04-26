@@ -95,8 +95,7 @@ safelearn = function(
       # }, error = function(e) return(0))
 
       tryCatch(
-        {
-          data_all[data_all$G == g
+        {data_all[data_all$G == g
                    & data_all$X >= c.vec[1]
                    & data_all$X < c.vec[q]
                    & data_all$X < c.vec[g],

@@ -18,183 +18,52 @@ crossfit <- function(
   # Section 4.1. Doubly robust estimation
   # Section 4.3. Choosing the smoothness parameter
   ################################################################################
-  mu.fit <- NULL
-  Y <- data_all[['Y']]
+
+  cross_fit_output <- data.frame()
 
   for (k in 1:fold) {
-    # data_train <- data_split %>% filter(fold_id!=k) %>% unnest(data) %>% ungroup() %>% select(-fold_id)
-    # data_test <- data_split %>% filter(fold_id==k) %>% unnest(data) %>% ungroup() %>% select(-fold_id)
-
     data_train <- data_all %>% filter(fold_id != k)
     data_test <- data_all %>% filter(fold_id  == k)
-
-    # ====================================================================== #
-    # Appendix A.2. Step 1. (a)
-    # Constructing the estimates of group propensity score
-    # ====================================================================== #
 
     # conditional prob of group
     gamfit <- multinom(formula = G ~ X, data = data_train)
     ps <- predict(gamfit, newdata = data_test, "probs")
+    data_test[, paste0("pseudo.ps", seq(1, q, 1))] <- predict(gamfit, newdata = data_test, "probs")
 
-    if (is.null(dim(ps)[1])) {
-      data_all <- as.data.frame(data_all) # -----------------------------------------------------------------fix this later
-      ps <- as.data.frame(ps)
-      data_all[data_all$fold_id == k, paste0("pseudo.ps", seq(1, q, 1))] <- ps
-      data_all <- as_tibble(data_all)
-    } else {
-      data_all[data_all$fold_id == k, paste0("pseudo.ps", seq(1, q, 1))] <- ps
+    for (g in seq(1,q,1)){
+
+      mu_all <- estimate_mu(data_train, data_test, c.vec, k, g, q)
+
+      data_test[data_test$D == 1 & data_test$X >= c.vec[g], paste0("pseudo.", g)] <- mu_all$pseudo1
+      if (nrow(data_test[data_test$X >= c.vec[g] & data_test$X < c.vec[min(g + 1, q)] & data_test$D == 0, ]) == 0) { }
+      else {
+      data_test[data_test$X >= c.vec[g] & data_test$X < c.vec[min(g + 1, q)] & data_test$D == 0, paste0("mu.m")] <- mu_all$mu_m1
+      }
+      if (nrow(data_test[data_test$X >= c.vec[g] & data_test$X < c.vec[min(g + 1, q)] & data_test$G == g, ]) == 0) { }
+      else {
+      data_test[data_test$X >= c.vec[g] & data_test$X < c.vec[min(g + 1, q)] & data_test$G == g, paste0("mu.aug")] <- mu_all$mu_aug1
+      }
+
+      data_test[data_test$D == 0 & data_test$X < c.vec[g], paste0("pseudo.", g)] <- mu_all$pseudo0
+      if (nrow(data_test[data_test$X >= c.vec[max(g - 1, 1)] & data_test$X < c.vec[g] & data_test$D == 1, ]) == 0) { }
+      else {
+      data_test[data_test$X >= c.vec[max(g - 1, 1)] & data_test$X < c.vec[g] & data_test$D == 1, paste0("mu.m")] <- mu_all$mu_m0
+      }
+      if (nrow(data_test[data_test$X >= c.vec[max(g - 1, 1)] & data_test$X < c.vec[g] & data_test$G == g, ]) == 0) { }
+      else {
+      data_test[data_test$X >= c.vec[max(g - 1, 1)] & data_test$X < c.vec[g] & data_test$G == g, paste0("mu.aug")] <- mu_all$mu_aug0
+      }
     }
 
-    # ====================================================================== #
-    # Appendix A.2. Step 1. (b)
-    # Constructing the estimates of the group-specific regression functions
-    # treatment group
-    # ====================================================================== #
+    print(cross_fit_output)
+    print(data_test)
 
-    # The loop is over groups g = 1, ..., q
-    for(g in seq(1,q,1)){
-      # m is for DR estimator (14) in Section 4.1.
-      eval.dat1.m <- data_test %>%
-        filter(X >= c.vec[g],
-               X < c.vec[min(g + 1, q)],
-               D == 0) %>% # G == min(g + 1, q) did not work
-        pull(X)
-
-      # aug is for DR estimator (14) in Section 4.1.
-      eval.dat1.aug <- data_test %>%
-        filter(X >= c.vec[g],
-               X < c.vec[min(g + 1, q)],
-               G == g) %>%
-        pull(X)
-
-      # pseudo is for Appendix A.2.
-      eval.dat1.pseudo <- data_test %>%
-        filter(D == 1,
-               X >= c.vec[g]) %>%
-        pull(X)
-
-      eval.dat1.all <- c(eval.dat1.m, eval.dat1.aug, eval.dat1.pseudo)
-
-      # local linear regression
-      tryCatch({
-        mu.fit1 <- lprobust(data_train$Y[data_train$D == 1 & data_train$G == g],
-                            data_train$X[data_train$D == 1 & data_train$G == g],
-                            eval = eval.dat1.all,
-                            bwselect = "imse-dpi")$Estimate[, 5]
-      }, error = function(e) return(0))
-
-      pseudo1 <- mu.fit1[(length(eval.dat1.m) + length(eval.dat1.aug) + 1):length(eval.dat1.all)]
-
-      tryCatch({
-          data_all[data_all$fold_id == k &
-                     data_all$D == 1 &
-                     data_all$X >= c.vec[g],
-                   paste0("pseudo.", g)] <- pseudo1
-        }, error = function(e) return(0))
-
-      # ====================================================================== #
-      # Section 4.1. Doubly robust estimation
-      # ====================================================================== #
-
-      # Section 4.1. Doubly robust estimation
-      mu.m1 <- mu.fit1[1:length(eval.dat1.m)]
-      mu.aug1 <- mu.fit1[(length(eval.dat1.m) + 1):(length(eval.dat1.m) + length(eval.dat1.aug))]
-
-      tryCatch({
-          data_all[data_all$fold_id == k &
-                     data_all$X >= c.vec[g] &
-                     data_all$X < c.vec[min(g + 1, q)] &
-                     data_all$D == 0, # D == 0 # G == min(g + 1, q)
-                   paste0("mu", ".m")] <- mu.m1
-        }, error = function(e) return(0) )
-
-      tryCatch({
-          data_all[data_all$fold_id == k &
-                     data_all$X >= c.vec[g] &
-                     data_all$X < c.vec[min(g + 1, q)] &
-                     data_all$G == g,
-                   paste0("mu", ".aug")] <- mu.aug1
-        }, error = function(e) return(0) )
-
-      # ====================================================================== #
-      # Appendix A.2. Step 1. (b)
-      # Constructing the estimates of the group-specific regression functions
-      # control group
-      # ====================================================================== #
-
-      # m is for DR estimator (14) in Section 4.1.
-      eval.dat0.m <- data_test %>%
-        filter(X >= c.vec[max(g - 1, 1)],
-               X < c.vec[g],
-               D == 1) %>% # G == max(g - 1, 1) did not work
-        pull(X)
-
-      # aug is for DR estimator (14) in Section 4.1.
-      eval.dat0.aug <- data_test %>%
-        filter(X >= c.vec[max(g - 1, 1)],
-               X < c.vec[g],
-               G == g) %>%
-        pull(X)
-
-      # pseudo is for Appendix A.2.
-      eval.dat0.pseudo <- data_test %>%
-        filter(D == 0,
-               X < c.vec[g]) %>%
-        pull(X)
-
-      eval.dat0.all <- c(eval.dat0.m, eval.dat0.aug, eval.dat0.pseudo)
-
-      # local linear regression
-      tryCatch({
-        mu.fit0 <- lprobust(data_train$Y[data_train$D == 0 & data_train$G == g],
-                            data_train$X[data_train$D == 0 & data_train$G == g],
-                            eval = eval.dat0.all,
-                            bwselect = "imse-dpi")$Estimate[, 5]
-      },error = function(e) return(0) )
-
-
-      pseudo0 <- mu.fit0[(length(eval.dat0.m) + length(eval.dat0.aug) + 1):length(eval.dat0.all)]
-
-      tryCatch({
-        data_all[data_all$fold_id == k &
-                   data_all$D == 0 &
-                   data_all$X < c.vec[g],
-                 paste0("pseudo.", g)] <- pseudo0
-        },error = function(e) return(0) )
-
-      # ====================================================================== #
-      # Section 4.1. Doubly robust estimation
-      # ====================================================================== #
-
-      mu.m0 <- mu.fit0[1:length(eval.dat0.m)]
-      mu.aug0 <- mu.fit0[(length(eval.dat0.m) + 1):(length(eval.dat0.m) + length(eval.dat0.aug))]
-
-      # tryCatch({
-          data_all[data_all$fold_id == k &
-                     data_all$X >= c.vec[max(g - 1, 1)] &
-                     data_all$X < c.vec[g] &
-                     data_all$D == 1, # D == 1, G == max(g - 1, 1) → なんでこれで動かないのか
-                   paste0("mu", ".m")] <- mu.m0
-        # }, error = function(e) return(0) )
-
-      tryCatch({
-          data_all[data_all$fold_id == k &
-                     data_all$X >= c.vec[max(g - 1, 1)] &
-                     data_all$X < c.vec[g] &
-                     data_all$G == g,
-                   paste0("mu", ".aug")] <- mu.aug0
-        }, error = function(e) return(0) )
-    }
+    cross_fit_output <- rbind(cross_fit_output, data_test)
   }
 
-  ##############################################################################
-  # A.2. Step 2 Pseudo Outcome Regression
-  # Constructing the pseudo outcome
-  # Estimating cross-group differences dif
-  # Choosing the value of smoothness parameter Lip
-  ##############################################################################
+  data_all <- cross_fit_output
 
+  Y <- data_all[['Y']]
   psd_dat1 <- psd_dat0 <- NULL  # storing the pseudo outcome (A.2. Step 2 Pseudo Outcome Regression)
   Lip_1 <- Lip_0 <- matrix(0, q, q)  # storing the value of smoothness parameter; 1/0: treatment/control
   dif.1m <- dif.0m <- matrix(0, nrow = q, ncol = q)  # storing the value of estimated cross-group differences at cutoff point
@@ -281,6 +150,6 @@ crossfit <- function(
     data_all_temp = data_all
   )
 
-  out
+  return(out)
 }
 
