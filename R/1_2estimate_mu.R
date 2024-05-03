@@ -29,7 +29,6 @@ estimate_mu <- function (data_train,
   # pseudo is for Appendix A.2.
   eval.dat0.pseudo <- data_test0 %>% filter(X < c.vec[g]) %>% pull(X)
 
-
   Y1g <- data_train1 %>% filter(G == g) %>% pull(Y)
   X1g <- data_train1 %>% filter(G == g) %>% pull(X)
   Y0g <- data_train0 %>% filter(G == g) %>% pull(Y)
