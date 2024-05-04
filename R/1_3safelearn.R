@@ -54,43 +54,27 @@ safelearn = function(
 
   for (temp_cost in cost) {
     for (temp_M in M) {
-
-      print(paste("Calculating the case of M =", temp_M, "C =", temp_cost))
+      print(paste("Calculation in progress for M =", temp_M, "and C =", temp_cost))
 
       Lip_1 <- temp_M * Lip_1temp
       Lip_0 <- temp_M * Lip_0temp
       c.all <- rep(0, length(c.vec))
 
       for(g in seq(1, q, 1)) {
-        # ======================================================================== #
-        # Section 4.2. Estimating the bounds
-        # please refer to (15)
+        for (d in c(1, 0)) {
+          eval_cond <- (data_all$G == g) & (data_all$X >= c.vec[1]) & (data_all$X < c.vec[q])
+          if (d == 1) { eval_cond <- eval_cond & (data_all$X < c.vec[g])
+          } else { eval_cond <- eval_cond & (data_all$X >= c.vec[g]) }
 
-        # ---------------------------------------------------------------------- #
-        # treatment group
-        eval1 <- (data_all$G == g) & (data_all$X >= c.vec[1]) & (data_all$X < c.vec[q]) & (data_all$X < c.vec[g])
-        eval.dat1 <- data_all[eval1, ]$X
-        IND.1 <- sapply(eval.dat1, function(x) sum(c.vec < x)) #the number of treated
-        temp_df1 <- cbind(eval.dat1, IND.1)
-        data_all[eval1, paste0("d", 1)] <- apply(temp_df1, 1, function(x) sum(unlist(sapply(x[2], function(g.temp) lip_extra(x.train = x[1], group = "dif1", g = g, g.pr = g.temp))[2, ])))
+          eval_dat <- data_all[eval_cond, ]$X
+          IND <- sapply(eval_dat, function(x) sum(c.vec < x))
+          temp_df <- cbind(eval_dat, IND)
 
-        # ---------------------------------------------------------------------- #
-        # control group
-        eval0 <- (data_all$G == g) & (data_all$X >= c.vec[1]) & (data_all$X < c.vec[q]) & (data_all$X >= c.vec[g])
-        eval.dat0 <- data_all[eval0, ]$X
-        IND.0 <- sapply(eval.dat0, function(x) sum(c.vec < x)) #the number of untreated
-        temp_df0 <- cbind(eval.dat0, IND.0)
-
-        tryCatch({
-        data_all[eval0, paste0("d", 0)] <- apply(temp_df0, 1, function(x) sum(unlist(sapply(x[2] + 1, function(g.temp) lip_extra(x.train = x[1], group = "dif0", g = g, g.pr = g.temp))[2, ])))
-        }, error = function(e) return(0))
+          if (nrow(temp_df) > 0 && ncol(temp_df) > 0) {
+            data_all[eval_cond, paste0("d", d)] <- apply(temp_df, 1, function(x) sum(unlist(sapply(x[2] + (1 - d), function(g.temp) lip_extra(x.train = x[1], group = paste0("dif", d), g = g, g.pr = g.temp))[2, ])))
+          }
+        }
       }
-
-      # ======================================================================== #
-      # Section 4.1. Doubly Robust Estimation
-      # Section 4.2. Estimating the bounds
-      # please refer to (12), (14), (15), (17)
-      # ======================================================================== #
 
       data_mid <- data_all %>% filter(X >= min(c.vec), X < max(c.vec))
       regret_sum <- NULL
@@ -102,39 +86,42 @@ safelearn = function(
             d <- 0
             range1 <- (data_mid$X >= c.vec[g]) & (data_mid$X < c.alt) & (data_mid$G == g)
             range2 <- (data_mid$X < c.alt) & (data_mid$X >= c.vec[g]) & (data_mid$X >= c.vec[ifelse(data_mid$G == 1, 1, data_mid$G - 1)]) & (data_mid$X < c.vec[data_mid$G])
-            cost <- temp_cost * dim(data_mid[range1, "Y"])[1] / n
           } else {
             d <- 1
             range1 <- (data_mid$X < c.vec[g]) & (data_mid$X >= c.alt) & (data_mid$G == g)
             range2 <- (data_mid$X >= c.alt) & (data_mid$X < c.vec[g]) & (data_mid$X >= c.vec[data_mid$G]) & (data_mid$X < c.vec[ifelse(data_mid$G == q, q, data_mid$G + 1)])
-            cost <- -1 * temp_cost * dim(data_mid[range1, "Y"])[1] / n
           }
+
+          base_regret <- sum(data_mid[data_mid$G == g, "Y"])
+          Iden_alt <- (sum(data_mid[data_mid$X >= c.vec[g] & data_mid$X >= c.alt & data_mid$G == g, "Y"]) +
+                         sum(data_mid[data_mid$X < c.vec[g] & data_mid$X < c.alt & data_mid$G == g, "Y"]))
 
           data_temp1 <- data_mid[range1,]
-          base_regret <- sum(data_mid[data_mid$G == g, "Y"]) / n
-          Iden_alt <- (sum(data_mid[data_mid$X >= c.vec[g] & data_mid$X >= c.alt & data_mid$G == g, "Y"]) +
-                         sum(data_mid[data_mid$X < c.vec[g] & data_mid$X < c.alt & data_mid$G == g, "Y"])) / n
-          DR_1 <- sum(data_temp1[, "mu.m"]) / n
-          Theta_2 <- sum(data_temp1[, paste0("d", d)]) / n
+          DR_1 <- sum(data_temp1[, "mu.m"])
+          Theta_2 <- sum(data_temp1[, paste0("d", d)])
 
           data_temp2 <- data_mid[range2, ]
-
-          if (nrow(data_temp2) != 0) {
-            DR_2 <- 0
-            for (i in seq(1, nrow(data_temp2), 1)) {
-              data_i <- data_temp2[i,]
-              DR_2 <- DR_2 + (data_i[[paste0("pseudo.ps", g)]] / data_i[[paste0("pseudo.ps", data_i$G)]]) * (data_i$Y - data_i$mu.aug)
-            }
-            DR_2 <- DR_2 / n
-          }
-
-          # DR_2 <- tryCatch(sum(with(data_temp2,
-          #                           eval(parse(text = paste0("pseudo.ps", g))) /
-          #                             eval(parse(text = paste0("pseudo.ps", G))) *
-          #                             (Y - eval(parse(text = "mu.aug"))))) / n,
-          #                  error = function(e) return(0))
-
-          temp_reg <- (Iden_alt + DR_1 + DR_2 + Theta_2 + cost) - base_regret
+          DR_2 <- tryCatch(sum(with(data_temp2,
+                                    eval(parse(text = paste0("pseudo.ps", g))) /
+                                      eval(parse(text = paste0("pseudo.ps", G))) *
+                                      (Y - eval(parse(text = "mu.aug"))))),
+                           error = function(e) return(0))
+          # ------------------------------------------------------------------ #
+          # trycatch to avoid the following error
+          # Error in eval(parse(text = paste0("pseudo.ps", G))) :  object 'pseudo.ps' not found
+          # This occurs in case nrow(data_temp2) == 0, and maybe other cases...?
+          #
+          # The following code does not produce exactly the same result
+          #
+          # if (nrow(data_temp2) != 0) {
+          #   DR_2 <- sum(with(data_temp2,
+          #                    eval(parse(text = paste0("pseudo.ps", g))) /
+          #                      eval(parse(text = paste0("pseudo.ps", G))) *
+          #                      (Y - eval(parse(text = "mu.aug"))))) / n
+          # }
+          # ------------------------------------------------------------------ #
+          cost <- temp_cost * dim(data_mid[range1, ])[1]
+          temp_reg <- ((Iden_alt + DR_1 + DR_2 + Theta_2 + cost * (c.alt >= c.vec[g]) - cost * (c.alt < c.vec[g])) / n) - (base_regret / n)
           regret <- c(regret, temp_reg)
         }
         if (max(regret) == 0) { # if baseline policy is the best policy
