@@ -21,19 +21,19 @@ plot.rdlearn <- function(result,
                          ylab = ""
                          )
 {
-  orgcut <- result$orgcut
-  safecut <- select(result$safecut, -group)
-  q <- result$numgroup
+  org_cut <- result$org_cut
+  safe_cut <- select(result$safe_cut, -group)
+  q <- result$num_group
 
   plotdata <- data.frame(
-    y_axis = rep(rev(1:q), ncol(safecut)),
-    orgcut = rep(orgcut, ncol(safecut)),
-    safecut = unlist(safecut),
-    type = rep(names(safecut), each = q)
+    y_axis = rep(rev(1:q), ncol(safe_cut)),
+    org_cut = rep(org_cut, ncol(safe_cut)),
+    safe_cut = unlist(safe_cut),
+    type = rep(names(safe_cut), each = q)
   )
 
   ggplot(data = plotdata, aes(type, y_axis)) +
-    geom_tile(aes(fill = safecut - orgcut), color = "white") +
+    geom_tile(aes(fill = safe_cut - org_cut), color = "white") +
     scale_fill_gradient2(
       low = "purple",
       mid = "white",
@@ -41,14 +41,14 @@ plot.rdlearn <- function(result,
       name = "Change in cutoff"
     ) +
     geom_text(
-      aes(label = safecut - orgcut),
+      aes(label = safe_cut - org_cut),
       color = "black",
       size = 3,
       position = position_dodge(width = 1)
     ) +
     scale_y_continuous(
       breaks = seq(1, q, 1),
-      labels = rev(result$safecut$group)
+      labels = rev(result$safe_cut$group)
     ) +
     xlab(xlab) +
     ylab(ylab) +

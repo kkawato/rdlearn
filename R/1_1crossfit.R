@@ -7,7 +7,7 @@
 #'   indicator, cutoff, treatment indicator.
 #' @importFrom nnet multinom
 #' @importFrom dplyr %>% filter
-#' @return A list containing cross group differences \code{dif},
+#' @return A list containing cross group differences \code{dif_1},\code{dif_0}c
 #' @keywords internal
 #' @noRd
 crossfit <- function(
@@ -115,11 +115,12 @@ crossfit <- function(
   }
 
   out <- list(
-    dif.1m_temp = dif_1,
-    dif.0m_temp = dif_0,
-    Lip_1_temp = Lip_1,
-    Lip_0_temp = Lip_0,
-    data_all_temp = cross_fit_output
+    dif_1 = dif_1,
+    dif_0 = dif_0,
+    Lip_1 = Lip_1,
+    Lip_0 = Lip_0,
+
+     = cross_fit_output
   )
   return(out)
 }

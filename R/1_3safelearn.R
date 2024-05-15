@@ -18,8 +18,8 @@ safelearn = function(
     q,
     cost,
     M,
-    groupname,
-    temp_result)
+    group_name,
+    cross_fit_result)
 {
   ################################################################################
   # please refer to
@@ -27,11 +27,11 @@ safelearn = function(
   # Section 4.2. Estimating the bounds
   ################################################################################
 
-  dif.1m <- temp_result$dif.1m_temp
-  dif.0m <- temp_result$dif.0m_temp
-  Lip_1 <- temp_result$Lip_1_temp
-  Lip_0 <- temp_result$Lip_0_temp
-  data_all <- temp_result$data_all_temp
+  dif.1m <- cross_fit_result$dif_1
+  dif.0m <- cross_fit_result$dif_0
+  Lip_1 <- cross_fit_result$Lip_1
+  Lip_0 <- cross_fit_result$Lip_0
+  data_all <- cross_fit_result$cross_fit_output
 
   Y <- data_all['Y']
   X <- data_all['X']
@@ -62,7 +62,7 @@ safelearn = function(
     return(list(upper = upper, lower = lower))
   }
 
-  safecut_all <- data.frame(group = groupname)
+  safecut_all <- data.frame(group = group_name)
   Lip_1temp <- Lip_1
   Lip_0temp <- Lip_0
 
@@ -99,8 +99,6 @@ safelearn = function(
                       group = paste0("dif", d),
                       g = g,
                       g.pr = g.temp
-                      # Lip_list = Lip_list,
-                      # temp_result = temp_result
                     )
                   })[2, ]
                 ))
@@ -164,7 +162,7 @@ safelearn = function(
         }
         regret_sum <- c(regret_sum, max(regret))
       }
-      c.all_df <- data.frame(c.all, group = groupname)
+      c.all_df <- data.frame(c.all, group = group_name)
       names(c.all_df)[1] <- paste0("M=", temp_M, ",", "C=", temp_cost)
       safecut_all <- full_join(safecut_all, c.all_df, by = ("group" = "group"))
     }

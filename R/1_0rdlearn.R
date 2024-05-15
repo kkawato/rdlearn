@@ -8,7 +8,7 @@
 #' @param y A column name of outcome variable.
 #' @param x A column name of running variable.
 #' @param c A column name of cutoff.
-#' @param groupname A column name of each cutoff group's name (e.g. department
+#' @param group_name A column name of each cutoff group's name (e.g. department
 #'   name). If no argument is entered, the names "Group 1", "Group 2", ... are
 #'   assigned from the group with smallest cutoff.
 #' @param fold The number of folds for cross-fitting. Default is 10.
@@ -23,11 +23,12 @@
 #' @return \code{rdlearn} returns an object of \code{rdlearn} class, which is a
 #'   list of following items:
 #' \describe{
-#'   \item{safecut}{A table of obtained new treatment cutoffs in the dataframe format}
+#'   \item{org_cut}{}
+#'   \item{safe_cut}{A table of obtained new treatment cutoffs in the dataframe format}
 #' }
 #'
 #' @examples
-#' result <- rdlearn(y = "elig", x = "saber11", c = "cutoff", groupname = "department", data = acces, fold = 20, M = c(0, 1), cost = 0)
+#' result <- rdlearn(y = "elig", x = "saber11", c = "cutoff", group_name = "department", data = acces, fold = 20, M = c(0, 1), cost = 0)
 #' plot(result)
 #'
 #' @export
@@ -35,49 +36,24 @@ rdlearn <- function(
     y,
     x,
     c,
-    groupname = NULL,
+    group_name = NULL,
     data,
     fold = 10,
     M = 1,
     cost = 0) {
   # Get function call
   cl <- match.call()
-
-  # Check argument missingness and type
-  if (missing(y) || !is.character(y) || length(y) > 1) {
-    stop("'y' must be a character string of length one.")
-  }
-  if (missing(x) || !is.character(x) || length(x) > 1) {
-    stop("'x' must be a character string of length one.")
-  }
-  if (missing(c) || !is.character(c) || length(c) > 1) {
-    stop("'c' must be a character string of length one.")
-  }
-
   var_names <- list(y, x, c)
+  # --------------------------- Check input ---------------------------------- #
+  check_input(y = y,
+              x = x,
+              c = c,
+              data = data,
+              M = M,
+              cost = cost,
+              var_names = var_names)
 
-  # Check if all variables are in 'data'
-  if (!all(var_names %in% names(data))) {
-    stop("all variables must be in 'data'.")
-  }
-
-  # Check NA
-  if (anyNA(data[[y]])) {
-    stop("the column 'y' contains NA.")
-  }
-  if (anyNA(data[[x]])) {
-    stop("the column 'x' contains NA.")
-  }
-  if (anyNA(data[[c]])) {
-    stop("the column 'c' contains NA.")
-  }
-
-  # Check M and cost
-  if (length(M) > 1 && length(cost) > 1) {
-    stop("M and cost should be a scalar.")
-  }
-
-  # --------------------------- Prepare data -------------------------------- #
+  # --------------------------- Prepare data --------------------------------- #
 
   # Prepare variables:
   # * Y: outcome variable
@@ -98,16 +74,16 @@ rdlearn <- function(
   # Treatment indicator
   D <- as.numeric(X >= C)
 
-  # When groupname is not provided, assign a new name "Group k"
-  if (is.null(groupname)) {
-    groupname <- character(q)
+  # When group_name is not provided, assign a new name "Group k"
+  if (is.null(group_name)) {
+    group_name <- character(q)
     for (k in 1:q) {
-      groupname[k] <- paste0("Group", k)
+      group_name[k] <- paste0("Group", k)
     }
   } else {
-    grouplist <- data[[groupname]]
+    grouplist <- data[[group_name]]
     dict <- setNames(grouplist, C)
-    groupname <- sapply(c.vec, function(x) dict[[as.character(x)]])
+    group_name <- sapply(c.vec, function(x) dict[[as.character(x)]])
   }
 
   # Add fold_id to data used for cross-fitting
@@ -124,7 +100,7 @@ rdlearn <- function(
 
   # ------------------------- Apply Algorithms ------------------------------- #
   # Apply cross fitting
-  cross_fit_output <- crossfit(
+  cross_fit_result <- crossfit(
     c.vec = c.vec,
     q = q,
     fold = fold,
@@ -139,23 +115,20 @@ rdlearn <- function(
     q = q,
     cost = cost,
     M = M,
-    groupname = groupname,
-    temp_result = cross_fit_output
+    group_name = group_name,
+    cross_fit_result = cross_fit_result
   )
 
   # Organize output
   out <- list(
     call = cl,
-    variables = var_names,
-    orgcut = c.vec,
+    var_names = var_names,
+    org_cut = c.vec,
+    safe_cut = safecut_all,
     sample = n,
-    numgroup = q,
-    M = M,
-    cost = cost,
-    groupname = groupname,
-    safecut = safecut_all,
-    data_all = data_all,
-    temp_result = cross_fit_output
+    num_group = q,
+    group_name = group_name,
+    cross_fit_result = cross_fit_result
   )
 
   class(out) <- "rdlearn"
