@@ -1,11 +1,11 @@
-rm(list=ls())
+# rm(list=ls())
 set.seed(12345)
 library(tidyverse)
 library(nprobust)
 library(nnet)
 library(ggplot2)
 
-result <- rdlearn(y = "elig", x = "saber11", c = "cutoff", groupname = "department", data = acces, fold = 20, M = c(0, 1), cost = 0)
+result <- rdlearn(y = "elig", x = "saber11", c = "cutoff", group_name = "department", data = acces, fold = 20, M = c(0, 1), cost = 0)
 plot(result)
 
 # result <- rdlearn(y = "elig", x = "saber11", c = "cutoff", groupname = "department", data = acces, fold = 10, M = c(0, 1), cost = 0)
@@ -28,4 +28,3 @@ plot.rdlearn(result2)
 result_simA <- rdlearn(y = "out", x = "run", c = "cut", data = simdata_A, fold = 5, M=c(1,2), cost=0)
 plot(result_simA)
 # This also worked with the simulation data in the appendix.
-

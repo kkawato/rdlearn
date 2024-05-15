@@ -4,7 +4,7 @@
 \alias{rdlearn}
 \title{Safe policy learning under RD design with multiple cutoffs}
 \usage{
-rdlearn(y, x, c, groupname = NULL, data, fold = 10, M = 1, cost = 0)
+rdlearn(y, x, c, group_name = NULL, data, fold = 10, M = 1, cost = 0)
 }
 \arguments{
 \item{y}{A column name of outcome variable.}
@@ -13,7 +13,7 @@ rdlearn(y, x, c, groupname = NULL, data, fold = 10, M = 1, cost = 0)
 
 \item{c}{A column name of cutoff.}
 
-\item{groupname}{A column name of each cutoff group's name (e.g. department
+\item{group_name}{A column name of each cutoff group's name (e.g. department
 name). If no argument is entered, the names "Group 1", "Group 2", ... are
 assigned from the group with smallest cutoff.}
 
@@ -31,7 +31,8 @@ scaled by the range of the outcome Y. Default is 0.}
 \code{rdlearn} returns an object of \code{rdlearn} class, which is a
   list of following items:
 \describe{
-  \item{safecut}{A table of obtained new treatment cutoffs in the dataframe format}
+  \item{org_cut}{}
+  \item{safe_cut}{A table of obtained new treatment cutoffs in the dataframe format}
 }
 }
 \description{
@@ -40,10 +41,7 @@ cutoffs. The resulting new treatment cutoffs have a safety guarantee that
 they will not yield a worse overall outcome than the existing cutoffs.
 }
 \examples{
-result <- rdlearn(y = "elig", x = "saber11", c = "cutoff", groupname = "department", data = acces, fold = 20, M = c(0, 1), cost = 0)
+result <- rdlearn(y = "elig", x = "saber11", c = "cutoff", group_name = "department", data = acces, fold = 20, M = c(0, 1), cost = 0)
 plot(result)
 
-}
-\references{
-Yi Zhang ...
 }

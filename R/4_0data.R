@@ -14,4 +14,3 @@
 #'   \item{department}{the names of each department.}}
 #' @references Melguizo, T., F. Sanchez, and T. Velasco (2016). Credit for low-income students and access to and academic performance in higher education in colombia: A regression discontinuity approach. World development 80, 61–77.
 "acces"
-

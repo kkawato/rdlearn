@@ -8,8 +8,7 @@ sens <- function(x, ...) UseMethod("sens")
 #' @param result An object of class \code{rdlearn} returned by the \code{\link{rdlearn}}.
 #' @param M A multiplicative smoothness factor.
 #' @param cost A cost for calculating regret.
-#' @return an \code{rdlearn} object containing ...
-#' @export
+#' @return an \code{rdlearn} object containing the same contents as the result of function \code{{rdlearn}}.
 #'
 #' @examples
 #' result2 <- sens(result, M = 1, cost=c(0, 0.2, 0.4, 0.6, 0.8, 1))
@@ -32,14 +31,14 @@ sens.rdlearn <- function (
     stop("Both M and cost are vectors.")
   }
 
-  result$safecut <- safelearn(
-      c.vec = result$orgcut,
+  result$safe_cut <- safelearn(
+      c.vec = result$org_cut,
       n = result$sample,
-      q = result$numgroup,
+      q = result$num_group,
       cost = cost,
       M = M,
-      groupname = result$groupname,
-      temp_result = result$temp_result
+      group_name = result$group_name,
+      cross_fit_result = result$cross_fit_result
     )
   result
 }

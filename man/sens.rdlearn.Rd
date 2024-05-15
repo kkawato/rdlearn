@@ -14,7 +14,7 @@
 \item{cost}{A cost for calculating regret.}
 }
 \value{
-an \code{rdlearn} object containing ...
+an \code{rdlearn} object containing the same contents as the result of function \code{{rdlearn}}.
 }
 \description{
 \code{sens}
