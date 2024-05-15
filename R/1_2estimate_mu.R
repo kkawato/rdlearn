@@ -1,18 +1,29 @@
+#' Implement estimation of \mu, group specific regression function, at each fold of cross fitting
+#'
+#' @param data_train A training data at each fold of cross fitting
+#' @param data_test A test data at each fold of cross fitting
+#' @param c.vec A vector containing cutoffs from lowest to highest
+#' @param q The number of groups
+#' @param fold A fold id for cross-fitting
+#' @param g A group indicator
+#' @importFrom nprobust lprobust
+#' @importFrom dplyr %>% filter pull
+#' @return A list containing \mu
+#' @keywords internal
+#' @noRd
 estimate_mu <- function (data_train,
                          data_test,
                          c.vec,
                          fold,
                          g,
                          q) {
-  mu_all <- list()
-
   data_test1 <- data_test %>% filter(D == 1)
   data_test0 <- data_test %>% filter(D == 0)
   data_train1 <- data_train %>% filter(D == 1)
   data_train0 <- data_train %>% filter(D == 0)
 
   # m is for DR estimator (14) in Section 4.1.
-  eval.dat1.m <- data_test0 %>% filter(X >= c.vec[g], X < c.vec[min(g + 1, q)]) %>% pull(X) # G == min(g + 1, q) did not work
+  eval.dat1.m <- data_test0 %>% filter(X >= c.vec[g], X < c.vec[min(g + 1, q)]) %>% pull(X)
 
   # aug is for DR estimator (14) in Section 4.1.
   eval.dat1.aug <- data_test %>% filter(X >= c.vec[g], X < c.vec[min(g + 1, q)], G == g) %>% pull(X)
@@ -21,7 +32,7 @@ estimate_mu <- function (data_train,
   eval.dat1.pseudo <- data_test1 %>% filter(X >= c.vec[g]) %>% pull(X)
 
   # m is for DR estimator (14) in Section 4.1.
-  eval.dat0.m <- data_test1 %>% filter(X >= c.vec[max(g - 1, 1)], X < c.vec[g] ) %>% pull(X)# G == max(g - 1, 1) did not work
+  eval.dat0.m <- data_test1 %>% filter(X >= c.vec[max(g - 1, 1)], X < c.vec[g] ) %>% pull(X)
 
   # aug is for DR estimator (14) in Section 4.1.
   eval.dat0.aug <- data_test %>% filter(X >= c.vec[max(g - 1, 1)], X < c.vec[g], G == g) %>% pull(X)
@@ -34,25 +45,64 @@ estimate_mu <- function (data_train,
   Y0g <- data_train0 %>% filter(G == g) %>% pull(Y)
   X0g <- data_train0 %>% filter(G == g) %>% pull(X)
 
-  # local linear regression
-  mu_all$pseudo1 <- lprobust(Y1g, X1g, eval = eval.dat1.pseudo, bwselect = "imse-dpi")$Estimate[, 5]
-  mu_all$pseudo0 <- lprobust(Y0g, X0g, eval = eval.dat0.pseudo, bwselect = "imse-dpi")$Estimate[, 5]
+  mu_all <- list()
+  data_list <- list(
+    list(y = Y1g, x = X1g, eval_dat = eval.dat1.pseudo, name = "pseudo1"),
+    list(y = Y1g, x = X1g, eval_dat = eval.dat1.m, name = "mu_m1"),
+    list(y = Y1g, x = X1g, eval_dat = eval.dat1.aug, name = "mu_aug1"),
+    list(y = Y0g, x = X0g, eval_dat = eval.dat0.pseudo, name = "pseudo0"),
+    list(y = Y0g, x = X0g, eval_dat = eval.dat0.m, name = "mu_m0"),
+    list(y = Y0g, x = X0g, eval_dat = eval.dat0.aug, name = "mu_aug0")
+  )
 
-  if (length(eval.dat1.m) != 0) {
-    mu_all$mu_m1 <- lprobust(Y1g, X1g, eval = eval.dat1.m, bwselect = "imse-dpi")$Estimate[, 5]
-  }
+  for (data in data_list) {
+    y <- data$y
+    x <- data$x
+    eval_dat <- data$eval_dat
+    name <- data$name
 
-  if (length(eval.dat1.aug) != 0) {
-    mu_all$mu_aug1 <- lprobust(Y1g, X1g, eval = eval.dat1.aug, bwselect = "imse-dpi")$Estimate[, 5]
-  }
-
-  if (length(eval.dat0.m) != 0) {
-    mu_all$mu_m0 <- lprobust(Y0g, X0g, eval = eval.dat0.m, bwselect = "imse-dpi")$Estimate[, 5]
-  }
-
-  if (length(eval.dat0.aug) != 0) {
-    mu_all$mu_aug0 <- lprobust(Y0g, X0g, eval = eval.dat0.aug, bwselect = "imse-dpi")$Estimate[, 5]
+    if (length(eval_dat) > 0) {
+      tryCatch({
+        mu_all[[name]] <- lprobust(y, x, eval = eval_dat, bwselect = "imse-dpi")$Estimate[, 5]
+      }, error = function(e) mu_all[[name]] <- 0)
+    }
   }
 
   return(mu_all)
 }
+
+#-------------------------------------#
+# trycatch for avoiding this error
+# this error frequently occurs in case the number of folds is small
+#-------------------------------------#
+# Error in matrix(NA, n.B, o.B + 1) :
+#   invalid 'nrow' value (too large or NA)
+# 9.
+# matrix(NA, n.B, o.B + 1)
+# 8.
+# lprobust.bw(y, x, cluster, c = eval, o = p, nu = deriv, o.B = q,
+#             h.V = c.bw, h.B1 = bw.mp1, h.B2 = bw.mp2, bwregul, vce, nnmatch,
+#             kernel, dups, dupsid)
+# 7.
+# lpbwselect.mse.dpi(y = y, x = x, cluster = cluster, eval = eval[i],
+#                    p = p, q = q, deriv = deriv, kernel = kernel, bwcheck = bwcheck,
+#                    bwregul = bwregul, vce = vce, nnmatch = nnmatch, interior = interior)
+# 6.
+# lpbwselect.imse.dpi(y = y, x = x, cluster = cluster, p = p, q = q,
+#                     deriv = deriv, kernel = kernel, bwcheck = bwcheck, bwregul = bwregul,
+#                     imsegrid = imsegrid, vce = vce, nnmatch = nnmatch, interior = interior)
+# 5.
+# lpbwselect(y = y, x = x, eval = eval, deriv = deriv, p = p, vce = vce,
+#            cluster = cluster, bwselect = bwselect, interior = interior,
+#            kernel = kernel, bwcheck = bwcheck, bwregul = bwregul, imsegrid = imsegrid,
+#            subset = subset)
+# 4.
+# lprobust(Y1g, X1g, eval = eval.dat1.pseudo, bwselect = "imse-dpi") at 1_2estimate_mu.R#39
+# 3.
+# estimate_mu(data_train, data_test, c.vec, k, g, q) at 1_1crossfit.R#35
+# 2.
+# crossfit(c.vec = c.vec, q = q, fold = fold, data_split = data_split,
+#          data_all = data_all) at 1_0rdlearn.R#135
+# 1.
+# rdlearn(y = "elig", x = "saber11", c = "cutoff", groupname = "department",
+#         data = acces, fold = 20, M = c(0, 1), cost = 0)

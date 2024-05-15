@@ -20,7 +20,7 @@ acces
 \description{
 A dataset comprising 8245 applicants to the ACCES Program across 23 different
 departments in Colombia, including eligibility for the ACCES Program,
-position scores of the SABER 11, cutoffs of each department, and the names of each department.
+position score of the SABER 11, cutoff of each department, and the name of each department.
 }
 \references{
 Melguizo, T., F. Sanchez, and T. Velasco (2016). Credit for low-income students and access to and academic performance in higher education in colombia: A regression discontinuity approach. World development 80, 61–77.

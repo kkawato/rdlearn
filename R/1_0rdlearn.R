@@ -1,28 +1,35 @@
-#' Safe policy learning under regression discontinuity designs with multiple cutoffs
+#' Safe policy learning under RD design with multiple cutoffs
 #'
-#' \code{rdlearn} estimates
+#' \code{rdlearn} implements policy learning under the RD design with multiple
+#' cutoffs. The resulting new treatment cutoffs have a safety guarantee that
+#' they will not yield a worse overall outcome than the existing cutoffs.
 #'
-#' @param y column name of outcome variable.
-#' @param x column name of running variable.
-#' @param c column name of cutoff.
-#' @param groupname column name of each cutoff group's name (e.g. department name).
-#'   If no argument is entered, the names "Group 1", "Group 2", ... are
+#' @param data A dataframe containing all following variables.
+#' @param y A column name of outcome variable.
+#' @param x A column name of running variable.
+#' @param c A column name of cutoff.
+#' @param groupname A column name of each cutoff group's name (e.g. department
+#'   name). If no argument is entered, the names "Group 1", "Group 2", ... are
 #'   assigned from the group with smallest cutoff.
-#' @param data data frame containing all variables.
-#' @param fold number of folds for cross-fitting. Default is 10.
-#' @param M multiplicative smoothness factor. Default is 1.
-#' @param cost cost for calculating regret.
-#'   Default is 0. Cost should be scaled by the range of the outcome Y.
+#' @param fold The number of folds for cross-fitting. Default is 10.
+#' @param M A multiplicative smoothness factor for sensitivity analysis. Default
+#'   is 1.
+#' @param cost A cost of a treatment for calculating regret. This cost has to be
+#'   scaled by the range of the outcome Y. Default is 0.
 #'
-#' @return an \code{rdlearn} object containing ...
+#' @importFrom dplyr %>% filter ungroup select arrange
+#' @importFrom tidyr unnest
 #'
-#' @importFrom nprobust lprobust
-#' @importFrom nnet multinom
-#' @import tidyverse
-#'
-#' @references Yi Zhang ...
+#' @return \code{rdlearn} returns an object of \code{rdlearn} class, which is a
+#'   list of following items:
+#' \describe{
+#'   \item{safecut}{A table of obtained new treatment cutoffs in the dataframe format}
+#' }
 #'
 #' @examples
+#' result <- rdlearn(y = "elig", x = "saber11", c = "cutoff", groupname = "department", data = acces, fold = 20, M = c(0, 1), cost = 0)
+#' plot(result)
+#'
 #' @export
 rdlearn <- function(
     y,
@@ -106,29 +113,14 @@ rdlearn <- function(
   # Add fold_id to data used for cross-fitting
   tempdata <- data.frame(Y = Y, X = X, C = C, D = D, G = G)
 
-  # #これだと動かなかった
-  # data_all <- tempdata %>%
-  #   mutate(fold_id = sample(1:fold, size = n, replace = TRUE))
+  data_all <- tempdata %>%
+    mutate(fold_id = sample(1:fold, size = n, replace = TRUE)) %>%
+    arrange(fold_id)
 
-  # data_all <- tempdata %>%
-  #   mutate(fold_id = sample(1:fold, size = n, replace = TRUE)) %>%
-  #   arrange(fold_id)
-  #
-  # data_split <- data_all %>%
-  #   group_by(fold_id) %>%
-  #   nest() %>%
-  #   arrange(fold_id)
-
-  data_split <- tempdata %>%
-    mutate(
-      fold_id = sample(1:fold, size = n, replace = TRUE)) %>%
+  data_split <- data_all %>%
     group_by(fold_id) %>%
     nest() %>%
     arrange(fold_id)
-
-  data_all <- data_split %>%
-    unnest(data) %>%
-    ungroup()
 
   # ------------------------- Apply Algorithms ------------------------------- #
   # Apply cross fitting
@@ -155,7 +147,7 @@ rdlearn <- function(
   out <- list(
     call = cl,
     variables = var_names,
-    basecut = c.vec,
+    orgcut = c.vec,
     sample = n,
     numgroup = q,
     M = M,

@@ -2,7 +2,7 @@
 #'
 #' A dataset comprising 8245 applicants to the ACCES Program across 23 different
 #' departments in Colombia, including eligibility for the ACCES Program,
-#' position scores of the SABER 11, cutoffs of each department, and the names of each department.
+#' position score of the SABER 11, cutoff of each department, and the name of each department.
 #'
 #' @format A data frame with 8245 rows and 4 columns: \describe{
 #'   \item{elig}{eligibility for the ACCES Program.

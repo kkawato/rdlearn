@@ -1,44 +1,39 @@
 #' @export
 plot <- function(x, ...) UseMethod("plot")
 
-#'
 #' Plot method for \code{rdlearn} objects
 #'
 #' \code{plot} plots the cutoff change relative to the baseline cutoff for each department (y-axis)
 #' under different smoothness multiplicative factor M and cost of treatment C (x-axis).
 #'
-#' @param result an object of class \code{rdlearn} returned by the \code{\link{rdlearn}}.
-#' @param xlab a label of x-axis.
-#' @param ylab a label of y-axis.
-#'
+#' @param result An object of class \code{rdlearn} returned by the \code{\link{rdlearn}}.
+#' @param xlab A label of x-axis.
+#' @param ylab A label of y-axis.
 #' @return a \code{ggplot2} plot of changes in cutoffs.
-#'
 #' @import ggplot2
 #'
 #' @examples
+#' result <- rdlearn(y = "elig", x = "saber11", c = "cutoff", groupname = "department", data = acces, fold = 20, M = c(0, 1), cost = 0)
+#' plot(result)
 #' @export
 plot.rdlearn <- function(result,
                          xlab = "",
                          ylab = ""
                          )
 {
-  safecut <- result$safecut
+  orgcut <- result$orgcut
+  safecut <- select(result$safecut, -group)
   q <- result$numgroup
-  dataall <- data.frame()
 
-  for (k in 1:(ncol(safecut) - 1)) {
-    tempdf <- data.frame(
-      y = rev(1:q),
-      org.c = result$basecut,
-      safe.c = safecut[k + 1],
-      type = names(safecut)[k + 1]
-    )
-    names(tempdf)[3] <- "safe.c"
-    dataall <- rbind(dataall, tempdf)
-  }
+  plotdata <- data.frame(
+    y_axis = rep(rev(1:q), ncol(safecut)),
+    orgcut = rep(orgcut, ncol(safecut)),
+    safecut = unlist(safecut),
+    type = rep(names(safecut), each = q)
+  )
 
-  ggplot(data = dataall, aes(type, y)) +
-    geom_tile(aes(fill = safe.c - org.c), color = "white") +
+  ggplot(data = plotdata, aes(type, y_axis)) +
+    geom_tile(aes(fill = safecut - orgcut), color = "white") +
     scale_fill_gradient2(
       low = "purple",
       mid = "white",
@@ -46,14 +41,14 @@ plot.rdlearn <- function(result,
       name = "Change in cutoff"
     ) +
     geom_text(
-      aes(label = safe.c - org.c),
+      aes(label = safecut - orgcut),
       color = "black",
       size = 3,
       position = position_dodge(width = 1)
     ) +
     scale_y_continuous(
       breaks = seq(1, q, 1),
-      labels = rev(result$groupname)
+      labels = rev(result$safecut$group)
     ) +
     xlab(xlab) +
     ylab(ylab) +

@@ -5,14 +5,15 @@ sens <- function(x, ...) UseMethod("sens")
 #'
 #' \code{sens}
 #'
-#' @param result an object of class \code{rdlearn} returned by the \code{\link{rdlearn}}.
-#' @param M multiplicative smoothness factor.
-#' @param cost cost for calculating regret.
-#'
+#' @param result An object of class \code{rdlearn} returned by the \code{\link{rdlearn}}.
+#' @param M A multiplicative smoothness factor.
+#' @param cost A cost for calculating regret.
 #' @return an \code{rdlearn} object containing ...
 #' @export
 #'
 #' @examples
+#' result2 <- sens(result, M = 1, cost=c(0, 0.2, 0.4, 0.6, 0.8, 1))
+#' plot(result2)
 #'
 #' @export
 sens.rdlearn <- function (
@@ -32,7 +33,7 @@ sens.rdlearn <- function (
   }
 
   result$safecut <- safelearn(
-      c.vec = result$basecut,
+      c.vec = result$orgcut,
       n = result$sample,
       q = result$numgroup,
       cost = cost,
