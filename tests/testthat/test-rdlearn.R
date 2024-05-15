@@ -1,4 +1,4 @@
-# rm(list=ls())
+rm(list=ls())
 set.seed(12345)
 library(tidyverse)
 library(nprobust)
@@ -28,9 +28,4 @@ plot.rdlearn(result2)
 result_simA <- rdlearn(y = "out", x = "run", c = "cut", data = simdata_A, fold = 5, M=c(1,2), cost=0)
 plot(result_simA)
 # This also worked with the simulation data in the appendix.
-
-debug(rdlearn)
-
-
-
 

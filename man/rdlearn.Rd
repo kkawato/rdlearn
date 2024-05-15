@@ -2,35 +2,47 @@
 % Please edit documentation in R/1_0rdlearn.R
 \name{rdlearn}
 \alias{rdlearn}
-\title{Safe policy learning under regression discontinuity designs with multiple cutoffs}
+\title{Safe policy learning under RD design with multiple cutoffs}
 \usage{
 rdlearn(y, x, c, groupname = NULL, data, fold = 10, M = 1, cost = 0)
 }
 \arguments{
-\item{y}{column name of outcome variable.}
+\item{y}{A column name of outcome variable.}
 
-\item{x}{column name of running variable.}
+\item{x}{A column name of running variable.}
 
-\item{c}{column name of cutoff.}
+\item{c}{A column name of cutoff.}
 
-\item{groupname}{column name of each cutoff group's name (e.g. department name).
-If no argument is entered, the names "Group 1", "Group 2", ... are
+\item{groupname}{A column name of each cutoff group's name (e.g. department
+name). If no argument is entered, the names "Group 1", "Group 2", ... are
 assigned from the group with smallest cutoff.}
 
-\item{data}{data frame containing all variables.}
+\item{data}{A dataframe containing all following variables.}
 
-\item{fold}{number of folds for cross-fitting. Default is 10.}
+\item{fold}{The number of folds for cross-fitting. Default is 10.}
 
-\item{M}{multiplicative smoothness factor. Default is 1.}
+\item{M}{A multiplicative smoothness factor for sensitivity analysis. Default
+is 1.}
 
-\item{cost}{cost for calculating regret.
-Default is 0. Cost should be scaled by the range of the outcome Y.}
+\item{cost}{A cost of a treatment for calculating regret. This cost has to be
+scaled by the range of the outcome Y. Default is 0.}
 }
 \value{
-an \code{rdlearn} object containing ...
+\code{rdlearn} returns an object of \code{rdlearn} class, which is a
+  list of following items:
+\describe{
+  \item{safecut}{A table of obtained new treatment cutoffs in the dataframe format}
+}
 }
 \description{
-\code{rdlearn} estimates
+\code{rdlearn} implements policy learning under the RD design with multiple
+cutoffs. The resulting new treatment cutoffs have a safety guarantee that
+they will not yield a worse overall outcome than the existing cutoffs.
+}
+\examples{
+result <- rdlearn(y = "elig", x = "saber11", c = "cutoff", groupname = "department", data = acces, fold = 20, M = c(0, 1), cost = 0)
+plot(result)
+
 }
 \references{
 Yi Zhang ...

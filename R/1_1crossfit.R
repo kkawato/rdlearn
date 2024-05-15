@@ -1,9 +1,14 @@
 #' Implement cross-fitting for estimating cross-group differences
 #'
-#' @importFrom dplyr %>% filter ungroup select arrange
-#' @importFrom tidyr unnest
+#' @param c.vec A vector containing cutoffs from lowest to highest
+#' @param q The number of groups
+#' @param fold A fold id for cross-fitting
+#' @param data_all A data frame containig outcome, running variable, group
+#'   indicator, cutoff, treatment indicator.
 #' @importFrom nnet multinom
-#' @importFrom nprobust lprobust
+#' @importFrom dplyr %>% filter
+#' @return A list containing cross group differences \code{dif},
+#' @keywords internal
 #' @noRd
 crossfit <- function(
     c.vec,

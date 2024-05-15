@@ -7,15 +7,20 @@
 \method{sens}{rdlearn}(result, M = NULL, cost = NULL)
 }
 \arguments{
-\item{result}{an object of class \code{rdlearn} returned by the \code{\link{rdlearn}}.}
+\item{result}{An object of class \code{rdlearn} returned by the \code{\link{rdlearn}}.}
 
-\item{M}{multiplicative smoothness factor.}
+\item{M}{A multiplicative smoothness factor.}
 
-\item{cost}{cost for calculating regret.}
+\item{cost}{A cost for calculating regret.}
 }
 \value{
 an \code{rdlearn} object containing ...
 }
 \description{
 \code{sens}
+}
+\examples{
+result2 <- sens(result, M = 1, cost=c(0, 0.2, 0.4, 0.6, 0.8, 1))
+plot(result2)
+
 }

@@ -1,3 +1,16 @@
+#' Implement estimation of \mu, group specific regression function, at each fold of cross fitting
+#'
+#' @param data_train A training data at each fold of cross fitting
+#' @param data_test A test data at each fold of cross fitting
+#' @param c.vec A vector containing cutoffs from lowest to highest
+#' @param q The number of groups
+#' @param fold A fold id for cross-fitting
+#' @param g A group indicator
+#' @importFrom nprobust lprobust
+#' @importFrom dplyr %>% filter pull
+#' @return A list containing \mu
+#' @keywords internal
+#' @noRd
 estimate_mu <- function (data_train,
                          data_test,
                          c.vec,
@@ -34,19 +47,19 @@ estimate_mu <- function (data_train,
 
   mu_all <- list()
   data_list <- list(
-    list(Y1g, X1g, eval.dat1.pseudo, "pseudo1"),
-    list(Y1g, X1g, eval.dat1.m, "mu_m1"),
-    list(Y1g, X1g, eval.dat1.aug, "mu_aug1"),
-    list(Y0g, X0g, eval.dat0.pseudo, "pseudo0"),
-    list(Y0g, X0g, eval.dat0.m, "mu_m0"),
-    list(Y0g, X0g, eval.dat0.aug, "mu_aug0")
+    list(y = Y1g, x = X1g, eval_dat = eval.dat1.pseudo, name = "pseudo1"),
+    list(y = Y1g, x = X1g, eval_dat = eval.dat1.m, name = "mu_m1"),
+    list(y = Y1g, x = X1g, eval_dat = eval.dat1.aug, name = "mu_aug1"),
+    list(y = Y0g, x = X0g, eval_dat = eval.dat0.pseudo, name = "pseudo0"),
+    list(y = Y0g, x = X0g, eval_dat = eval.dat0.m, name = "mu_m0"),
+    list(y = Y0g, x = X0g, eval_dat = eval.dat0.aug, name = "mu_aug0")
   )
 
   for (data in data_list) {
-    y <- data[[1]]
-    x <- data[[2]]
-    eval_dat <- data[[3]]
-    name <- data[[4]]
+    y <- data$y
+    x <- data$x
+    eval_dat <- data$eval_dat
+    name <- data$name
 
     if (length(eval_dat) > 0) {
       tryCatch({

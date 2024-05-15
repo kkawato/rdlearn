@@ -1,3 +1,17 @@
+#' Implement estimation of \mu, group specific regression function, at each fold of cross fitting
+#'
+#' @param data_train A training data at each fold of cross fitting
+#' @param data_test A test data at each fold of cross fitting
+#' @param c.vec A vector containing cutoffs from lowest to highest
+#' @param n A sample size
+#' @param q The number of groups
+#' @param g A group indicator
+#' @importFrom nprobust lprobust
+#' @importFrom dplyr %>% filter pull
+#' @return A list containing \mu
+#' @keywords internal
+#' @noRd
+
 safelearn = function(
     c.vec,
     n,
@@ -58,20 +72,39 @@ safelearn = function(
 
       Lip_1 <- temp_M * Lip_1temp
       Lip_0 <- temp_M * Lip_0temp
+      Lip_list <- list(Lip_1, Lip_0)
       c.all <- rep(0, length(c.vec))
 
       for(g in seq(1, q, 1)) {
         for (d in c(1, 0)) {
           eval_cond <- (data_all$G == g) & (data_all$X >= c.vec[1]) & (data_all$X < c.vec[q])
-          if (d == 1) { eval_cond <- eval_cond & (data_all$X < c.vec[g])
-          } else { eval_cond <- eval_cond & (data_all$X >= c.vec[g]) }
+
+          if (d == 1) {
+            eval_cond <- eval_cond & (data_all$X < c.vec[g])
+          } else {
+            eval_cond <- eval_cond & (data_all$X >= c.vec[g])
+          }
 
           eval_dat <- data_all[eval_cond, ]$X
           IND <- sapply(eval_dat, function(x) sum(c.vec < x))
           temp_df <- cbind(eval_dat, IND)
 
           if (nrow(temp_df) > 0 && ncol(temp_df) > 0) {
-            data_all[eval_cond, paste0("d", d)] <- apply(temp_df, 1, function(x) sum(unlist(sapply(x[2] + (1 - d), function(g.temp) lip_extra(x.train = x[1], group = paste0("dif", d), g = g, g.pr = g.temp))[2, ])))
+            data_all[eval_cond, paste0("d", d)] <-
+              apply(temp_df, 1, function(x) {
+                sum(unlist(
+                  sapply(x[2] + (1 - d), function(g.temp) {
+                    lip_extra(
+                      x.train = x[1],
+                      group = paste0("dif", d),
+                      g = g,
+                      g.pr = g.temp
+                      # Lip_list = Lip_list,
+                      # temp_result = temp_result
+                    )
+                  })[2, ]
+                ))
+              })
           }
         }
       }

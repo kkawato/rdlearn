@@ -7,11 +7,11 @@
 \method{plot}{rdlearn}(result, xlab = "", ylab = "")
 }
 \arguments{
-\item{result}{an object of class \code{rdlearn} returned by the \code{\link{rdlearn}}.}
+\item{result}{An object of class \code{rdlearn} returned by the \code{\link{rdlearn}}.}
 
-\item{xlab}{a label of x-axis.}
+\item{xlab}{A label of x-axis.}
 
-\item{ylab}{a label of y-axis.}
+\item{ylab}{A label of y-axis.}
 }
 \value{
 a \code{ggplot2} plot of changes in cutoffs.
@@ -19,4 +19,8 @@ a \code{ggplot2} plot of changes in cutoffs.
 \description{
 \code{plot} plots the cutoff change relative to the baseline cutoff for each department (y-axis)
 under different smoothness multiplicative factor M and cost of treatment C (x-axis).
+}
+\examples{
+result <- rdlearn(y = "elig", x = "saber11", c = "cutoff", groupname = "department", data = acces, fold = 20, M = c(0, 1), cost = 0)
+plot(result)
 }
