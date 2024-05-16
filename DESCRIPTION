@@ -13,7 +13,10 @@ RoxygenNote: 7.3.1
 URL: https://github.com/kkawato/RDDPackage
 BugReports: https://github.com/kkawato/RDDPackage/issues
 Suggests: 
+    knitr,
+    rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Depends: 
     R (>= 2.10)
+VignetteBuilder: knitr

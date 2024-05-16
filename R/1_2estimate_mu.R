@@ -7,21 +7,20 @@
 #' @param g The group indicator.
 #' @param q The total number of groups.
 #'
-#' @return A list containing the estimates of the group-specific regression functions for each group:
-#'   \item{pseudo1}{Estimates for the treated group for Appendix A.2.}
-#'   \item{mu_m1}{Estimates for the treated group for DR estimator (14) in Section 4.1.}
-#'   \item{mu_aug1}{Estimates for the treated group for the part of augmentation in DR estimator (14) in Section 4.1.}
+#' @return A list containing the estimates of the group-specific regression
+#'   functions for each group: \item{pseudo1}{Estimates for the treated group
+#'   for Appendix A.2.} \item{mu_m1}{Estimates for the treated group for DR
+#'   estimator (14) in Section 4.1.} \item{mu_aug1}{Estimates for the treated
+#'   group for the part of augmentation in DR estimator (14) in Section 4.1.}
 #'   \item{pseudo0}{Estimates for the control group for Appendix A.2.}
-#'   \item{mu_m0}{Estimates for the control group for DR estimator (14) in Section 4.1.}
-#'   \item{mu_aug0}{Estimates for the control group for the part of augmentation in DR estimator (14) in Section 4.1.}
+#'   \item{mu_m0}{Estimates for the control group for DR estimator (14) in
+#'   Section 4.1.} \item{mu_aug0}{Estimates for the control group for the part
+#'   of augmentation in DR estimator (14) in Section 4.1.}
 #'
 #' @importFrom nprobust lprobust
 #' @importFrom dplyr %>% filter pull
 #' @keywords internal
 #' @noRd
-estimate_mu <- function(data_train, data_test, c.vec, fold, g, q) {
-  ...
-}
 estimate_mu <- function (data_train,
                          data_test,
                          c.vec,

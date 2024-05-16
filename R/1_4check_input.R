@@ -6,10 +6,14 @@
 #' @param x A character string representing the name of the running variable.
 #' @param c A character string representing the name of the cutoff variable.
 #' @param data A data frame containing all the required variables.
-#' @param M A numeric value or vector representing the multipliers for sensitivity analysis.
-#' @param cost A numeric value or vector representing the cost of treatment for calculating regret.
-#' @param var_names A list containing the names of the outcome, running, and cutoff variables.
-#'
+#' @param M A numeric value or vector representing the multipliers for
+#'   sensitivity analysis.
+#' @param cost A numeric value or vector representing the cost of treatment for
+#'   calculating regret.
+#' @param var_names A list containing the names of the outcome, running, and
+#'   cutoff variables.
+#' @param trace A logical value that controls whether to display the progress of
+#'   cross-fitting and regret calculation.
 #' @keywords internal
 #' @noRd
 check_input <- function(
@@ -19,7 +23,8 @@ check_input <- function(
     data,
     M,
     cost,
-    var_names){
+    var_names,
+    trace){
   # Check argument missingness and type
   if (missing(y) || !is.character(y) || length(y) > 1) {
     stop("'y' must be a character string of length one.")
@@ -52,5 +57,8 @@ check_input <- function(
     stop("Either M or cost must be a scalar.")
   }
 
-
+  # Check trace
+  if (!is.logical(trace)) {
+    stop("trace must be TRUE or FALSE.")
+  }
 }

@@ -4,23 +4,29 @@
 \alias{sens.rdlearn}
 \title{Sensitivity Analysis for rdlearn Objects}
 \usage{
-\method{sens}{rdlearn}(result, M = NULL, cost = NULL)
+\method{sens}{rdlearn}(result, M = NULL, cost = NULL, trace = TRUE)
 }
 \arguments{
-\item{result}{An object of class \code{rdlearn} returned by the \code{\link{rdlearn}} function.}
+\item{result}{An object of class \code{rdlearn} returned by the
+\code{\link{rdlearn}} function.}
 
-\item{M}{A numeric value or vector specifying the multiplicative smoothness factor(s)
-for sensitivity analysis.}
+\item{M}{A numeric value or vector specifying the multiplicative smoothness
+factor(s) for sensitivity analysis.}
 
-\item{cost}{A numeric value or vector specifying the cost of treatment for calculating
-regret.}
+\item{cost}{A numeric value or vector specifying the cost of treatment for
+calculating regret.}
+
+\item{trace}{A logical value that controls whether to display the progress of
+cross-fitting and regret calculation. If set to TRUE, the progress will be
+printed. The default value is TRUE.}
 }
 \value{
-An updated \code{rdlearn} object with the new cutoffs based on the provided values of M and cost.
+An updated \code{rdlearn} object with the new cutoffs based on the
+  provided values of M and cost.
 }
 \description{
-This function performs sensitivity analysis for the \code{rdlearn} object under different
-smoothness multiplier (M) and the cost of treatment (cost).
+This function performs sensitivity analysis for the \code{rdlearn} object
+under different smoothness multiplier (M) and the cost of treatment (cost).
 }
 \examples{
 result <- rdlearn(y = "elig", x = "saber11", c = "cutoff",

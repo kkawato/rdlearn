@@ -77,7 +77,6 @@ plot.rdlearn <- function(result,
       axis.ticks.length = unit(0, "cm"),
       plot.caption = element_text(hjust = 0, size = 8, face = "plain")
     )
-
   plot + labs(caption = paste0("Outcome: ", y, "; Running Variable: ", x, "; Cutoff: ", c, "   ",
                                "Sample Size: ", n, "; Number of Groups: ", q))
 }

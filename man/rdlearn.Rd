@@ -2,33 +2,54 @@
 % Please edit documentation in R/1_0rdlearn.R
 \name{rdlearn}
 \alias{rdlearn}
-\title{Safe Policy Learning for Regression Discontinuity Design with Multiple Cutoffs}
+\title{Safe Policy Learning for Regression Discontinuity Design with Multiple
+Cutoffs}
 \usage{
-rdlearn(y, x, c, group_name = NULL, data, fold = 10, M = 1, cost = 0)
+rdlearn(
+  y,
+  x,
+  c,
+  group_name = NULL,
+  data,
+  fold = 10,
+  M = 1,
+  cost = 0,
+  trace = TRUE
+)
 }
 \arguments{
-\item{y}{A character string specifying the name of the outcome variable column.}
+\item{y}{A character string specifying the name of the outcome variable
+column.}
 
-\item{x}{A character string specifying the name of the running variable column.}
+\item{x}{A character string specifying the name of the running variable
+column.}
 
-\item{c}{A character string specifying the name of the cutoff variable column.}
+\item{c}{A character string specifying the name of the cutoff variable
+column.}
 
-\item{group_name}{A character string specifying the name of the column containing group
-names (e.g., department names) for each cutoff. If not provided, the groups are
-assigned names "Group 1", "Group 2", ... in ascending order of cutoff values.}
+\item{group_name}{A character string specifying the name of the column
+containing group names (e.g., department names) for each cutoff. If not
+provided, the groups are assigned names "Group 1", "Group 2", ... in
+ascending order of cutoff values.}
 
 \item{data}{A data frame containing all required variables.}
 
 \item{fold}{The number of folds for cross-fitting. Default is 10.}
 
-\item{M}{A numeric value or vector specifying the multiplicative smoothness factor(s)
-for sensitivity analysis. Default is 1.}
+\item{M}{A numeric value or vector specifying the multiplicative smoothness
+factor(s) for sensitivity analysis. Default is 1.}
 
-\item{cost}{A numeric value or vector specifying the cost of treatment for calculating
-regret. This cost should be scaled by the range of the outcome variable Y. Default is 0.}
+\item{cost}{A numeric value or vector specifying the cost of treatment for
+calculating regret. This cost should be scaled by the range of the outcome
+variable Y. Default is 0.}
+
+\item{trace}{A logical value that controls whether to display the progress of
+cross-fitting and regret calculation. If set to TRUE, the progress will be
+printed. The default value is TRUE.}
 }
 \value{
-An object of class \code{rdlearn}, which is a list containing the following components:
+An object of class \code{rdlearn}, which is a list containing the
+  following components:
   \describe{
     \item{call}{The original function call.}
     \item{var_names}{A list of variable names for the outcome, running variable, and cutoff.}
@@ -41,10 +62,10 @@ An object of class \code{rdlearn}, which is a list containing the following comp
   }
 }
 \description{
-The \code{rdlearn} function implements safe policy learning under a regression
-discontinuity design with multiple cutoffs. The resulting new treatment assignment
-rules (cutoffs) are guaranteed to yield no worse overall outcomes than the existing
-cutoffs.
+The \code{rdlearn} function implements safe policy learning under a
+regression discontinuity design with multiple cutoffs. The resulting new
+treatment assignment rules (cutoffs) are guaranteed to yield no worse overall
+outcomes than the existing cutoffs.
 }
 \examples{
 result <- rdlearn(y = "elig", x = "saber11", c = "cutoff",

@@ -3,17 +3,20 @@ sens <- function(x, ...) UseMethod("sens")
 
 #' Sensitivity Analysis for rdlearn Objects
 #'
-#' This function performs sensitivity analysis for the \code{rdlearn} object under different
-#' smoothness multiplier (M) and the cost of treatment (cost).
+#' This function performs sensitivity analysis for the \code{rdlearn} object
+#' under different smoothness multiplier (M) and the cost of treatment (cost).
 #'
-#' @param result An object of class \code{rdlearn} returned by the \code{\link{rdlearn}} function.
-#' @param M A numeric value or vector specifying the multiplicative smoothness factor(s)
-#'   for sensitivity analysis.
-#' @param cost A numeric value or vector specifying the cost of treatment for calculating
-#'   regret.
-#'
-#' @return An updated \code{rdlearn} object with the new cutoffs based on the provided values of M and cost.
-#'
+#' @param result An object of class \code{rdlearn} returned by the
+#'   \code{\link{rdlearn}} function.
+#' @param M A numeric value or vector specifying the multiplicative smoothness
+#'   factor(s) for sensitivity analysis.
+#' @param cost A numeric value or vector specifying the cost of treatment for
+#'   calculating regret.
+#' @param trace A logical value that controls whether to display the progress of
+#'   cross-fitting and regret calculation. If set to TRUE, the progress will be
+#'   printed. The default value is TRUE.
+#' @return An updated \code{rdlearn} object with the new cutoffs based on the
+#'   provided values of M and cost.
 #' @examples
 #' result <- rdlearn(y = "elig", x = "saber11", c = "cutoff",
 #'                   group_name = "department", data = acces,
@@ -25,7 +28,8 @@ sens <- function(x, ...) UseMethod("sens")
 sens.rdlearn <- function (
     result,
     M = NULL,
-    cost = NULL
+    cost = NULL,
+    trace = TRUE
 ){
   # check M and cost
   if(missing(M))
@@ -45,7 +49,8 @@ sens.rdlearn <- function (
       cost = cost,
       M = M,
       group_name = result$group_name,
-      cross_fit_result = result$cross_fit_result
+      cross_fit_result = result$cross_fit_result,
+      trace = trace
     )
   result
 }

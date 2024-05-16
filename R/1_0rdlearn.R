@@ -1,24 +1,33 @@
-#' Safe Policy Learning for Regression Discontinuity Design with Multiple Cutoffs
+#' Safe Policy Learning for Regression Discontinuity Design with Multiple
+#' Cutoffs
 #'
-#' The \code{rdlearn} function implements safe policy learning under a regression
-#' discontinuity design with multiple cutoffs. The resulting new treatment assignment
-#' rules (cutoffs) are guaranteed to yield no worse overall outcomes than the existing
-#' cutoffs.
+#' The \code{rdlearn} function implements safe policy learning under a
+#' regression discontinuity design with multiple cutoffs. The resulting new
+#' treatment assignment rules (cutoffs) are guaranteed to yield no worse overall
+#' outcomes than the existing cutoffs.
 #'
 #' @param data A data frame containing all required variables.
-#' @param y A character string specifying the name of the outcome variable column.
-#' @param x A character string specifying the name of the running variable column.
-#' @param c A character string specifying the name of the cutoff variable column.
-#' @param group_name A character string specifying the name of the column containing group
-#'   names (e.g., department names) for each cutoff. If not provided, the groups are
-#'   assigned names "Group 1", "Group 2", ... in ascending order of cutoff values.
+#' @param y A character string specifying the name of the outcome variable
+#'   column.
+#' @param x A character string specifying the name of the running variable
+#'   column.
+#' @param c A character string specifying the name of the cutoff variable
+#'   column.
+#' @param group_name A character string specifying the name of the column
+#'   containing group names (e.g., department names) for each cutoff. If not
+#'   provided, the groups are assigned names "Group 1", "Group 2", ... in
+#'   ascending order of cutoff values.
 #' @param fold The number of folds for cross-fitting. Default is 10.
-#' @param M A numeric value or vector specifying the multiplicative smoothness factor(s)
-#'   for sensitivity analysis. Default is 1.
-#' @param cost A numeric value or vector specifying the cost of treatment for calculating
-#'   regret. This cost should be scaled by the range of the outcome variable Y. Default is 0.
-#'
-#' @return An object of class \code{rdlearn}, which is a list containing the following components:
+#' @param M A numeric value or vector specifying the multiplicative smoothness
+#'   factor(s) for sensitivity analysis. Default is 1.
+#' @param cost A numeric value or vector specifying the cost of treatment for
+#'   calculating regret. This cost should be scaled by the range of the outcome
+#'   variable Y. Default is 0.
+#' @param trace A logical value that controls whether to display the progress of
+#'   cross-fitting and regret calculation. If set to TRUE, the progress will be
+#'   printed. The default value is TRUE.
+#' @return An object of class \code{rdlearn}, which is a list containing the
+#'   following components:
 #'   \describe{
 #'     \item{call}{The original function call.}
 #'     \item{var_names}{A list of variable names for the outcome, running variable, and cutoff.}
@@ -45,7 +54,8 @@ rdlearn <- function(
     data,
     fold = 10,
     M = 1,
-    cost = 0) {
+    cost = 0,
+    trace = TRUE) {
   # Get function call
   cl <- match.call()
   var_names <- list(outcome = y,
@@ -58,7 +68,8 @@ rdlearn <- function(
               data = data,
               M = M,
               cost = cost,
-              var_names = var_names)
+              var_names = var_names,
+              trace = trace)
 
   # --------------------------- Prepare data --------------------------------- #
 
@@ -107,7 +118,8 @@ rdlearn <- function(
     c.vec = c.vec,
     q = q,
     fold = fold,
-    data_all = data_all
+    data_all = data_all,
+    trace = trace
   )
 
   # Apply safe learning
@@ -118,7 +130,8 @@ rdlearn <- function(
     cost = cost,
     M = M,
     group_name = group_name,
-    cross_fit_result = cross_fit_result
+    cross_fit_result = cross_fit_result,
+    trace = trace
   )
 
   # Organize output

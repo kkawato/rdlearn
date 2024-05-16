@@ -1,7 +1,8 @@
 #' Implement Safe Policy Learning
 #'
-#' This function implements the safe policy learning algorithm for estimating optimal cutoffs.
-#' It follows the procedures outlined in Sections 4.1 and 4.2 of the referenced source.
+#' This function implements the safe policy learning algorithm for estimating
+#' optimal cutoffs. It follows the procedures outlined in Sections 4.1 and 4.2
+#' of the referenced source.
 #'
 #' @param c.vec A vector of cutoff values for the continuous variable X.
 #' @param n The total sample size.
@@ -9,10 +10,12 @@
 #' @param cost A vector of cost values to consider.
 #' @param M A vector of multipliers for the Lipschitz constants.
 #' @param group_name The name of the grouping variable.
-#' @param cross_fit_result A list containing the results from the cross-fitting procedure.
+#' @param cross_fit_result A list containing the results from the cross-fitting
+#'   procedure.
 #'
-#' @return A data frame containing the estimated optimal cutoff values for each combination of M and cost.
-#'   The columns represent different combinations of M and cost, and the rows correspond to the groups.
+#' @return A data frame containing the estimated optimal cutoff values for each
+#'   combination of M and cost. The columns represent different combinations of
+#'   M and cost, and the rows correspond to the groups.
 #'
 #' @importFrom dplyr %>% filter
 #' @importFrom purrr map
@@ -25,7 +28,8 @@ safelearn = function(
     cost,
     M,
     group_name,
-    cross_fit_result)
+    cross_fit_result,
+    trace)
 {
   ################################################################################
   # please refer to
@@ -74,8 +78,9 @@ safelearn = function(
 
   for (temp_cost in cost) {
     for (temp_M in M) {
-      print(paste("Calculation in progress for M =", temp_M, "and C =", temp_cost))
-
+      if (trace == TRUE){
+        print(paste("Calculation in progress for M =", temp_M, "and C =", temp_cost))
+      }
       Lip_1 <- temp_M * Lip_1temp
       Lip_0 <- temp_M * Lip_0temp
       Lip_list <- list(Lip_1, Lip_0)

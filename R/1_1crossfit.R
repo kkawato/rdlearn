@@ -1,19 +1,21 @@
 #' Implement cross-fitting for estimating cross-group differences
 #'
-#' This function performs cross-fitting to estimate cross-group differences in a doubly robust manner.
-#' It follows the procedure outlined in Appendix A.2 and Sections 4.1 and 4.3 of the referenced source.
+#' This function performs cross-fitting to estimate cross-group differences in a
+#' doubly robust manner. It follows the procedure outlined in Appendix A.2 and
+#' Sections 4.1 and 4.3 of the referenced source.
 #'
 #' @param c.vec A vector of cutoff values.
 #' @param q The number of groups.
 #' @param fold The number of folds for cross-fitting.
 #' @param data_all The full data frame containing all variables.
 #'
-#' @return A list with the following components:
-#'   \item{dif_1}{A matrix of estimated differences for the treated group (D = 1).}
-#'   \item{dif_0}{A matrix of estimated differences for the control group (D = 0).}
-#'   \item{Lip_1}{A matrix of estimated Lipschitz constants for the treated group (D = 1).}
-#'   \item{Lip_0}{A matrix of estimated Lipschitz constants for the control group (D = 0).}
-#'   \item{cross_fit_output}{The data frame containing the cross-fitted outcomes and other intermediate calculations.}
+#' @return A list with the following components: \item{dif_1}{A matrix of
+#'   estimated differences for the treated group (D = 1).} \item{dif_0}{A matrix
+#'   of estimated differences for the control group (D = 0).} \item{Lip_1}{A
+#'   matrix of estimated Lipschitz constants for the treated group (D = 1).}
+#'   \item{Lip_0}{A matrix of estimated Lipschitz constants for the control
+#'   group (D = 0).} \item{cross_fit_output}{The data frame containing the
+#'   cross-fitted outcomes and other intermediate calculations.}
 #'
 #' @importFrom dplyr %>% filter ungroup select arrange
 #' @importFrom tidyr unnest
@@ -25,7 +27,8 @@ crossfit <- function(
   c.vec,
   q,
   fold,
-  data_all)
+  data_all,
+  trace)
 {
   ################################################################################
   # please refer to
@@ -37,11 +40,14 @@ crossfit <- function(
   cross_fit_output <- data.frame()
 
   for (k in 1:fold) {
+    if (trace == TRUE){
+      print(paste0("Cross fitting for fold ",k))
+    }
     data_train <- data_all %>% filter(fold_id != k)
     data_test <- data_all %>% filter(fold_id  == k)
 
     # conditional prob of group
-    gamfit <- multinom(formula = G ~ X, data = data_train)
+    gamfit <- multinom(formula = G ~ X, data = data_train, trace = "FALSE")
     ps <- predict(gamfit, newdata = data_test, "probs")
     data_test[, paste0("pseudo.ps", seq(1, q, 1))] <- predict(gamfit, newdata = data_test, "probs")
 

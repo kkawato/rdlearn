@@ -5,7 +5,6 @@
 #' regression discontinuity designs with multiple cutoffs. The main
 #' functionalities include:
 #'
-#'
 #' @section Package Functions:
 #' The \code{rdlearn} package offers three main functions:
 #'

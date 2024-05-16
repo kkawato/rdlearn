@@ -18,8 +18,8 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-+ Author: [Kentaro Kawato]
-+ Package manual: [PDF]
++ Author: Kentaro Kawato, Yi Zhang
++ Package manual: pdf file
 
 ## Installation Instructions
 
@@ -32,6 +32,10 @@ devtools::install_github("kkawato/rdlearn")
 ## Example: Cutoff change relative to the baseline for each department (y-axis) under different smoothness multiplicative factors (x-axis)
 
 ```{r include=FALSE, echo = TRUE}
+
+```
+
+```{r example, message = FALSE, warning=FALSE}
 ## load pacakge
 library(rdleran)
 library(tidyverse)
@@ -41,12 +45,11 @@ library(ggplot2)
 
 ## load example data
 data('acces')
-```
 
-```{r example, message = FALSE, warning=FALSE}
 ## set seed for replication
 # set.seed(12345)
-result <- rdlearn(y = "elig", x = "saber11", c = "cutoff", group_name = "department", data = acces, fold = 20, M = c(0, 1, 2, 4), cost = 0)
+
+result <- rdlearn(y = "elig", x = "saber11", c = "cutoff", group_name = "department", data = acces, fold = 20, M = c(0, 1, 2, 4), cost = 0, trace = FALSE)
 
 # use "plot" to visualize the result
 # Figure 2
@@ -58,7 +61,7 @@ plot(result)
 ```{r example2, message = FALSE, warning=FALSE}
 # "sens" is for sensitivity analysis.
 # This function inherits the cross-fitting data.
-sens_result <- sens(result, M = 1, cost=c(0, 0.2, 0.4, 0.6, 0.8, 1))
+sens_result <- sens(result, M = 1, cost=c(0, 0.2, 0.4, 0.6, 0.8, 1), trace = FALSE)
 # Figure 3
 plot(sens_result)
 ```
