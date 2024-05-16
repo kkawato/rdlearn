@@ -1,4 +1,14 @@
-#' Input check for \code{rdlearn}.
+#' Check Input for rdlearn
+#'
+#' This function checks the input arguments for the \code{rdlearn} function.
+#'
+#' @param y A character string representing the name of the outcome variable.
+#' @param x A character string representing the name of the running variable.
+#' @param c A character string representing the name of the cutoff variable.
+#' @param data A data frame containing all the required variables.
+#' @param M A numeric value or vector representing the multipliers for sensitivity analysis.
+#' @param cost A numeric value or vector representing the cost of treatment for calculating regret.
+#' @param var_names A list containing the names of the outcome, running, and cutoff variables.
 #'
 #' @keywords internal
 #' @noRd

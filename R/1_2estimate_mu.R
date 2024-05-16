@@ -1,16 +1,27 @@
-#' Implement estimation of \mu, group specific regression function, at each fold of cross fitting
+#' Estimate Group-Specific Regression Functions for Cross-Fitting
 #'
-#' @param data_train A training data at each fold of cross fitting
-#' @param data_test A test data at each fold of cross fitting
-#' @param c.vec A vector containing cutoffs from lowest to highest
-#' @param q The number of groups
-#' @param fold A fold id for cross-fitting
-#' @param g A group indicator
+#' @param data_train The training data for the current fold of cross-fitting.
+#' @param data_test The test data for the current fold of cross-fitting.
+#' @param c.vec A vector containing cutoff values.
+#' @param fold The current fold ID for cross-fitting.
+#' @param g The group indicator.
+#' @param q The total number of groups.
+#'
+#' @return A list containing the estimates of the group-specific regression functions for each group:
+#'   \item{pseudo1}{Estimates for the treated group for Appendix A.2.}
+#'   \item{mu_m1}{Estimates for the treated group for DR estimator (14) in Section 4.1.}
+#'   \item{mu_aug1}{Estimates for the treated group for the part of augmentation in DR estimator (14) in Section 4.1.}
+#'   \item{pseudo0}{Estimates for the control group for Appendix A.2.}
+#'   \item{mu_m0}{Estimates for the control group for DR estimator (14) in Section 4.1.}
+#'   \item{mu_aug0}{Estimates for the control group for the part of augmentation in DR estimator (14) in Section 4.1.}
+#'
 #' @importFrom nprobust lprobust
 #' @importFrom dplyr %>% filter pull
-#' @return A list containing \mu
 #' @keywords internal
 #' @noRd
+estimate_mu <- function(data_train, data_test, c.vec, fold, g, q) {
+  ...
+}
 estimate_mu <- function (data_train,
                          data_test,
                          c.vec,

@@ -1,34 +1,39 @@
-#' Safe policy learning under RD design with multiple cutoffs
+#' Safe Policy Learning for Regression Discontinuity Design with Multiple Cutoffs
 #'
-#' \code{rdlearn} implements policy learning under the RD design with multiple
-#' cutoffs. The resulting new treatment cutoffs have a safety guarantee that
-#' they will not yield a worse overall outcome than the existing cutoffs.
+#' The \code{rdlearn} function implements safe policy learning under a regression
+#' discontinuity design with multiple cutoffs. The resulting new treatment assignment
+#' rules (cutoffs) are guaranteed to yield no worse overall outcomes than the existing
+#' cutoffs.
 #'
-#' @param data A dataframe containing all following variables.
-#' @param y A column name of outcome variable.
-#' @param x A column name of running variable.
-#' @param c A column name of cutoff.
-#' @param group_name A column name of each cutoff group's name (e.g. department
-#'   name). If no argument is entered, the names "Group 1", "Group 2", ... are
-#'   assigned from the group with smallest cutoff.
+#' @param data A data frame containing all required variables.
+#' @param y A character string specifying the name of the outcome variable column.
+#' @param x A character string specifying the name of the running variable column.
+#' @param c A character string specifying the name of the cutoff variable column.
+#' @param group_name A character string specifying the name of the column containing group
+#'   names (e.g., department names) for each cutoff. If not provided, the groups are
+#'   assigned names "Group 1", "Group 2", ... in ascending order of cutoff values.
 #' @param fold The number of folds for cross-fitting. Default is 10.
-#' @param M A multiplicative smoothness factor for sensitivity analysis. Default
-#'   is 1.
-#' @param cost A cost of a treatment for calculating regret. This cost has to be
-#'   scaled by the range of the outcome Y. Default is 0.
+#' @param M A numeric value or vector specifying the multiplicative smoothness factor(s)
+#'   for sensitivity analysis. Default is 1.
+#' @param cost A numeric value or vector specifying the cost of treatment for calculating
+#'   regret. This cost should be scaled by the range of the outcome variable Y. Default is 0.
 #'
-#' @importFrom dplyr %>% filter ungroup select arrange
-#' @importFrom tidyr unnest
-#'
-#' @return \code{rdlearn} returns an object of \code{rdlearn} class, which is a
-#'   list of following items:
-#' \describe{
-#'   \item{org_cut}{}
-#'   \item{safe_cut}{A table of obtained new treatment cutoffs in the dataframe format}
-#' }
+#' @return An object of class \code{rdlearn}, which is a list containing the following components:
+#'   \describe{
+#'     \item{call}{The original function call.}
+#'     \item{var_names}{A list of variable names for the outcome, running variable, and cutoff.}
+#'     \item{org_cut}{A vector of original cutoff values.}
+#'     \item{safe_cut}{A data frame containing the obtained new treatment assignment cutoffs.}
+#'     \item{sample}{The total sample size.}
+#'     \item{num_group}{The number of groups.}
+#'     \item{group_name}{A vector of group names.}
+#'     \item{cross_fit_result}{The result of the cross-fitting procedure.}
+#'   }
 #'
 #' @examples
-#' result <- rdlearn(y = "elig", x = "saber11", c = "cutoff", group_name = "department", data = acces, fold = 20, M = c(0, 1), cost = 0)
+#' result <- rdlearn(y = "elig", x = "saber11", c = "cutoff",
+#'                   group_name = "department", data = acces,
+#'                   fold = 20, M = c(0, 1), cost = 0)
 #' plot(result)
 #'
 #' @export
@@ -43,7 +48,9 @@ rdlearn <- function(
     cost = 0) {
   # Get function call
   cl <- match.call()
-  var_names <- list(y, x, c)
+  var_names <- list(outcome = y,
+                    run_var = x,
+                    cutoff = c)
   # --------------------------- Check input ---------------------------------- #
   check_input(y = y,
               x = x,
@@ -59,20 +66,16 @@ rdlearn <- function(
   # * Y: outcome variable
   # * X: running variable
   # * C: cutoff
-  Y <- data[[y]]
-  X <- data[[x]]
-  C <- data[[c]]
+  Y <- data[[y]] ; X <- data[[x]] ; C <- data[[c]]
 
   # Sort cutoffs from min to max
-  c.vec <- sort(unique(C))
-  # Sample size
-  n <- length(Y)
-  # Number of groups
-  q <- length(unique(C))
   # Group index, from min cutoff to max cutoff
-  G <- match(C, c.vec)
   # Treatment indicator
-  D <- as.numeric(X >= C)
+  c.vec <- sort(unique(C)) ; G <- match(C, c.vec) ; D <- as.numeric(X >= C)
+
+  # Sample size
+  # Number of groups
+  n <- length(Y) ; q <- length(unique(C))
 
   # When group_name is not provided, assign a new name "Group k"
   if (is.null(group_name)) {
@@ -104,7 +107,6 @@ rdlearn <- function(
     c.vec = c.vec,
     q = q,
     fold = fold,
-    data_split = data_split,
     data_all = data_all
   )
 

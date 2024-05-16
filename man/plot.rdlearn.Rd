@@ -2,25 +2,29 @@
 % Please edit documentation in R/2_0plot.rdlearn.R
 \name{plot.rdlearn}
 \alias{plot.rdlearn}
-\title{Plot method for \code{rdlearn} objects}
+\title{Plot Cutoff Changes for rdlearn Objects}
 \usage{
 \method{plot}{rdlearn}(result, xlab = "", ylab = "")
 }
 \arguments{
-\item{result}{An object of class \code{rdlearn} returned by the \code{\link{rdlearn}}.}
+\item{result}{An object of class \code{rdlearn} returned by the \code{\link{rdlearn}} function.}
 
-\item{xlab}{A label of x-axis.}
+\item{xlab}{A character string specifying the label for the x-axis.}
 
-\item{ylab}{A label of y-axis.}
+\item{ylab}{A character string specifying the label for the y-axis.}
 }
 \value{
-a \code{ggplot2} plot of changes in cutoffs.
+A \code{ggplot2} object representing the plot of cutoff changes.
 }
 \description{
-\code{plot} plots the cutoff change relative to the baseline cutoff for each department (y-axis)
-under different smoothness multiplicative factor M and cost of treatment C (x-axis).
+This function plots the changes in cutoff values relative to the baseline cutoffs
+for each group, under different combinations of the smoothness
+multiplier (M) and the cost of treatment (C).
 }
 \examples{
-result <- rdlearn(y = "elig", x = "saber11", c = "cutoff", groupname = "department", data = acces, fold = 20, M = c(0, 1), cost = 0)
+result <- rdlearn(y = "elig", x = "saber11", c = "cutoff",
+                  group_name = "department", data = acces,
+                  fold = 20, M = c(0, 1), cost = 0)
 plot(result)
+
 }

@@ -2,25 +2,31 @@
 % Please edit documentation in R/3_0sens.rdlearn.R
 \name{sens.rdlearn}
 \alias{sens.rdlearn}
-\title{Sensitivity analysis method for \code{rdlearn} objects}
+\title{Sensitivity Analysis for rdlearn Objects}
 \usage{
 \method{sens}{rdlearn}(result, M = NULL, cost = NULL)
 }
 \arguments{
-\item{result}{An object of class \code{rdlearn} returned by the \code{\link{rdlearn}}.}
+\item{result}{An object of class \code{rdlearn} returned by the \code{\link{rdlearn}} function.}
 
-\item{M}{A multiplicative smoothness factor.}
+\item{M}{A numeric value or vector specifying the multiplicative smoothness factor(s)
+for sensitivity analysis.}
 
-\item{cost}{A cost for calculating regret.}
+\item{cost}{A numeric value or vector specifying the cost of treatment for calculating
+regret.}
 }
 \value{
-an \code{rdlearn} object containing the same contents as the result of function \code{{rdlearn}}.
+An updated \code{rdlearn} object with the new cutoffs based on the provided values of M and cost.
 }
 \description{
-\code{sens}
+This function performs sensitivity analysis for the \code{rdlearn} object under different
+smoothness multiplier (M) and the cost of treatment (cost).
 }
 \examples{
-result2 <- sens(result, M = 1, cost=c(0, 0.2, 0.4, 0.6, 0.8, 1))
+result <- rdlearn(y = "elig", x = "saber11", c = "cutoff",
+                  group_name = "department", data = acces,
+                  fold = 20, M = c(0, 1), cost = 0)
+result2 <- sens(result, M = 1, cost = c(0, 0.2, 0.4, 0.6, 0.8, 1))
 plot(result2)
 
 }

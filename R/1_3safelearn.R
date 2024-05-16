@@ -1,15 +1,21 @@
-#' Implement estimation of \mu, group specific regression function, at each fold of cross fitting
+#' Implement Safe Policy Learning
 #'
-#' @param data_train A training data at each fold of cross fitting
-#' @param data_test A test data at each fold of cross fitting
-#' @param c.vec A vector containing cutoffs from lowest to highest
-#' @param n A sample size
-#' @param q The number of groups
-#' @param g A group indicator
-#' @importFrom nprobust lprobust
-#' @importFrom dplyr %>% filter pull
-#' @return A list containing \mu
-#' @keywords internal
+#' This function implements the safe policy learning algorithm for estimating optimal cutoffs.
+#' It follows the procedures outlined in Sections 4.1 and 4.2 of the referenced source.
+#'
+#' @param c.vec A vector of cutoff values for the continuous variable X.
+#' @param n The total sample size.
+#' @param q The number of groups.
+#' @param cost A vector of cost values to consider.
+#' @param M A vector of multipliers for the Lipschitz constants.
+#' @param group_name The name of the grouping variable.
+#' @param cross_fit_result A list containing the results from the cross-fitting procedure.
+#'
+#' @return A data frame containing the estimated optimal cutoff values for each combination of M and cost.
+#'   The columns represent different combinations of M and cost, and the rows correspond to the groups.
+#'
+#' @importFrom dplyr %>% filter
+#' @importFrom purrr map
 #' @noRd
 
 safelearn = function(

@@ -2,46 +2,54 @@
 % Please edit documentation in R/1_0rdlearn.R
 \name{rdlearn}
 \alias{rdlearn}
-\title{Safe policy learning under RD design with multiple cutoffs}
+\title{Safe Policy Learning for Regression Discontinuity Design with Multiple Cutoffs}
 \usage{
 rdlearn(y, x, c, group_name = NULL, data, fold = 10, M = 1, cost = 0)
 }
 \arguments{
-\item{y}{A column name of outcome variable.}
+\item{y}{A character string specifying the name of the outcome variable column.}
 
-\item{x}{A column name of running variable.}
+\item{x}{A character string specifying the name of the running variable column.}
 
-\item{c}{A column name of cutoff.}
+\item{c}{A character string specifying the name of the cutoff variable column.}
 
-\item{group_name}{A column name of each cutoff group's name (e.g. department
-name). If no argument is entered, the names "Group 1", "Group 2", ... are
-assigned from the group with smallest cutoff.}
+\item{group_name}{A character string specifying the name of the column containing group
+names (e.g., department names) for each cutoff. If not provided, the groups are
+assigned names "Group 1", "Group 2", ... in ascending order of cutoff values.}
 
-\item{data}{A dataframe containing all following variables.}
+\item{data}{A data frame containing all required variables.}
 
 \item{fold}{The number of folds for cross-fitting. Default is 10.}
 
-\item{M}{A multiplicative smoothness factor for sensitivity analysis. Default
-is 1.}
+\item{M}{A numeric value or vector specifying the multiplicative smoothness factor(s)
+for sensitivity analysis. Default is 1.}
 
-\item{cost}{A cost of a treatment for calculating regret. This cost has to be
-scaled by the range of the outcome Y. Default is 0.}
+\item{cost}{A numeric value or vector specifying the cost of treatment for calculating
+regret. This cost should be scaled by the range of the outcome variable Y. Default is 0.}
 }
 \value{
-\code{rdlearn} returns an object of \code{rdlearn} class, which is a
-  list of following items:
-\describe{
-  \item{org_cut}{}
-  \item{safe_cut}{A table of obtained new treatment cutoffs in the dataframe format}
-}
+An object of class \code{rdlearn}, which is a list containing the following components:
+  \describe{
+    \item{call}{The original function call.}
+    \item{var_names}{A list of variable names for the outcome, running variable, and cutoff.}
+    \item{org_cut}{A vector of original cutoff values.}
+    \item{safe_cut}{A data frame containing the obtained new treatment assignment cutoffs.}
+    \item{sample}{The total sample size.}
+    \item{num_group}{The number of groups.}
+    \item{group_name}{A vector of group names.}
+    \item{cross_fit_result}{The result of the cross-fitting procedure.}
+  }
 }
 \description{
-\code{rdlearn} implements policy learning under the RD design with multiple
-cutoffs. The resulting new treatment cutoffs have a safety guarantee that
-they will not yield a worse overall outcome than the existing cutoffs.
+The \code{rdlearn} function implements safe policy learning under a regression
+discontinuity design with multiple cutoffs. The resulting new treatment assignment
+rules (cutoffs) are guaranteed to yield no worse overall outcomes than the existing
+cutoffs.
 }
 \examples{
-result <- rdlearn(y = "elig", x = "saber11", c = "cutoff", group_name = "department", data = acces, fold = 20, M = c(0, 1), cost = 0)
+result <- rdlearn(y = "elig", x = "saber11", c = "cutoff",
+                  group_name = "department", data = acces,
+                  fold = 20, M = c(0, 1), cost = 0)
 plot(result)
 
 }
