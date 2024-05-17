@@ -2,8 +2,7 @@
 #'
 #' @description
 #' The \code{rdlearn} package provides tools for safe policy learning under
-#' regression discontinuity designs with multiple cutoffs. The main
-#' functionalities include:
+#' regression discontinuity designs with multiple cutoffs.
 #'
 #' @section Package Functions:
 #' The \code{rdlearn} package offers three main functions:
@@ -45,3 +44,12 @@
 #' sens_result <- sens(result, M = 1, cost = c(0, 0.2, 0.4, 0.6, 0.8, 1))
 #' plot(sens_result)
 #' }
+#' @keywords internal
+"_PACKAGE"
+
+# The following block is used by usethis to automatically manage
+# roxygen namespace tags. Modify with care!
+## usethis namespace: start
+#' @importFrom glue glue_collapse
+## usethis namespace: end
+NULL

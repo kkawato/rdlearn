@@ -19,7 +19,6 @@
 #'
 #' @importFrom nprobust lprobust
 #' @importFrom dplyr %>% filter pull
-#' @keywords internal
 #' @noRd
 estimate_mu <- function (data_train,
                          data_test,

@@ -2,21 +2,33 @@ Package: rdleran
 Type: Package
 Title: Safe policy learning under RD design with multiple cutoffs
 Version: 0.1.0
-Author: Kentaro Kawato
-Maintainer: Kentaro Kawato <kentaro1358nohe@gmail.com>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Authors@R:
+    c(person(given = "Kentaro",
+           family = "Kawato",
+           role = c("aut", "cre"),
+           email = "kentaro1358nohe@gmail.com"),
+    person(given = "Zhang",
+           family = "Yi",
+           role = c("aut", "cre")))
+Description: The rdlearn package offers tools for safe policy learning in regression discontinuity designs with multiple cutoffs. 
+    The learned cutoffs are guaranteed to perform no worse than the existing cutoffs in terms of overall outcomes.
+    Additionally, this package allows you to visualize the learned cutoffs relative to the baseline and perform sensitivity analysis on the learned policies.
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.1
-URL: https://github.com/kkawato/RDDPackage
-BugReports: https://github.com/kkawato/RDDPackage/issues
+URL: https://github.com/kkawato/rdleran
+BugReports: https://github.com/kkawato/rdlearn/issues
+Imports:
+    tidyverse,
+    nprobust,
+    nnet,
+    ggplot2
 Suggests: 
     knitr,
     rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Depends: 
-    R (>= 2.10)
+    R (>= 4.40)
 VignetteBuilder: knitr

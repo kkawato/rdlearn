@@ -22,9 +22,6 @@ plot <- function(x, ...) UseMethod("plot")
 #' plot(result)
 #'
 #' @export
-plot.rdlearn <- function(result, xlab = "", ylab = "") {
-  ...
-}
 plot.rdlearn <- function(result,
                          xlab = "",
                          ylab = ""
