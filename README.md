@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# rdleran
+# rdlearn
 
 <!-- badges: start -->
 <!-- badges: end -->

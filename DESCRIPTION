@@ -9,7 +9,7 @@ Authors@R:
            email = "kentaro1358nohe@gmail.com"),
     person(given = "Zhang",
            family = "Yi",
-           role = c("aut", "cre")))
+           role = c("aut")))
 Description: The rdlearn package offers tools for safe policy learning in regression discontinuity designs with multiple cutoffs. 
     The learned cutoffs are guaranteed to perform no worse than the existing cutoffs in terms of overall outcomes.
     Additionally, this package allows you to visualize the learned cutoffs relative to the baseline and perform sensitivity analysis on the learned policies.
@@ -30,5 +30,5 @@ Suggests:
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Depends: 
-    R (>= 4.40)
+    R (>= 4.3.3)
 VignetteBuilder: knitr
