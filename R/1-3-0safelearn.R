@@ -12,7 +12,8 @@
 #' @param group_name The name of the grouping variable.
 #' @param cross_fit_result A list containing the results from the cross-fitting
 #'   procedure.
-#'
+#' @param trace A logical value that controls whether to display the progress of
+#'   cross-fitting and regret calculation.
 #' @return A data frame containing the estimated optimal cutoff values for each
 #'   combination of M and cost. The columns represent different combinations of
 #'   M and cost, and the rows correspond to the groups.
@@ -20,7 +21,7 @@
 #' @importFrom dplyr %>% filter
 #' @importFrom purrr map
 #' @noRd
-safelearn = function(
+safelearn <- function(
     c.vec,
     n,
     q,
@@ -28,16 +29,16 @@ safelearn = function(
     M,
     group_name,
     cross_fit_result,
-    trace)
-{
+    trace
+) {
   ################################################################################
   # please refer to
   # Section 4.1. Doubly robust estimation
   # Section 4.2. Estimating the bounds
   ################################################################################
 
-  dif.1m <- cross_fit_result$dif_1
-  dif.0m <- cross_fit_result$dif_0
+  dif_1 <- cross_fit_result$dif_1
+  dif_0 <- cross_fit_result$dif_0
   Lip_1 <- cross_fit_result$Lip_1
   Lip_0 <- cross_fit_result$Lip_0
   data_all <- cross_fit_result$cross_fit_output
@@ -46,30 +47,6 @@ safelearn = function(
   X <- data_all['X']
   C <- data_all['C']
   G <- data_all['G']
-
-  lip_extra <- function(x.train,
-                        group,
-                        g,
-                        g.pr) {
-
-    if (group == "dif1") { # B1 G=1
-      d <- 1
-      Lip <- Lip_1[g, g.pr]
-      dif.m <- dif.1m[g, g.pr]
-      eval.main <- unique(C[G == max(g, g.pr)])
-    }
-
-    if (group == "dif0") { # B1 G=1
-      d <- 0
-      Lip <- Lip_0[g, g.pr]
-      dif.m <- dif.0m[g, g.pr]
-      eval.main <- unique(C[G == min(g, g.pr)])
-    }
-
-    upper <- map(x.train, function(x) min(1, min(dif.m + Lip * abs(x - eval.main))))
-    lower <- map(x.train, function(x) max(-1, max(dif.m - Lip * abs(x - eval.main))))
-    return(list(upper = upper, lower = lower))
-  }
 
   safecut_all <- data.frame(group = group_name)
   Lip_1temp <- Lip_1
@@ -106,9 +83,15 @@ safelearn = function(
                   sapply(x[2] + (1 - d), function(g.temp) {
                     lip_extra(
                       x.train = x[1],
-                      group = paste0("dif", d),
+                      treat = d,
                       g = g,
-                      g.pr = g.temp
+                      g.pr = g.temp,
+                      Lip_1 = Lip_1,
+                      Lip_0 = Lip_0,
+                      dif_1 = dif_1,
+                      dif_0 = dif_0,
+                      G = G,
+                      C = C
                     )
                   })[2, ]
                 ))
@@ -123,43 +106,13 @@ safelearn = function(
       for (g in seq(1, q, 1)) {
         regret <- NULL
         for (c.alt in unique(X[X >= c.vec[1] & X < c.vec[q]])) {
-          if (c.alt >= c.vec[g]) {
-            d <- 0
-            range1 <- (data_mid$X >= c.vec[g]) & (data_mid$X < c.alt) & (data_mid$G == g)
-            range2 <- (data_mid$X < c.alt) & (data_mid$X >= c.vec[g]) & (data_mid$X >= c.vec[ifelse(data_mid$G == 1, 1, data_mid$G - 1)]) & (data_mid$X < c.vec[data_mid$G])
-          } else {
-            d <- 1
-            range1 <- (data_mid$X < c.vec[g]) & (data_mid$X >= c.alt) & (data_mid$G == g)
-            range2 <- (data_mid$X >= c.alt) & (data_mid$X < c.vec[g]) & (data_mid$X >= c.vec[data_mid$G]) & (data_mid$X < c.vec[ifelse(data_mid$G == q, q, data_mid$G + 1)])
-          }
-
-          base_regret <- sum(data_mid[data_mid$G == g, "Y"])
-          Iden_alt <- (sum(data_mid[data_mid$X >= c.vec[g] & data_mid$X >= c.alt & data_mid$G == g, "Y"]) +
-                         sum(data_mid[data_mid$X < c.vec[g] & data_mid$X < c.alt & data_mid$G == g, "Y"]))
-
-          data_temp1 <- data_mid[range1,]
-          DR_1 <- sum(data_temp1[, "mu.m"])
-          Theta_2 <- sum(data_temp1[, paste0("d", d)])
-
-          data_temp2 <- data_mid[range2, ]
-          if (nrow(data_temp2) > 0 && ncol(data_temp2) > 0) {
-            DR_2 <- sum(with(data_temp2,
-                             eval(parse(text = paste0("pseudo.ps", g))) /
-                               eval(parse(text = paste0("pseudo.ps", G))) *
-                               (Y - eval(parse(text = "mu.aug"))))) / n }
-
-          # ------------------------------------------------------------------ #
-          # trycatch to avoid the following error
-          # Error in eval(parse(text = paste0("pseudo.ps", G))) :  object 'pseudo.ps' not found
-          # DR_2 <- tryCatch(sum(with(data_temp2,
-          #                           eval(parse(text = paste0("pseudo.ps", g))) /
-          #                             eval(parse(text = paste0("pseudo.ps", G))) *
-          #                             (Y - eval(parse(text = "mu.aug"))))),
-          #                  error = function(e) return(0))
-          # ------------------------------------------------------------------ #
-
-          cost <- temp_cost * dim(data_mid[range1, ])[1]
-          temp_reg <- ((Iden_alt + DR_1 + DR_2 + Theta_2 + cost * (c.alt >= c.vec[g]) - cost * (c.alt < c.vec[g])) / n) - (base_regret / n)
+          temp_reg <- calculate_regret(data_mid = data_mid,
+                                       c.vec = c.vec,
+                                       g = g,
+                                       q = q,
+                                       c.alt = c.alt,
+                                       n = n,
+                                       temp_cost = temp_cost)
           regret <- c(regret, temp_reg)
         }
         if (max(regret) == 0) { # if baseline policy is the best policy
@@ -176,6 +129,4 @@ safelearn = function(
   }
   safecut_all
 }
-
-
 

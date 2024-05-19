@@ -23,9 +23,8 @@
 #' @param cost A numeric value or vector specifying the cost of treatment for
 #'   calculating regret. This cost should be scaled by the range of the outcome
 #'   variable Y. Default is 0.
-#' @param trace A logical value that controls whether to display the progress of
-#'   cross-fitting and regret calculation. If set to TRUE, the progress will be
-#'   printed. The default value is TRUE.
+#' @param trace A logical value that controls whether to display the progress.
+#'   If set to TRUE, the progress will be printed. The default value is TRUE.
 #' @return An object of class \code{rdlearn}, which is a list containing the
 #'   following components:
 #'   \describe{

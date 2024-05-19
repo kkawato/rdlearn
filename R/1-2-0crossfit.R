@@ -1,13 +1,17 @@
-#' Implement cross-fitting for estimating cross-group differences
+#' Implement cross-fitting for estimating cross-group differences and
+#' calculating the smoothness parameter
 #'
-#' This function performs cross-fitting to estimate cross-group differences in a
-#' doubly robust manner. It follows the procedure outlined in Appendix A.2 and
-#' Sections 4.1 and 4.3 of the referenced source.
+#' This function performs cross-fitting to estimate cross-group difference
+#' (dif). This function also calculates the smoothness parameter (Lip). It
+#' follows the procedure outlined in Appendix A.2 and Sections 4.1 and 4.3 of
+#' the referenced source.
 #'
 #' @param c.vec A vector of cutoff values.
 #' @param q The number of groups.
 #' @param fold The number of folds for cross-fitting.
 #' @param data_all The full data frame containing all variables.
+#' @param trace A logical value that controls whether to display the progress.
+#'   If set to TRUE, the progress will be printed. The default value is TRUE.
 #'
 #' @return A list with the following components: \item{dif_1}{A matrix of
 #'   estimated differences for the treated group (D = 1).} \item{dif_0}{A matrix
@@ -20,7 +24,6 @@
 #' @importFrom dplyr %>% filter ungroup select arrange
 #' @importFrom tidyr unnest
 #' @importFrom nnet multinom
-#' @importFrom nprobust lprobust
 #' @keywords internal
 #' @noRd
 crossfit <- function(
@@ -81,61 +84,21 @@ crossfit <- function(
   }
 
   Y <- cross_fit_output[['Y']]
-  for (d in c(1, 0)) {
-    psd_dat <- NULL  # storing the pseudo outcome (A.2. Step 2 Pseudo Outcome Regression)
-    Lip <- matrix(0, q, q)
-    dif <- matrix(0, nrow = q, ncol = q)
 
-    for (g in seq(1, q - 1, 1)) {
-      for (g.pr in seq(g + 1, q, 1)) {
-        if (d == 1){
-          temp.dat <- cross_fit_output %>% filter(D == 1 & X >= c.vec[g.pr])
-        }
-
-        if (d == 0) {
-          temp.dat <- cross_fit_output %>% filter(D == 0 & X < c.vec[g])
-        }
-
-        psout <- temp.dat[, paste0("pseudo.", g)] - temp.dat[, paste0("pseudo.", g.pr)] +
-          with(temp.dat, I(G == g) *
-                 (Y - eval(parse(text = paste0("pseudo.", g)))) /
-                 eval(parse(text = paste0("pseudo.ps", g)))) -
-          with(temp.dat, I(G == g.pr) *
-                 (Y - eval(parse(text = paste0("pseudo.", g.pr)))) /
-                 eval(parse(text = paste0("pseudo.ps", g.pr))))
-
-        temp.vc <- data.frame(psout, temp.dat$X, g, g.pr)
-        names(temp.vc)[1:2] <- c("psout", "X")
-        psd_dat <- rbind(psd_dat, temp.vc)
-
-        eval_point <- c.vec[g.pr] * (d == 1) + c.vec[g] * (d == 0)
-        dif[g, g.pr] <- lprobust(temp.vc[, "psout"],
-                                 temp.vc[, "X"],
-                                 eval = eval_point,
-                                 deriv = 0,
-                                 p = 1,
-                                 bwselect = "mse-dpi")$Estimate[, 5]
-
-        Lip[g, g.pr] <- abs(lprobust(temp.vc[, "psout"],
-                                     temp.vc[, "X"],
-                                     eval = eval_point,
-                                     deriv = 1,
-                                     p = 2,
-                                     bwselect = "mse-dpi")$Estimate[, 5])
-      }
-    }
-    dif <- dif + t(-dif)
-    Lip <- Lip + t(Lip)
-    assign(paste0("dif_", d), dif)
-    assign(paste0("Lip_", d), Lip)
-  }
+  dif_Lip_output <- estimate_dif_lip(
+    cross_fit_output = cross_fit_output,
+    q = q,
+    c.vec = c.vec,
+    trace = trace
+  )
 
   out <- list(
-    dif_1 = dif_1,
-    dif_0 = dif_0,
-    Lip_1 = Lip_1,
-    Lip_0 = Lip_0,
+    dif_1 = dif_Lip_output$dif_1,
+    dif_0 = dif_Lip_output$dif_0,
+    Lip_1 = dif_Lip_output$Lip_1,
+    Lip_0 = dif_Lip_output$Lip_0,
     cross_fit_output = cross_fit_output
   )
+
   return(out)
 }
