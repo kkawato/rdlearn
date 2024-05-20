@@ -1,13 +1,15 @@
 #' Calculating regret
 #'
-#' @param data_mid data whose runnig variable is under the maximam cutoff and over the minimum cutoff
+#' Please refer to the description of 1-2-0crossfit.R.
+#'
+#' @param data_mid A data whose running variable is under the maximum cutoff and over the minimum cutoff.
 #' @param c.vec A vector of cutoff values for the continuous variable X.
-#' @param g group indicator
-#' @param c.alt alternative cutoff
+#' @param g A group indicator.
+#' @param c.alt An alternative cutoff.
 #' @param n The total sample size.
 #' @param temp_cost the cost of treatment.
 #'
-#' @return the regret calculated with alternative cutoff.
+#' @return The regret calculated with an alternative cutoff.
 #'
 #' @keywords internal
 #' @noRd

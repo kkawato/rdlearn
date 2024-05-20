@@ -1,23 +1,23 @@
-#' Estimating the bounds
+#' Estimating the bounds of cross-group differences
 #'
-#' Please refer to Section 4.2. (16) of the referenced source
+#' Please refer to the description of 1-4-0crossfit.R.
 #'
-#' @param x.train training data
-#' @param treat treatment indicator
-#' @param g cutoff group indicater
-#' @param g.pr cutoff group indicater
-#' @param Lip_1 cross-group smoothness parameter among treatment group
-#' @param Lip_0 cross-group smoothenes parameter among control group
-#' @param dif_1 cross-group differences among treatment group
-#' @param dif_0 cross-group differences among control group
-#' @param G group indicator for each individual
-#' @param C cutoff value for each individual
+#' @param x.train A training data.
+#' @param treat Treatment indicator.
+#' @param g Cutoff group indicator.
+#' @param g.pr Another cutoff group indicator.
+#' @param Lip_1 The cross-group smoothness parameter among treatment group.
+#' @param Lip_0 The cross-group smoothness parameter among control group.
+#' @param dif_1 The cross-group differences among treatment group.
+#' @param dif_0 The cross-group differences among control group.
+#' @param G Cutoff group indicator for each individual.
+#' @param C Cutoff value for each individual.
 #'
 #' @return A list containing the empirical upper bound and lower bound of
-#'   cross-group difference
+#'   cross-group difference \code{dif}.
 #' @keywords internal
 #' @noRd
-lip_extra <- function(x.train,
+extrapolation <- function(x.train,
                       treat,
                       g,
                       g.pr,

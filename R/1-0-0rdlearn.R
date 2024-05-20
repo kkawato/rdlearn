@@ -35,7 +35,8 @@
 #'     \item{sample}{The total sample size.}
 #'     \item{num_group}{The number of groups.}
 #'     \item{group_name}{A vector of group names.}
-#'     \item{cross_fit_result}{The result of the cross-fitting procedure.}
+#'     \item{cross_fit_output}{The intermediate output of the cross-fitting procedure.}
+#'     \item{dif_lip_output}{The intermediate output of the cross-group differences and the smootheness parameters}
 #'   }
 #'
 #' @examples
@@ -108,24 +109,25 @@ rdlearn <- function(
   }
 
   # Add fold_id to data used for cross-fitting
-  tempdata <- data.frame(Y = Y, X = X, C = C, D = D, G = G)
-
-  data_all <- tempdata %>%
+  data_all <- data.frame(Y = Y, X = X, C = C, D = D, G = G) %>%
     mutate(fold_id = sample(1:fold, size = n, replace = TRUE)) %>%
-    arrange(fold_id)
-
-  data_split <- data_all %>%
-    group_by(fold_id) %>%
-    nest() %>%
     arrange(fold_id)
 
   # ------------------------- Apply Algorithms ------------------------------- #
   # Apply cross fitting
-  cross_fit_result <- crossfit(
+  cross_fit_output <- crossfit(
     c.vec = c.vec,
     q = q,
     fold = fold,
     data_all = data_all,
+    trace = trace
+  )
+
+  #Apply
+  dif_lip_output <- estimate_dif_lip(
+    cross_fit_output = cross_fit_output,
+    q = q,
+    c.vec = c.vec,
     trace = trace
   )
 
@@ -137,7 +139,8 @@ rdlearn <- function(
     cost = cost,
     M = M,
     group_name = group_name,
-    cross_fit_result = cross_fit_result,
+    dif_lip_output = dif_lip_output,
+    cross_fit_output = cross_fit_output,
     trace = trace
   )
 
@@ -150,7 +153,8 @@ rdlearn <- function(
     sample = n,
     num_group = q,
     group_name = group_name,
-    cross_fit_result = cross_fit_result
+    cross_fit_output = cross_fit_output,
+    dif_lip_output = dif_lip_output
   )
 
   class(out) <- "rdlearn"

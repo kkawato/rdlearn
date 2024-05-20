@@ -1,4 +1,6 @@
-#' Estimate Group-Specific Regression Functions for Cross-Fitting
+#' Estimate the conditional outcome regression for each group g \tilda{m(X,g)}
+#'
+#' Please refer to the description of 1-2-0crossfit.R.
 #'
 #' @param data_train The training data for the current fold of cross-fitting.
 #' @param data_test The test data for the current fold of cross-fitting.

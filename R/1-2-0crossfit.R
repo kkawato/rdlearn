@@ -1,10 +1,28 @@
-#' Implement cross-fitting for estimating cross-group differences and
-#' calculating the smoothness parameter
+#' Implement cross-fitting to estimate nuisance components
 #'
-#' This function performs cross-fitting to estimate cross-group difference
-#' (dif). This function also calculates the smoothness parameter (Lip). It
-#' follows the procedure outlined in Appendix A.2 and Sections 4.1 and 4.3 of
-#' the referenced source.
+#' @description
+#' This function performs two calculations simultaneously.
+#'
+#' First, to construct a doubly robust estimator of the point identifiable component
+#' \code{\Theta_1}, we adopt a fully nonparametric approach to estimating the following
+#' nuisance components: the conditional outcome regression for each group g
+#' \tilde{m(X,g)} and the conditional probability of group membership g given
+#' \tilde{e_g(X)}. Specifically, we fit a local linear regression for
+#' \tilde{m(X,g)} available in \code{nprobust} and fit a multinomial logistic
+#' regression for \tilde{e_g(X)} based on a single hidden layer neural network
+#' of the \code{nnet}. For more detail, Please refer to the "4.1 Doubly robust
+#' estimation"
+#'
+#' Second, to calculate the worst-case value of \code{\Theta_2}, which is partially
+#' identifiable, we need to estimate the conditional differences \code{dif}
+#' between observed treatment groups or between observed control groups using
+#' data above or below the threshold, respectively. We propose an efficient
+#' two-stage doubly robust estimator that has a fast convergence rate, which
+#' requires the calculation of \code{pseudo}. For more detail, Please refer to
+#' the "Appendix A.2. A double robust estimator for heterogeneous cross-group
+#' differences Step 1. Nuisance training. and Step 2. Pseudo-outcome
+#' regression", "4.2 Estimating the bounds" and "4.3 Choosing the smoothness
+#' parameter".
 #'
 #' @param c.vec A vector of cutoff values.
 #' @param q The number of groups.
@@ -13,13 +31,7 @@
 #' @param trace A logical value that controls whether to display the progress.
 #'   If set to TRUE, the progress will be printed. The default value is TRUE.
 #'
-#' @return A list with the following components: \item{dif_1}{A matrix of
-#'   estimated differences for the treated group (D = 1).} \item{dif_0}{A matrix
-#'   of estimated differences for the control group (D = 0).} \item{Lip_1}{A
-#'   matrix of estimated Lipschitz constants for the treated group (D = 1).}
-#'   \item{Lip_0}{A matrix of estimated Lipschitz constants for the control
-#'   group (D = 0).} \item{cross_fit_output}{The data frame containing the
-#'   cross-fitted outcomes and other intermediate calculations.}
+#' @return A dataframe containing the cross-fitted outcomes and other intermediate calculations.
 #'
 #' @importFrom dplyr %>% filter ungroup select arrange
 #' @importFrom tidyr unnest
@@ -33,13 +45,6 @@ crossfit <- function(
   data_all,
   trace)
 {
-  ################################################################################
-  # please refer to
-  # Appendix A.2. A double robust estimator for heterogeneous cross-group differences
-  # Section 4.1. Doubly robust estimation
-  # Section 4.3. Choosing the smoothness parameter
-  ################################################################################
-
   cross_fit_output <- data.frame()
 
   for (k in 1:fold) {
@@ -82,23 +87,5 @@ crossfit <- function(
     }
     cross_fit_output <- rbind(cross_fit_output, data_test)
   }
-
-  Y <- cross_fit_output[['Y']]
-
-  dif_Lip_output <- estimate_dif_lip(
-    cross_fit_output = cross_fit_output,
-    q = q,
-    c.vec = c.vec,
-    trace = trace
-  )
-
-  out <- list(
-    dif_1 = dif_Lip_output$dif_1,
-    dif_0 = dif_Lip_output$dif_0,
-    Lip_1 = dif_Lip_output$Lip_1,
-    Lip_0 = dif_Lip_output$Lip_0,
-    cross_fit_output = cross_fit_output
-  )
-
-  return(out)
+  return(cross_fit_output)
 }

@@ -1,16 +1,33 @@
-#' Estimating cross-group differences dif and calculating the smoothness
-#' parameter Lip.
+#' Estimating cross-group differences \code{dif} and calculating the smoothness
+#' parameter \code{Lip}.
 #'
-#' Please refer to A.2. Step 2 Pseudo Outcome Regression and Section 4.3 of the
-#' referenced source.
+#' @description
+#' First, this function constructs the efficient two-stage doubly robust
+#' estimator of the cross-group difference \code{dif}. In short, this function
+#' constructs the pseudo-outcome and regresses it on covariates X using
+#' \code{lprobust} in the test sample.
+#'
+#' Second, by leveraging this \code{dif}, this function also calculates the
+#' smoothness parameter (\code{Lip}). After obtaining the first local derivative of
+#' \code{dif} using \code{lprobust}, we compute the absolute value of the estimated
+#' first-order derivative at a grid of points in the region of overlapping
+#' policies between the two groups, and take the maximum value as \code{Lip}.
+#'
+#' For more detail, please refer to "A.2 A double robust estimator for
+#' heterogeneous cross-group differences Step 2. Pseudo-outcome regression:" and
+#' "4.3 Choosing the smoothness parameter".
 #'
 #' @param cross_fit_output The output of the function \code{estimate_mu}.
 #' @param q The total number of groups.
 #' @param c.vec A vector of cutoff values for the continuous variable X.
 #' @param trace A logical value that controls whether to display the progress of
 #'   cross-fitting and regret calculation.
-#' @return A list containing cross-group differences dif and the moothness
-#'   parameter Lip for treatment group and control group
+#' @return A list with the following components: \item{dif_1}{A matrix of
+#'   estimated differences for the treated group (D = 1).} \item{dif_0}{A matrix
+#'   of estimated differences for the control group (D = 0).} \item{Lip_1}{A
+#'   matrix of estimated Lipschitz constants for the treated group (D = 1).}
+#'   \item{Lip_0}{A matrix of estimated Lipschitz constants for the control
+#'   group (D = 0).}
 #' @importFrom nprobust lprobust
 #' @keywords internal
 #' @noRd

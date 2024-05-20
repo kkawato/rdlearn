@@ -13,6 +13,20 @@
 #' @import ggplot2
 #'
 #' @rdname plot.rdlearn
+#' @examples
+#' library(nprobust)
+#' library(nnet)
+#' library(ggplot2)
+#' library(dplyr)
+#' library(glue)
+#' library(purrr)
+#' library(tidyr)
+#'
+#' result <- rdlearn(y = "elig", x = "saber11", c = "cutoff",
+#'                   group_name = "department", data = acces,
+#'                   fold = 20, M = c(0, 1), cost = 0)
+#' plot(result)
+#'
 #' @export
 plot <- function(result,
                          xlab = "",

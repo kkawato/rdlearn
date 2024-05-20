@@ -57,7 +57,8 @@ An object of class \code{rdlearn}, which is a list containing the
     \item{sample}{The total sample size.}
     \item{num_group}{The number of groups.}
     \item{group_name}{A vector of group names.}
-    \item{cross_fit_result}{The result of the cross-fitting procedure.}
+    \item{cross_fit_output}{The intermediate output of the cross-fitting procedure.}
+    \item{dif_lip_output}{The intermediate output of the cross-group differences and the smootheness parameters}
   }
 }
 \description{

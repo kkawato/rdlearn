@@ -10,7 +10,7 @@ Authors@R:
     person(given = "Zhang",
            family = "Yi",
            role = c("aut")))
-Description: The rdlearn package offers tools for safe policy learning in regression discontinuity designs with multiple cutoffs. 
+Description: The rdlearn package offers tools for safe policy learning under regression discontinuity designs with multiple cutoffs. 
     The learned cutoffs are guaranteed to perform no worse than the existing cutoffs in terms of overall outcomes.
     Additionally, this package allows you to visualize the learned cutoffs relative to the baseline and perform sensitivity analysis on the learned policies.
 License: MIT + file LICENSE

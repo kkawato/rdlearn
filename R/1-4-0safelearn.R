@@ -1,8 +1,20 @@
 #' Implement Safe Policy Learning
 #'
+#' @description
 #' This function implements the safe policy learning algorithm for estimating
-#' optimal cutoffs. It follows the procedures outlined in Sections 4.1 and 4.2
-#' of the referenced source.
+#' optimal cutoffs. There are the following two steps.
+#'
+#' First, we estimate the upper and lower bounds of \code{dif} by leveraging the
+#' smoothness parameter \code{Lip} for constructing \code{Theta_2.} For more
+#' detail, please refer to " 4.2 Estimating the bounds" of the referenced
+#' source.
+#'
+#' Next, we calculate the regrets under baseline cutoffs and alternative
+#' cutoffs. For alternative cutoffs, we estimate three components
+#' \code{Iden_alt}, \code{Theta_1} and \code{Theta_2}. After calculating the
+#' regrets of all plausible alternative cutoffs, we choose the safest cutoffs. For
+#' more detail, please refer to "4.1 Doubly robust estimation" and "4.2
+#' Estimating the bounds" of the referenced source.
 #'
 #' @param c.vec A vector of cutoff values for the continuous variable X.
 #' @param n The total sample size.
@@ -29,20 +41,15 @@ safelearn <- function(
     cost,
     M,
     group_name,
-    cross_fit_result,
+    dif_lip_output,
+    cross_fit_output,
     trace
 ) {
-  ################################################################################
-  # please refer to
-  # Section 4.1. Doubly robust estimation
-  # Section 4.2. Estimating the bounds
-  ################################################################################
-
-  dif_1 <- cross_fit_result$dif_1
-  dif_0 <- cross_fit_result$dif_0
-  Lip_1 <- cross_fit_result$Lip_1
-  Lip_0 <- cross_fit_result$Lip_0
-  data_all <- cross_fit_result$cross_fit_output
+  dif_1 <- dif_lip_output$dif_1
+  dif_0 <- dif_lip_output$dif_0
+  Lip_1 <- dif_lip_output$Lip_1
+  Lip_0 <- dif_lip_output$Lip_0
+  data_all <- cross_fit_output
 
   Y <- data_all['Y']
   X <- data_all['X']
@@ -82,7 +89,7 @@ safelearn <- function(
               apply(temp_df, 1, function(x) {
                 sum(unlist(
                   sapply(x[2] + (1 - d), function(g.temp) {
-                    lip_extra(
+                    extrapolation(
                       x.train = x[1],
                       treat = d,
                       g = g,
