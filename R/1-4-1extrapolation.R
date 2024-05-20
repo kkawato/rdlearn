@@ -12,21 +12,22 @@
 #' @param dif_0 The cross-group differences among control group.
 #' @param G Cutoff group indicator for each individual.
 #' @param C Cutoff value for each individual.
-#'
+#' @importFrom purrr map
 #' @return A list containing the empirical upper bound and lower bound of
-#'   cross-group difference \code{dif}.
+#' cross-group difference \code{dif}.
 #' @keywords internal
 #' @noRd
 extrapolation <- function(x.train,
-                      treat,
-                      g,
-                      g.pr,
-                      Lip_1,
-                      Lip_0,
-                      dif_1,
-                      dif_0,
-                      G,
-                      C) {
+                          treat,
+                          g,
+                          g.pr,
+                          Lip_1,
+                          Lip_0,
+                          dif_1,
+                          dif_0,
+                          G,
+                          C) {
+
   if (treat == 1) {
     Lip <- Lip_1[g, g.pr]
     dif <- dif_1[g, g.pr]
@@ -41,5 +42,6 @@ extrapolation <- function(x.train,
 
   upper <- map(x.train, function(x) min(1, min(dif + Lip * abs(x - eval.main))))
   lower <- map(x.train, function(x) max(-1, max(dif - Lip * abs(x - eval.main))))
+
   return(list(upper = upper, lower = lower))
 }

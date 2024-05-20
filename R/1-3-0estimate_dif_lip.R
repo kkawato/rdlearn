@@ -29,6 +29,7 @@
 #'   \item{Lip_0}{A matrix of estimated Lipschitz constants for the control
 #'   group (D = 0).}
 #' @importFrom nprobust lprobust
+#' @importFrom dplyr %>% filter
 #' @keywords internal
 #' @noRd
 estimate_dif_lip <- function(
