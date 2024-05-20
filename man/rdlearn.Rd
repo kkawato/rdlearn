@@ -68,6 +68,10 @@ treatment assignment rules (cutoffs) are guaranteed to yield no worse overall
 outcomes than the existing cutoffs.
 }
 \examples{
+\dontrun{
+# Load example data
+data(acces)
+library(rdlearn)
 library(nprobust)
 library(nnet)
 library(ggplot2)
@@ -80,5 +84,6 @@ result <- rdlearn(y = "elig", x = "saber11", c = "cutoff",
                   group_name = "department", data = acces,
                   fold = 20, M = c(0, 1), cost = 0)
 plot(result)
+}
 
 }

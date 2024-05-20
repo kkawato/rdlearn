@@ -40,6 +40,10 @@
 #'   }
 #'
 #' @examples
+#' \dontrun{
+#' # Load example data
+#' data(acces)
+#' library(rdlearn)
 #' library(nprobust)
 #' library(nnet)
 #' library(ggplot2)
@@ -52,6 +56,7 @@
 #'                   group_name = "department", data = acces,
 #'                   fold = 20, M = c(0, 1), cost = 0)
 #' plot(result)
+#' }
 #'
 #' @export
 rdlearn <- function(

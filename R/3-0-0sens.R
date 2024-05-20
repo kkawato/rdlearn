@@ -15,6 +15,10 @@
 #' @return An updated \code{rdlearn} object with the new cutoffs based on the
 #'   provided values of M and cost.
 #' @examples
+#' \dontrun{
+#' # Load example data
+#' data(acces)
+#' library(rdlearn)
 #' library(nprobust)
 #' library(nnet)
 #' library(ggplot2)
@@ -27,7 +31,7 @@
 #'                   fold = 20, M = c(0, 1), cost = 0)
 #' sens_result <- sens(result, M = 1, cost = c(0, 0.2, 0.4, 0.6, 0.8, 1))
 #' plot(sens_result)
-#'
+#' }
 #' @export
 sens <- function (
     object,

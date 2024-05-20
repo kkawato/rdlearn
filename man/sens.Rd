@@ -29,6 +29,10 @@ This function performs sensitivity analysis for the \code{rdlearn} object
 under different smoothness multiplier (M) and the cost of treatment (cost).
 }
 \examples{
+\dontrun{
+# Load example data
+data(acces)
+library(rdlearn)
 library(nprobust)
 library(nnet)
 library(ggplot2)
@@ -41,5 +45,5 @@ result <- rdlearn(y = "elig", x = "saber11", c = "cutoff",
                   fold = 20, M = c(0, 1), cost = 0)
 sens_result <- sens(result, M = 1, cost = c(0, 0.2, 0.4, 0.6, 0.8, 1))
 plot(sens_result)
-
+}
 }

@@ -17,7 +17,7 @@
 #' heterogeneous cross-group differences Step 2. Pseudo-outcome regression:" and
 #' "4.3 Choosing the smoothness parameter".
 #'
-#' @param cross_fit_output The output of the function \code{estimate_mu}.
+#' @param cross_fit_output The output of the function \code{estimate_mu}.de
 #' @param q The total number of groups.
 #' @param c.vec A vector of cutoff values for the continuous variable X.
 #' @param trace A logical value that controls whether to display the progress of
@@ -45,7 +45,7 @@ estimate_dif_lip <- function(
 
   for (d in c(1, 0)) {
     if (trace == TRUE){
-      print(paste0("Estimatin dif and Lip for d = ", d))
+      print(paste0("Estimating dif and Lip for d = ", d))
     }
     dif <- matrix(0, nrow = q, ncol = q)
     Lip <- matrix(0, q, q)

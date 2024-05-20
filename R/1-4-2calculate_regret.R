@@ -39,16 +39,29 @@ calculate_regret <- function(data_mid,
   Theta_2 <- sum(data_temp1[, paste0("d", d)])
 
   data_temp2 <- data_mid[range2, ]
-  DR_2 <- 0
-  if (nrow(data_temp2) > 0 && ncol(data_temp2) > 0) {
-    DR_2 <- sum(with(data_temp2,
-                     eval(parse(text = paste0("pseudo.ps", g))) /
-                       eval(parse(text = paste0("pseudo.ps", G))) *
-                       (Y - eval(parse(text = "mu.aug"))))) / n
-  }
 
+  DR_2 <- tryCatch(sum(with(data_temp2,
+                            eval(parse(text = paste0("pseudo.ps", g))) /
+                              eval(parse(text = paste0("pseudo.ps", G))) *
+                              (Y - eval(parse(text = "mu.aug"))))),
+                   error = function(e) return(0))
+  # ------------------------------------------------------------------ #
+  # trycatch to avoid the following error
+  # Error in eval(parse(text = paste0("pseudo.ps", G))) :  object 'pseudo.ps' not found
+  # This occurs in case nrow(data_temp2) == 0, and maybe other cases...?
+  #
+  # The following code does not produce exactly the same result
+  #
+  # if (nrow(data_temp2) != 0) {
+  #   DR_2 <- sum(with(data_temp2,
+  #                    eval(parse(text = paste0("pseudo.ps", g))) /
+  #                      eval(parse(text = paste0("pseudo.ps", G))) *
+  #                      (Y - eval(parse(text = "mu.aug"))))) / n
+  # }
+  # ------------------------------------------------------------------ #
+  Theta_1 <- DR_1 + DR_2
   cost <- temp_cost * dim(data_mid[range1, ])[1]
-  temp_reg <- ((Iden_alt + DR_1 + DR_2 + Theta_2 + cost * (c.alt >= c.vec[g]) - cost * (c.alt < c.vec[g])) / n) - (base_regret / n)
 
+  temp_reg <- ((Iden_alt + Theta_1 + Theta_2 + cost * (c.alt >= c.vec[g]) - cost * (c.alt < c.vec[g])) / n) - (base_regret / n)
   return(temp_reg)
 }

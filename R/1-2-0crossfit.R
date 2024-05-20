@@ -61,28 +61,38 @@ crossfit <- function(
 
     for (g in seq(1, q, 1)){
       mu_all <- estimate_mu(data_train, data_test, c.vec, k, g, q)
-      data_test[data_test$D == 1 & data_test$X >= c.vec[g], paste0("pseudo.", g)] <- mu_all$pseudo1
-      data_test[data_test$D == 0 & data_test$X < c.vec[g], paste0("pseudo.", g)] <- mu_all$pseudo0
+
+      pseudo1 <- (data_test$D == 1) & (data_test$X >= c.vec[g])
+      pseudo0 <- (data_test$D == 0) & (data_test$X < c.vec[g])
 
       m1 <- (data_test$X >= c.vec[g]) & (data_test$X < c.vec[min(g + 1, q)]) & (data_test$D == 0)
       aug1 <- (data_test$X >= c.vec[g]) & (data_test$X < c.vec[min(g + 1, q)]) & (data_test$G == g)
+
       m0 <- (data_test$X >= c.vec[max(g - 1, 1)]) & (data_test$X < c.vec[g]) & (data_test$D == 1)
       aug0 <- (data_test$X >= c.vec[max(g - 1, 1)]) & (data_test$X < c.vec[g]) & (data_test$G == g)
 
-      if (nrow(data_test[m1, ]) > 0) {
+      if (nrow(data_test[pseudo1, ]) > 0 && !is.null(mu_all$pseudo1)){
+        data_test[pseudo1, paste0("pseudo.", g)] <- mu_all$pseudo1
+      }
+
+      if (nrow(data_test[pseudo0, ]) > 0 && !is.null(mu_all$pseudo0)){
+        data_test[pseudo0, paste0("pseudo.", g)] <- mu_all$pseudo0
+      }
+
+      if (nrow(data_test[m1, ]) > 0 && !is.null(mu_all$mu_m1)) {
         data_test[m1, paste0("mu.m")] <- mu_all$mu_m1
       }
 
-      if (nrow(data_test[aug1, ]) > 0) {
+      if (nrow(data_test[aug1, ]) > 0 && !is.null(mu_all$mu_aug1)) {
         data_test[aug1, paste0("mu.aug")] <- mu_all$mu_aug1
       }
 
-      if (nrow(data_test[m0, ]) > 0) {
+      if (nrow(data_test[m0, ]) > 0 && !is.null(mu_all$mu_m0)) {
         data_test[m0, paste0("mu.m")] <- mu_all$mu_m0
       }
 
-      if (nrow(data_test[aug0, ]) > 0) {
-      data_test[aug0, paste0("mu.aug")] <- mu_all$mu_aug0
+      if (nrow(data_test[aug0, ]) > 0 && !is.null(mu_all$mu_aug0)) {
+        data_test[aug0, paste0("mu.aug")] <- mu_all$mu_aug0
       }
     }
     cross_fit_output <- rbind(cross_fit_output, data_test)

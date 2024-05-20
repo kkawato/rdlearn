@@ -30,7 +30,7 @@
 #'   combination of M and cost. The columns represent different combinations of
 #'   M and cost, and the rows correspond to the groups.
 #'
-#' @importFrom dplyr %>% filter
+#' @importFrom dplyr %>% filter full_join
 #' @importFrom purrr map
 #' @keywords internal
 #' @noRd
