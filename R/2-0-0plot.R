@@ -1,6 +1,3 @@
-#' @export
-plot <- function(x, ...) UseMethod("plot")
-
 #' Plot Cutoff Changes for rdlearn Objects
 #'
 #' This function plots the changes in cutoff values relative to the baseline cutoffs
@@ -15,17 +12,11 @@ plot <- function(x, ...) UseMethod("plot")
 #'
 #' @import ggplot2
 #'
-#' @examples
-#' result <- rdlearn(y = "elig", x = "saber11", c = "cutoff",
-#'                   group_name = "department", data = acces,
-#'                   fold = 20, M = c(0, 1), cost = 0)
-#' plot(result)
-#'
+#' @rdname plot.rdlearn
 #' @export
-plot.rdlearn <- function(result,
+plot <- function(result,
                          xlab = "",
-                         ylab = ""
-                         )
+                         ylab = "")
 {
   var_names <- result$var_names
   y <- var_names$outcome

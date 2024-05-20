@@ -20,6 +20,7 @@
 #'
 #' @importFrom dplyr %>% filter
 #' @importFrom purrr map
+#' @keywords internal
 #' @noRd
 safelearn <- function(
     c.vec,

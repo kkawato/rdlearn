@@ -5,7 +5,7 @@ Version: 0.1.0
 Authors@R:
     c(person(given = "Kentaro",
            family = "Kawato",
-           role = c("aut", "cre"),
+           role = c("cre"),
            email = "kentaro1358nohe@gmail.com"),
     person(given = "Zhang",
            family = "Yi",
@@ -20,15 +20,17 @@ RoxygenNote: 7.3.1
 URL: https://github.com/kkawato/rdleran
 BugReports: https://github.com/kkawato/rdlearn/issues
 Imports:
-    tidyverse,
     nprobust,
     nnet,
-    ggplot2
+    ggplot2,
+    dplyr,
+    glue,
+    purrr,
+    tidyr
 Suggests: 
     knitr,
     rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
-Depends: 
-    R (>= 4.3.3)
+Depends: R (>= 2.10)
 VignetteBuilder: knitr

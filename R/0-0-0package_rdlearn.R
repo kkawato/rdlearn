@@ -14,12 +14,12 @@
 #'
 #' \bold{Visualization}
 #' \itemize{
-#'   \item \code{\link{plot.rdlearn}}: Visualize the learned cutoffs
+#'   \item \code{\link{plot}}: Visualize the learned cutoffs
 #' }
 #'
 #' \bold{Sensitivity Analysis}
 #' \itemize{
-#'   \item \code{\link{sens.rdlearn}}: Perform sensitivity analysis
+#'   \item \code{\link{sens}}: Perform sensitivity analysis
 #' }
 #'
 #' @references
@@ -31,6 +31,14 @@
 #' \dontrun{
 #' # Load example data
 #' data(acces)
+#'
+#' library(nprobust)
+#' library(nnet)
+#' library(ggplot2)
+#' library(dplyr)
+#' library(glue)
+#' library(purrr)
+#' library(tidyr)
 #'
 #' # Learn new treatment assignment cutoffs
 #' result <- rdlearn(y = "elig", x = "saber11", c = "cutoff",
