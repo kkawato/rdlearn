@@ -60,6 +60,8 @@ sens <- function (
       cost = cost,
       M = M,
       group_name = result$group_name,
+      dif_lip_output = result$dif_lip_output,
+      cross_fit_output = result$cross_fit_output,
       trace = trace
     )
   result
