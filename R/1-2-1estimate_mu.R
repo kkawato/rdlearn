@@ -75,47 +75,16 @@ estimate_mu <- function (data_train,
     name <- data$name
 
     if (length(eval_dat) > 0) {
-      tryCatch({
-        mu_all[[name]] <- lprobust(y, x, eval = eval_dat, bwselect = "imse-dpi")$Estimate[, 5]
-      }, error = function(e) mu_all[[name]] <- 0)
+      tryCatch({ # For avoiding errors caused by "lprobust"
+        estimate <- nprobust::lprobust(y, x, eval = eval_dat, bwselect = "imse-dpi")$Estimate[, 5]
+        estimate[is.na(estimate)] <- 0
+        mu_all[[name]] <- estimate
+      }, error = function(e) {
+        mu_all[[name]] <- 0
+      })
     }
   }
-
   return(mu_all)
 }
 
-#-------------------------------------#
-# trycatch for avoiding this error
-# this error frequently occurs in case the number of folds is small
-#-------------------------------------#
-# Error in matrix(NA, n.B, o.B + 1) :
-#   invalid 'nrow' value (too large or NA)
-# 9.
-# matrix(NA, n.B, o.B + 1)
-# 8.
-# lprobust.bw(y, x, cluster, c = eval, o = p, nu = deriv, o.B = q,
-#             h.V = c.bw, h.B1 = bw.mp1, h.B2 = bw.mp2, bwregul, vce, nnmatch,
-#             kernel, dups, dupsid)
-# 7.
-# lpbwselect.mse.dpi(y = y, x = x, cluster = cluster, eval = eval[i],
-#                    p = p, q = q, deriv = deriv, kernel = kernel, bwcheck = bwcheck,
-#                    bwregul = bwregul, vce = vce, nnmatch = nnmatch, interior = interior)
-# 6.
-# lpbwselect.imse.dpi(y = y, x = x, cluster = cluster, p = p, q = q,
-#                     deriv = deriv, kernel = kernel, bwcheck = bwcheck, bwregul = bwregul,
-#                     imsegrid = imsegrid, vce = vce, nnmatch = nnmatch, interior = interior)
-# 5.
-# lpbwselect(y = y, x = x, eval = eval, deriv = deriv, p = p, vce = vce,
-#            cluster = cluster, bwselect = bwselect, interior = interior,
-#            kernel = kernel, bwcheck = bwcheck, bwregul = bwregul, imsegrid = imsegrid,
-#            subset = subset)
-# 4.
-# lprobust(Y1g, X1g, eval = eval.dat1.pseudo, bwselect = "imse-dpi") at 1_2estimate_mu.R#39
-# 3.
-# estimate_mu(data_train, data_test, c.vec, k, g, q) at 1_1crossfit.R#35
-# 2.
-# crossfit(c.vec = c.vec, q = q, fold = fold, data_split = data_split,
-#          data_all = data_all) at 1_0rdlearn.R#135
-# 1.
-# rdlearn(y = "elig", x = "saber11", c = "cutoff", groupname = "department",
-#         data = acces, fold = 20, M = c(0, 1), cost = 0)
+

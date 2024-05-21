@@ -70,14 +70,14 @@ estimate_dif_lip <- function(
 
         eval_point <- c.vec[g.pr] * (d == 1) + c.vec[g] * (d == 0)
 
-        dif[g, g.pr] <- lprobust(temp.vc[, "psout"],
+        dif[g, g.pr] <- nprobust::lprobust(temp.vc[, "psout"],
                                  temp.vc[, "X"],
                                  eval = eval_point,
                                  deriv = 0,
                                  p = 1,
                                  bwselect = "mse-dpi")$Estimate[, 5]
 
-        Lip[g, g.pr] <- abs(lprobust(temp.vc[, "psout"],
+        Lip[g, g.pr] <- abs(nprobust::lprobust(temp.vc[, "psout"],
                                      temp.vc[, "X"],
                                      eval = eval_point,
                                      deriv = 1,

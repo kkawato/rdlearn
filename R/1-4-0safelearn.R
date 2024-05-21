@@ -123,7 +123,7 @@ safelearn <- function(
                                        temp_cost = temp_cost)
           regret <- c(regret, temp_reg)
         }
-        if (max(regret) == 0) { # if baseline policy is the best policy
+        if (max(regret) == 0) {
           c.all[g] <- c.vec[g]
         } else {
           c.all[g] <- unique(X[X >= c.vec[1] & X < c.vec[q]])[which(regret == max(regret))[1]]

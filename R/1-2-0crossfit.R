@@ -33,6 +33,7 @@
 #'
 #' @return A dataframe containing the cross-fitted outcomes and other intermediate calculations.
 #'
+#' @importFrom stats predict
 #' @importFrom dplyr %>% filter ungroup select arrange
 #' @importFrom tidyr unnest
 #' @importFrom nnet multinom
@@ -55,7 +56,7 @@ crossfit <- function(
     data_test <- data_all %>% filter(fold_id  == k)
 
     # conditional prob of group
-    gamfit <- multinom(formula = G ~ X, data = data_train, trace = "FALSE")
+    gamfit <- nnet::multinom(formula = G ~ X, data = data_train, trace = "FALSE")
     ps <- predict(gamfit, newdata = data_test, "probs")
     data_test[, paste0("pseudo.ps", seq(1, q, 1))] <- predict(gamfit, newdata = data_test, "probs")
 
@@ -64,10 +65,8 @@ crossfit <- function(
 
       pseudo1 <- (data_test$D == 1) & (data_test$X >= c.vec[g])
       pseudo0 <- (data_test$D == 0) & (data_test$X < c.vec[g])
-
       m1 <- (data_test$X >= c.vec[g]) & (data_test$X < c.vec[min(g + 1, q)]) & (data_test$D == 0)
       aug1 <- (data_test$X >= c.vec[g]) & (data_test$X < c.vec[min(g + 1, q)]) & (data_test$G == g)
-
       m0 <- (data_test$X >= c.vec[max(g - 1, 1)]) & (data_test$X < c.vec[g]) & (data_test$D == 1)
       aug0 <- (data_test$X >= c.vec[max(g - 1, 1)]) & (data_test$X < c.vec[g]) & (data_test$G == g)
 

@@ -36,7 +36,7 @@
 #'     \item{num_group}{The number of groups.}
 #'     \item{group_name}{A vector of group names.}
 #'     \item{cross_fit_output}{The intermediate output of the cross-fitting procedure.}
-#'     \item{dif_lip_output}{The intermediate output of the cross-group differences and the smootheness parameters}
+#'     \item{dif_lip_output}{The intermediate output of the cross-group differences and the smoothness parameters}
 #'   }
 #'
 #' @examples
@@ -58,6 +58,9 @@
 #' plot(result)
 #' }
 #'
+#' @importFrom stats setNames
+#' @importFrom dplyr mutate arrange
+#' @importFrom utils globalVariables
 #' @export
 rdlearn <- function(
     y,
@@ -115,7 +118,7 @@ rdlearn <- function(
 
   # Add fold_id to data used for cross-fitting
   data_all <- data.frame(Y = Y, X = X, C = C, D = D, G = G) %>%
-    mutate(fold_id = sample(1:fold, size = n, replace = TRUE)) %>%
+    dplyr::mutate(fold_id = sample(1:fold, size = n, replace = TRUE)) %>%
     arrange(fold_id)
 
   # ------------------------- Apply Algorithms ------------------------------- #
@@ -128,7 +131,7 @@ rdlearn <- function(
     trace = trace
   )
 
-  #Apply
+  # Apply differences and Lipschitz estimation
   dif_lip_output <- estimate_dif_lip(
     cross_fit_output = cross_fit_output,
     q = q,
@@ -165,3 +168,6 @@ rdlearn <- function(
   class(out) <- "rdlearn"
   return(out)
 }
+
+# Register global variables to avoid R CMD check notes
+utils::globalVariables(c('fold_id', 'D', 'X', 'G', 'Y', 'group', 'type', 'y_axis'))

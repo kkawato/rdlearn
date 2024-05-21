@@ -40,8 +40,8 @@ extrapolation <- function(x.train,
     eval.main <- unique(C[G == min(g, g.pr)])
   }
 
-  upper <- map(x.train, function(x) min(1, min(dif + Lip * abs(x - eval.main))))
-  lower <- map(x.train, function(x) max(-1, max(dif - Lip * abs(x - eval.main))))
+  upper <- purrr::map(x.train, function(x) min(1, min(dif + Lip * abs(x - eval.main))))
+  lower <- purrr::map(x.train, function(x) max(-1, max(dif - Lip * abs(x - eval.main))))
 
   return(list(upper = upper, lower = lower))
 }

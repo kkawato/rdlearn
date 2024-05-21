@@ -1,4 +1,4 @@
-Package: rdleran
+Package: RDDPackage
 Type: Package
 Title: Safe policy learning under RD design with multiple cutoffs
 Version: 0.1.0
