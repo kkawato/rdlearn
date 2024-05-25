@@ -5,13 +5,13 @@
 #' optimal cutoffs. There are the following two steps.
 #'
 #' First, we estimate the upper and lower bounds of \code{dif} by leveraging the
-#' smoothness parameter \code{Lip} for constructing \code{Theta_2.} For more
+#' smoothness parameter \code{Lip} for constructing \code{Xi_2}. For more
 #' detail, please refer to " 4.2 Estimating the bounds" of the referenced
 #' source.
 #'
 #' Next, we calculate the regrets under baseline cutoffs and alternative
 #' cutoffs. For alternative cutoffs, we estimate three components
-#' \code{Iden_alt}, \code{Theta_1} and \code{Theta_2}. After calculating the
+#' \code{Iden_alt}, \code{Xi_1} and \code{Xi_2}. After calculating the
 #' regrets of all plausible alternative cutoffs, we choose the safest cutoffs. For
 #' more detail, please refer to "4.1 Doubly robust estimation" and "4.2
 #' Estimating the bounds" of the referenced source.

@@ -36,7 +36,7 @@ calculate_regret <- function(data_mid,
 
   data_temp1 <- data_mid[range1,]
   DR_1 <- sum(ifelse(is.na(data_temp1[, "mu.m"]), 0, data_temp1[, "mu.m"]))
-  Theta_2 <- sum(data_temp1[, paste0("d", d)])
+  Xi_2 <- sum(data_temp1[, paste0("d", d)])
 
   data_temp2 <- data_mid[range2, ]
   DR_2 <- tryCatch(sum(with(data_temp2,
@@ -59,9 +59,9 @@ calculate_regret <- function(data_mid,
   # }
   # ------------------------------------------------------------------ #
 
-  Theta_1 <- DR_1 + DR_2
+  Xi_1 <- DR_1 + DR_2
   cost <- temp_cost * dim(data_mid[range1, ])[1]
 
-  temp_reg <- ((Iden_alt + Theta_1 + Theta_2 + cost * (c.alt >= c.vec[g]) - cost * (c.alt < c.vec[g])) / n) - (base_regret / n)
+  temp_reg <- ((Iden_alt + Xi_1 + Xi_2 + cost * (c.alt >= c.vec[g]) - cost * (c.alt < c.vec[g])) / n) - (base_regret / n)
   return(temp_reg)
 }

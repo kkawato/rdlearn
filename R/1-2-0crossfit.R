@@ -4,7 +4,7 @@
 #' This function performs two calculations simultaneously.
 #'
 #' First, to construct a doubly robust estimator of the point identifiable component
-#' \code{\Theta_1}, we adopt a fully nonparametric approach to estimating the following
+#' \code{Xi_1}, we adopt a fully nonparametric approach to estimating the following
 #' nuisance components: the conditional outcome regression for each group g
 #' \tilde{m(X,g)} and the conditional probability of group membership g given
 #' \tilde{e_g(X)}. Specifically, we fit a local linear regression for
@@ -13,7 +13,7 @@
 #' of the \code{nnet}. For more detail, Please refer to the "4.1 Doubly robust
 #' estimation"
 #'
-#' Second, to calculate the worst-case value of \code{\Theta_2}, which is partially
+#' Second, to calculate the worst-case value of \code{Xi_2}, which is partially
 #' identifiable, we need to estimate the conditional differences \code{dif}
 #' between observed treatment groups or between observed control groups using
 #' data above or below the threshold, respectively. We propose an efficient

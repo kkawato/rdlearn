@@ -6,6 +6,10 @@
 #' treatment assignment rules (cutoffs) are guaranteed to yield no worse overall
 #' outcomes than the existing cutoffs.
 #'
+#' Regarding the detail of the algorithm, please refer to "4 Empirical policy
+#' learning" and "A.2 A double robust estimator for heterogeneous cross-group
+#' differences".
+#'
 #' @param data A data frame containing all required variables.
 #' @param y A character string specifying the name of the outcome variable
 #'   column.
