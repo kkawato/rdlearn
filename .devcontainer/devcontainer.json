@@ -1,9 +1,9 @@
 {
 	"image": "ghcr.io/rocker-org/devcontainer/r-ver:4.3",
 	"features": {
-		"ghcr.io/devcontainers/features/docker-outside-of-docker:2": {
-            "version": "latest"
-        },
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {
+			"version": "latest"
+		},
 		"ghcr.io/devcontainers/features/node:1": {},
 		"ghcr.io/rocker-org/devcontainer-features/r-packages:1": {
 			"packages": "tidyverse, devtools"
@@ -23,11 +23,6 @@
 			"settings": {
 				"terminal.integrated.defaultProfile.linux": "zsh"
 			}
-		}
-	},
-	"features": {
-		"ghcr.io/devcontainers/features/docker-in-docker:2": {
-			"version": "latest"
 		}
 	},
 	"postCreateCommand": "npm install -g @devcontainers/cli"
