@@ -31,7 +31,7 @@
 #' @param trace A logical value that controls whether to display the progress.
 #'   If set to TRUE, the progress will be printed. The default value is TRUE.
 #'
-#' @return A dataframe containing the cross-fitted outcomes and other intermediate calculations.
+#' @return A data frame containing the cross-fitted outcomes and other intermediate calculations.
 #'
 #' @importFrom stats predict
 #' @importFrom dplyr %>% filter ungroup select arrange

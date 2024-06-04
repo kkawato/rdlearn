@@ -17,7 +17,7 @@
 #' heterogeneous cross-group differences Step 2. Pseudo-outcome regression:" and
 #' "4.3 Choosing the smoothness parameter".
 #'
-#' @param cross_fit_output The output of the function \code{estimate_mu}.de
+#' @param cross_fit_output The output of the function \code{estimate_mu}.
 #' @param q The total number of groups.
 #' @param c.vec A vector of cutoff values for the continuous variable X.
 #' @param trace A logical value that controls whether to display the progress of
