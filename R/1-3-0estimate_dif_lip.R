@@ -44,8 +44,8 @@ estimate_dif_lip <- function(
   Lip1 <- matrix(0, nrow = q, ncol = q)
 
   for (d in c(1, 0)) {
-    if (trace == TRUE){
-      print(paste0("Estimating dif and Lip for d = ", d))
+    if (isTRUE(trace)){
+      cat(paste0("Estimating dif and Lip for d = ", d), "\n")
     }
     dif <- matrix(0, nrow = q, ncol = q)
     Lip <- matrix(0, q, q)

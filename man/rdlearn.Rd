@@ -67,6 +67,11 @@ regression discontinuity design with multiple cutoffs. The resulting new
 treatment assignment rules (cutoffs) are guaranteed to yield no worse overall
 outcomes than the existing cutoffs.
 }
+\details{
+Regarding the detail of the algorithm, please refer to "4 Empirical policy
+learning" and "A.2 A double robust estimator for heterogeneous cross-group
+differences".
+}
 \examples{
 \dontrun{
 # Load example data

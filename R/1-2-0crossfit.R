@@ -49,8 +49,8 @@ crossfit <- function(
   cross_fit_output <- data.frame()
 
   for (k in 1:fold) {
-    if (trace == TRUE){
-      print(paste0("Cross fitting for fold ",k))
+    if (isTRUE(trace)){
+      cat(paste0("Cross fitting for fold ", k, "\n"))
     }
     data_train <- data_all %>% filter(fold_id != k)
     data_test <- data_all %>% filter(fold_id  == k)

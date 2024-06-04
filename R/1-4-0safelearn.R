@@ -43,18 +43,17 @@ safelearn <- function(
     group_name,
     dif_lip_output,
     cross_fit_output,
-    trace
-) {
+    trace) {
   dif_1 <- dif_lip_output$dif_1
   dif_0 <- dif_lip_output$dif_0
   Lip_1 <- dif_lip_output$Lip_1
   Lip_0 <- dif_lip_output$Lip_0
   data_all <- cross_fit_output
 
-  Y <- data_all['Y']
-  X <- data_all['X']
-  C <- data_all['C']
-  G <- data_all['G']
+  Y <- data_all["Y"]
+  X <- data_all["X"]
+  C <- data_all["C"]
+  G <- data_all["G"]
 
   safecut_all <- data.frame(group = group_name)
   Lip_1temp <- Lip_1
@@ -62,15 +61,15 @@ safelearn <- function(
 
   for (temp_cost in cost) {
     for (temp_M in M) {
-      if (trace == TRUE){
-        print(paste("Calculation in progress for M =", temp_M, "and C =", temp_cost))
+      if (isTRUE(trace)) {
+        cat(paste("Calculation in progress for M =", temp_M, "and C =", temp_cost), "\n")
       }
       Lip_1 <- temp_M * Lip_1temp
       Lip_0 <- temp_M * Lip_0temp
       Lip_list <- list(Lip_1, Lip_0)
       c.all <- rep(0, length(c.vec))
 
-      for(g in seq(1, q, 1)) {
+      for (g in seq(1, q, 1)) {
         for (d in c(1, 0)) {
           eval_cond <- (data_all$G == g) & (data_all$X >= c.vec[1]) & (data_all$X < c.vec[q])
 
@@ -87,22 +86,18 @@ safelearn <- function(
           if (nrow(temp_df) > 0 && ncol(temp_df) > 0) {
             data_all[eval_cond, paste0("d", d)] <-
               apply(temp_df, 1, function(x) {
-                sum(unlist(
-                  sapply(x[2] + (1 - d), function(g.temp) {
-                    extrapolation(
-                      x.train = x[1],
-                      treat = d,
-                      g = g,
-                      g.pr = g.temp,
-                      Lip_1 = Lip_1,
-                      Lip_0 = Lip_0,
-                      dif_1 = dif_1,
-                      dif_0 = dif_0,
-                      G = G,
-                      C = C
-                    )
-                  })[2, ]
-                ))
+                extrapolation(
+                  x.train = x[1],
+                  treat = d,
+                  g = g,
+                  g.pr = x[2] + (1 - d),
+                  Lip_1 = Lip_1,
+                  Lip_0 = Lip_0,
+                  dif_1 = dif_1,
+                  dif_0 = dif_0,
+                  G = G,
+                  C = C
+                )$lower[[1]]
               })
           }
         }
@@ -114,13 +109,15 @@ safelearn <- function(
       for (g in seq(1, q, 1)) {
         regret <- NULL
         for (c.alt in unique(X[X >= c.vec[1] & X < c.vec[q]])) {
-          temp_reg <- calculate_regret(data_mid = data_mid,
-                                       c.vec = c.vec,
-                                       g = g,
-                                       q = q,
-                                       c.alt = c.alt,
-                                       n = n,
-                                       temp_cost = temp_cost)
+          temp_reg <- calculate_regret(
+            data_mid = data_mid,
+            c.vec = c.vec,
+            g = g,
+            q = q,
+            c.alt = c.alt,
+            n = n,
+            temp_cost = temp_cost
+          )
           regret <- c(regret, temp_reg)
         }
         if (max(regret) == 0) {
@@ -132,9 +129,8 @@ safelearn <- function(
       }
       c.all_df <- data.frame(c.all, group = group_name)
       names(c.all_df)[1] <- paste0("M=", temp_M, ",", "C=", temp_cost)
-      safecut_all <- full_join(safecut_all, c.all_df, by = ("group" = "group"))
+      safecut_all <- full_join(safecut_all, c.all_df, by = ("group" <- "group"))
     }
   }
-  safecut_all
+  return(safecut_all)
 }
-
