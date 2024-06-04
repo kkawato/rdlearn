@@ -129,7 +129,7 @@ safelearn <- function(
       }
       c.all_df <- data.frame(c.all, group = group_name)
       names(c.all_df)[1] <- paste0("M=", temp_M, ",", "C=", temp_cost)
-      safecut_all <- full_join(safecut_all, c.all_df, by = ("group" <- "group"))
+      safecut_all <- full_join(safecut_all, c.all_df, by = ("group" = "group"))
     }
   }
   return(safecut_all)
