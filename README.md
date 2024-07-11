@@ -1,21 +1,18 @@
-
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 # rdlearn
 
 <!-- badges: start -->
+
 <!-- badges: end -->
 
-- Author: Kentaro Kawato, Zhang Yi
-- Reference: Zhang Yi, Eli Ben-Michael, and Kosuke Imai. 2023. “Safe
-  Policy Learning under Regression Discontinuity Designs with Multiple
-  Cutoffs.” arXiv \[stat.ME\].<http://arxiv.org/abs/2208.13323>.
-- Package manual: pdf file
+-   Author: Kentaro Kawato, Zhang Yi
+-   Reference: Zhang Yi, Eli Ben-Michael, and Kosuke Imai. 2023. “Safe Policy Learning under Regression Discontinuity Designs with Multiple Cutoffs.” arXiv $$stat.ME$$.<http://arxiv.org/abs/2208.13323>.
+-   Package manual: pdf file
 
 ## Installation Instructions
 
-You can install the development version of rdleran from
-[GitHub](https://github.com/kkawato/rdlearn) with:
+You can install the development version of rdleran from [GitHub](https://github.com/kkawato/rdlearn) with:
 
 ``` r
 # install.packages("devtools")
@@ -45,7 +42,7 @@ result <- rdlearn(y = "elig", x = "saber11", c = "cutoff", group_name = "departm
 plot(result)
 ```
 
-<img src="man/figures/README-example-1.png" width="100%" />
+<img src="man/figures/README-example-1.png" width="100%"/>
 
 ## Example: Cutoff change relative to the baseline for each department (y-axis) with varying cost of treatment (x-axis)
 
@@ -57,4 +54,4 @@ sens_result <- sens(result, M = 1, cost=c(0, 0.2, 0.4, 0.6, 0.8, 1), trace = FAL
 plot(sens_result)
 ```
 
-<img src="man/figures/README-example2-1.png" width="100%" />
+<img src="man/figures/README-example2-1.png" width="100%"/>

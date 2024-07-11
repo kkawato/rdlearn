@@ -33,10 +33,13 @@
 #' }
 #'
 #' @export
-plot <- function(result,
-                         xlab = "",
-                         ylab = "")
-{
+plot <- function(result, opt){
+  if (!inherits(result, "rdlearn")) {
+    stop("The 'result' argument must be an object of class 'rdlearn'.")
+  }
+  if (missing(opt) || !opt %in% c('safe', 'dif')) {
+    stop("Please specify 'opt' as 'org', 'safe' or 'dif'.")
+  }
   var_names <- result$var_names
   y <- var_names$outcome
   x <- var_names$run_var
@@ -53,8 +56,18 @@ plot <- function(result,
     type = rep(names(safe_cut), each = q)
   )
 
+  if (opt == "org"){
+    fill <- org_cut
+  }
+  if (opt == "safe"){
+    fill <- safe_cut
+  }
+  if (opt == "dif"){
+    fill <- safe_cut - org_cut
+  }
+
   plot <- ggplot(data = plotdata, aes(type, y_axis)) +
-    geom_tile(aes(fill = safe_cut - org_cut), color = "white") +
+    geom_tile(aes(fill = fill), color = "white") +
     scale_fill_gradient2(
       low = "purple",
       mid = "white",
@@ -71,8 +84,8 @@ plot <- function(result,
       breaks = seq(1, q, 1),
       labels = rev(result$safe_cut$group)
     ) +
-    xlab(xlab) +
-    ylab(ylab) +
+    xlab("") +
+    ylab("") +
     theme(
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
@@ -86,4 +99,6 @@ plot <- function(result,
     )
   plot + labs(caption = paste0("Outcome: ", y, "; Running Variable: ", x, "; Cutoff: ", c, "   ",
                                "Sample Size: ", n, "; Number of Groups: ", q))
+
 }
+

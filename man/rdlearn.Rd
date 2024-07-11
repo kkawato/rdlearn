@@ -18,14 +18,11 @@ rdlearn(
 )
 }
 \arguments{
-\item{y}{A character string specifying the name of the outcome variable
-column.}
+\item{y}{A character string specifying the name of column containing the outcome variable.}
 
-\item{x}{A character string specifying the name of the running variable
-column.}
+\item{x}{A character string specifying the name of column containing the running variable.}
 
-\item{c}{A character string specifying the name of the cutoff variable
-column.}
+\item{c}{A character string specifying the name of column containing the cutoff variable.}
 
 \item{group_name}{A character string specifying the name of the column
 containing group names (e.g., department names) for each cutoff. If not
@@ -66,6 +63,11 @@ The \code{rdlearn} function implements safe policy learning under a
 regression discontinuity design with multiple cutoffs. The resulting new
 treatment assignment rules (cutoffs) are guaranteed to yield no worse overall
 outcomes than the existing cutoffs.
+}
+\details{
+Regarding the detail of the algorithm, please refer to "4 Empirical policy
+learning" and "A.2 A double robust estimator for heterogeneous cross-group
+differences".
 }
 \examples{
 \dontrun{

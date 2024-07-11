@@ -4,7 +4,7 @@
 \alias{plot}
 \title{Plot Cutoff Changes for rdlearn Objects}
 \usage{
-plot(result, xlab = "", ylab = "")
+plot(result, opt)
 }
 \arguments{
 \item{result}{An object of class \code{rdlearn} returned by the \code{\link{rdlearn}} function.}

@@ -11,12 +11,9 @@
 #' differences".
 #'
 #' @param data A data frame containing all required variables.
-#' @param y A character string specifying the name of the outcome variable
-#'   column.
-#' @param x A character string specifying the name of the running variable
-#'   column.
-#' @param c A character string specifying the name of the cutoff variable
-#'   column.
+#' @param y A character string specifying the name of column containing the outcome variable.
+#' @param x A character string specifying the name of column containing the running variable.
+#' @param c A character string specifying the name of column containing the cutoff variable.
 #' @param group_name A character string specifying the name of the column
 #'   containing group names (e.g., department names) for each cutoff. If not
 #'   provided, the groups are assigned names "Group 1", "Group 2", ... in
