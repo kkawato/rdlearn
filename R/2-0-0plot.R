@@ -37,8 +37,8 @@ plot <- function(result, opt){
   if (!inherits(result, "rdlearn")) {
     stop("The 'result' argument must be an object of class 'rdlearn'.")
   }
-  if (missing(opt) || !opt %in% c('safe', 'dif')) {
-    stop("Please specify 'opt' as 'org', 'safe' or 'dif'.")
+  if (missing(opt) || !opt %in% c("safe", "dif")) {
+    stop("Please specify 'opt' as 'safe' or 'dif'.")
   }
   var_names <- result$var_names
   y <- var_names$outcome
@@ -49,56 +49,114 @@ plot <- function(result, opt){
   org_cut <- result$org_cut
   safe_cut <- select(result$safe_cut, -group)
 
-  plotdata <- data.frame(
-    y_axis = rep(rev(1:q), ncol(safe_cut)),
-    org_cut = rep(org_cut, ncol(safe_cut)),
-    safe_cut = unlist(safe_cut),
-    type = rep(names(safe_cut), each = q)
-  )
+ if (opt == "safe") {
+   extended_safe_cut <- cbind(org_cut, safe_cut)
+   colnames(extended_safe_cut)[1] <- "original"
 
-  if (opt == "org"){
-    fill <- org_cut
-  }
-  if (opt == "safe"){
-    fill <- safe_cut
-  }
-  if (opt == "dif"){
-    fill <- safe_cut - org_cut
-  }
+   plotdata <- data.frame(
+     y_axis = rep(rev(1:q), ncol(extended_safe_cut)),
+     org_cut = rep(org_cut, ncol(extended_safe_cut)),
+     safe_cut = unlist(extended_safe_cut),
+     type = rep(names(extended_safe_cut), each = q)
+   )
 
-  plot <- ggplot(data = plotdata, aes(type, y_axis)) +
-    geom_tile(aes(fill = fill), color = "white") +
-    scale_fill_gradient2(
-      low = "purple",
-      mid = "white",
-      high = "orange",
-      name = "Change in cutoff"
-    ) +
-    geom_text(
-      aes(label = safe_cut - org_cut),
-      color = "black",
-      size = 3,
-      position = position_dodge(width = 1)
-    ) +
-    scale_y_continuous(
-      breaks = seq(1, q, 1),
-      labels = rev(result$safe_cut$group)
-    ) +
-    xlab("") +
-    ylab("") +
-    theme(
-      panel.grid.major = element_blank(),
-      panel.grid.minor = element_blank(),
-      panel.background = element_blank(),
-      axis.text = element_text(size = 10, hjust = 0.5),
-      axis.title = element_text(size = 14, face = "bold"),
-      axis.line = element_blank(),
-      axis.ticks = element_blank(),
-      axis.ticks.length = unit(0, "cm"),
-      plot.caption = element_text(hjust = 0, size = 8, face = "plain")
-    )
-  plot + labs(caption = paste0("Outcome: ", y, "; Running Variable: ", x, "; Cutoff: ", c, "   ",
+   plot <- ggplot(data = plotdata, aes(type, y_axis)) +
+     geom_tile(aes(fill = safe_cut - org_cut), color = "white") +
+     scale_fill_gradient2(
+       low = "purple",
+       mid = "white",
+       high = "orange",
+       midpoint = 0,
+       name = "Change in cutoff"
+     ) +
+     geom_text(
+       aes(label = safe_cut),
+       color = "black",
+       size = 3,
+       position = position_dodge(width = 1)
+     ) +
+     scale_y_continuous(
+       breaks = seq(1, q, 1),
+       labels = rev(result$safe_cut$group)
+     ) +
+     xlab("") +
+     ylab("") +
+     theme(
+       panel.grid.major = element_blank(),
+       panel.grid.minor = element_blank(),
+       panel.background = element_blank(),
+       axis.text = element_text(size = 10, hjust = 0.5),
+       axis.title = element_text(size = 14, face = "bold"),
+       axis.line = element_blank(),
+       axis.ticks = element_blank(),
+       axis.ticks.length = unit(0, "cm"),
+       plot.caption = element_text(hjust = 0, size = 8, face = "plain")
+     )
+ }
+
+ if (opt == "dif") {
+
+   plotdata <- data.frame(
+     y_axis = rep(rev(1:q), ncol(safe_cut)),
+     org_cut = rep(org_cut, ncol(safe_cut)),
+     safe_cut = unlist(safe_cut),
+     type = rep(names(safe_cut), each = q)
+   )
+
+    plot <- ggplot(data = plotdata, aes(type, y_axis)) +
+      geom_tile(aes(fill = safe_cut - org_cut), color = "white") +
+      scale_fill_gradient2(
+        low = "purple",
+        mid = "white",
+        high = "orange",
+        midpoint = 0,
+        name = "Change in cutoff"
+      ) +
+      geom_text(
+        aes(label = safe_cut - org_cut),
+        color = "black",
+        size = 3,
+        position = position_dodge(width = 1)
+      ) +
+      scale_y_continuous(
+        breaks = seq(1, q, 1),
+        labels = rev(result$safe_cut$group)
+      ) +
+      xlab("") +
+      ylab("") +
+      theme(
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        axis.text = element_text(size = 10, hjust = 0.5),
+        axis.title = element_text(size = 14, face = "bold"),
+        axis.line = element_blank(),
+        axis.ticks = element_blank(),
+        axis.ticks.length = unit(0, "cm"),
+        plot.caption = element_text(hjust = 0, size = 8, face = "plain")
+      )
+ }
+
+ plot + labs(caption = paste0("Outcome: ", y, "; Running Variable: ", x, "; Cutoff: ", c, "   ",
                                "Sample Size: ", n, "; Number of Groups: ", q))
-
 }
 
+
+# # create a copy of the original dataframe with an added blank column
+# df$blank_column <- NA
+#
+# # pivot the dataframe to long format if necessary
+# df_long <- pivot_longer(df, cols = -blank_column, names_to = "variable", values_to = "value")
+#
+# # create the plot
+# ggplot(df_long, aes(x = variable, y = your_y_variable)) +
+#   geom_tile(aes(fill = ifelse(variable == "blank_column", NA, safe_cut - org_cut)), color = "white") +
+#   scale_fill_gradient2(
+#     low = "purple",
+#     mid = "white",
+#     high = "orange",
+#     midpoint = 0,
+#     na.value = "transparent",  # this ensures the blank column is not colored
+#     name = "Change in cutoff"
+#   ) +
+#   theme_minimal()
