@@ -5,10 +5,10 @@
 #' multiplier (M) and the cost of treatment (C).
 #'
 #' @param result An object of class \code{rdlearn} returned by the \code{\link{rdlearn}} function.
-#' @param xlab A character string specifying the label for the x-axis.
-#' @param ylab A character string specifying the label for the y-axis.
+#' @param opt "safe"と指定することによって、derived safe cutoffsとoriginal cutoffsを表示する。
+#' "dif"と指定することによって、change in cutoffsを表示する。
 #'
-#' @return A \code{ggplot2} object representing the plot of cutoff changes.
+#' @return A \code{ggplot2} plot which also contains the distance measure between original cutoffs and safe cutoffs.
 #'
 #' @import ggplot2
 #'
@@ -40,6 +40,7 @@ plot <- function(result, opt){
   if (missing(opt) || !opt %in% c("safe", "dif")) {
     stop("Please specify 'opt' as 'safe' or 'dif'.")
   }
+
   var_names <- result$var_names
   y <- var_names$outcome
   x <- var_names$run_var
@@ -48,8 +49,9 @@ plot <- function(result, opt){
   q <- result$num_group
   org_cut <- result$org_cut
   safe_cut <- select(result$safe_cut, -group)
+  l2norm <- result$l2norm
 
- if (opt == "safe") {
+  if (opt == "safe") {
    extended_safe_cut <- cbind(org_cut, safe_cut)
    colnames(extended_safe_cut)[1] <- "original"
 
@@ -61,7 +63,7 @@ plot <- function(result, opt){
    )
 
    plot <- ggplot(data = plotdata, aes(type, y_axis)) +
-     geom_tile(aes(fill = safe_cut - org_cut), color = "white") +
+     geom_tile(aes(fill = safe_cut - org_cut), color = "black") +
      scale_fill_gradient2(
        low = "purple",
        mid = "white",
@@ -93,9 +95,7 @@ plot <- function(result, opt){
        plot.caption = element_text(hjust = 0, size = 8, face = "plain")
      )
  }
-
- if (opt == "dif") {
-
+  if (opt == "dif") {
    plotdata <- data.frame(
      y_axis = rep(rev(1:q), ncol(safe_cut)),
      org_cut = rep(org_cut, ncol(safe_cut)),
@@ -104,7 +104,7 @@ plot <- function(result, opt){
    )
 
     plot <- ggplot(data = plotdata, aes(type, y_axis)) +
-      geom_tile(aes(fill = safe_cut - org_cut), color = "white") +
+      geom_tile(aes(fill = safe_cut - org_cut), color = "black") +
       scale_fill_gradient2(
         low = "purple",
         mid = "white",
@@ -136,27 +136,9 @@ plot <- function(result, opt){
         plot.caption = element_text(hjust = 0, size = 8, face = "plain")
       )
  }
-
- plot + labs(caption = paste0("Outcome: ", y, "; Running Variable: ", x, "; Cutoff: ", c, "   ",
-                               "Sample Size: ", n, "; Number of Groups: ", q))
+  plot + labs(caption = paste0("Outcome: ", y, "; Running Variable: ", x, "; Cutoff: ", c, "   ",
+                               "Sample Size: ", n, "; Number of Groups: ", q, "\n",
+                               "L2 Norms: ", paste(names(l2norm), round(l2norm, 2), sep = "=", collapse = ", ")))
 }
 
 
-# # create a copy of the original dataframe with an added blank column
-# df$blank_column <- NA
-#
-# # pivot the dataframe to long format if necessary
-# df_long <- pivot_longer(df, cols = -blank_column, names_to = "variable", values_to = "value")
-#
-# # create the plot
-# ggplot(df_long, aes(x = variable, y = your_y_variable)) +
-#   geom_tile(aes(fill = ifelse(variable == "blank_column", NA, safe_cut - org_cut)), color = "white") +
-#   scale_fill_gradient2(
-#     low = "purple",
-#     mid = "white",
-#     high = "orange",
-#     midpoint = 0,
-#     na.value = "transparent",  # this ensures the blank column is not colored
-#     name = "Change in cutoff"
-#   ) +
-#   theme_minimal()

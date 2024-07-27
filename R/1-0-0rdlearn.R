@@ -153,6 +153,12 @@ rdlearn <- function(
     trace = trace
   )
 
+  # Calculate the distance between original cutoffs and safe cutoffs
+  l2norm <- calculate_distance(
+    org_cut = c.vec,
+    safe_cut = safecut_all
+  )
+
   # Organize output
   out <- list(
     call = cl,
@@ -163,7 +169,8 @@ rdlearn <- function(
     num_group = q,
     group_name = group_name,
     cross_fit_output = cross_fit_output,
-    dif_lip_output = dif_lip_output
+    dif_lip_output = dif_lip_output,
+    l2norm = l2norm
   )
 
   class(out) <- "rdlearn"
@@ -172,3 +179,5 @@ rdlearn <- function(
 
 # Register global variables to avoid R CMD check notes
 utils::globalVariables(c('fold_id', 'D', 'X', 'G', 'Y', 'group', 'type', 'y_axis'))
+
+# ---------------------------------------------------------------------------- #

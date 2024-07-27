@@ -85,25 +85,6 @@ safelearn <- function(
           temp_df <- cbind(eval_dat, IND)
 
           if (nrow(temp_df) > 0 && ncol(temp_df) > 0) {
-            data_all[eval_cond, paste0("d", d)] <-
-              apply(temp_df, 1, function(x) {
-                sum(unlist(
-                  sapply(x[2] + (1 - d), function(g.temp) {
-                    extrapolation(
-                      x.train = x[1],
-                      treat = d,
-                      g = g,
-                      g.pr = g.temp,
-                      Lip_1 = Lip_1,
-                      Lip_0 = Lip_0,
-                      dif_1 = dif_1,
-                      dif_0 = dif_0,
-                      G = G,
-                      C = C
-                    )
-                  })
-                ))
-              })
             # data_all[eval_cond, paste0("d", d)] <-
             #   apply(temp_df, 1, function(x) {
             #     sum(unlist(
@@ -120,9 +101,30 @@ safelearn <- function(
             #           G = G,
             #           C = C
             #         )
-            #       })[2, ]
+            #       })
             #     ))
             #   })
+
+            data_all[eval_cond, paste0("d", d)] <-
+              apply(temp_df, 1, function(x) {
+                sum(unlist(
+                  sapply(x[2] + (1 - d), function(g.temp) {
+                    extrapolation(
+                      x.train = x[1],
+                      treat = d,
+                      g = g,
+                      g.pr = g.temp,
+                      Lip_1 = Lip_1,
+                      Lip_0 = Lip_0,
+                      dif_1 = dif_1,
+                      dif_0 = dif_0,
+                      G = G,
+                      C = C
+                    )
+                  })[2, ]
+                ))
+              })
+
             # data_all[eval_cond, paste0("d", d)] <-
             #   apply(temp_df, 1, function(x) {
             #     extrapolation(

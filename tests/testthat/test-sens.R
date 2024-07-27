@@ -6,3 +6,5 @@ test_that("sens and plot", {
   sens_result <- sens(result, M = 1, cost=c(0, 0.2, 0.4, 0.6, 0.8, 1))
   plot(sens_result)
 })
+
+set.seed(12345)

@@ -66,7 +66,6 @@ rdestimate <- function(
     x_value <- subdata$X
 
     result <- rdrobust(y = y_value, x = x_value, c = cutoff_value)
-    print(result)
     coef_conventional <- round(result$coef["Conventional", "Coeff"], 2)
     se_conventional <- round(result$se["Conventional", "Std. Err."], 2)
     pv_conventional <- round(result$pv["Conventional", "P>|z|"], 3)
