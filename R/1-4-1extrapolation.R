@@ -12,7 +12,6 @@
 #' @param dif_0 The cross-group differences among control group.
 #' @param G Cutoff group indicator for each individual.
 #' @param C Cutoff value for each individual.
-#' @importFrom purrr map
 #' @return A list containing the empirical upper bound and lower bound of
 #' cross-group difference \code{dif}.
 #' @keywords internal
@@ -25,8 +24,8 @@ extrapolation <- function(x.train,
                           Lip_0,
                           dif_1,
                           dif_0,
-                          G,
-                          C) {
+                          G = G,
+                          C = C) {
 
   if (treat == 1) {
     Lip <- Lip_1[g, g.pr]
@@ -40,39 +39,6 @@ extrapolation <- function(x.train,
     eval.main <- unique(C[G == min(g, g.pr)])
   }
 
-  upper <- purrr::map(x.train, function(x) min(1, min(dif + Lip * abs(x - eval.main))))
-  lower <- purrr::map(x.train, function(x) max(-1, max(dif - Lip * abs(x - eval.main))))
-
-  return(list(upper = upper,lower = lower))
-  # return()
+  lower <- sapply(x.train, function(x) max(-1, max(dif - Lip * abs(x - eval.main))))
+  return(lower)
 }
-
-# extrapolation <- function(x.train,
-#                           treat,
-#                           g,
-#                           g.pr,
-#                           Lip_1,
-#                           Lip_0,
-#                           dif_1,
-#                           dif_0,
-#                           G,
-#                           C) {
-#
-#   if (treat == 1) {
-#     Lip <- Lip_1[g, g.pr]
-#     dif <- dif_1[g, g.pr]
-#     eval.main <- unique(C[G == max(g, g.pr)])
-#   }
-#
-#   if (treat == 0) {
-#     Lip <- Lip_0[g, g.pr]
-#     dif <- dif_0[g, g.pr]
-#     eval.main <- unique(C[G == min(g, g.pr)])
-#   }
-#
-#   # upper <- purrr::map(x.train, function(x) min(1, min(dif + Lip * abs(x - eval.main))))
-#   lower <- purrr::map(x.train, function(x) max(-1, max(dif - Lip * abs(x - eval.main))))
-#
-#   # return(list(upper = upper,lower = lower))
-#   return(lower)
-# }
