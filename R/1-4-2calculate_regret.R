@@ -39,11 +39,18 @@ calculate_regret <- function(data_mid,
   Xi_2 <- sum(data_temp1[, paste0("d", d)])
 
   data_temp2 <- data_mid[range2, ]
-  DR_2 <- tryCatch(sum(with(data_temp2,
-                            eval(parse(text = paste0("pseudo.ps", g))) /
-                              eval(parse(text = paste0("pseudo.ps", G))) *
-                              (Y - eval(parse(text = "mu.aug"))))),
-                   error = function(e) DR_2 <-0)
+
+  DR_2_temp <- tryCatch({
+    sum(with(data_temp2,
+             eval(parse(text = paste0("pseudo.ps", g))) /
+               eval(parse(text = paste0("pseudo.ps", G))) *
+               (Y - eval(parse(text = "mu.aug")))))
+  }, error = function(e) {
+    DR_2_temp <- 0
+  })
+
+  DR_2 <- if (is.na(DR_2_temp)) { 0 } else { DR_2_temp }
+
   # ------------------------------------------------------------------ #
   # trycatch to avoid the following error
   # Error in eval(parse(text = paste0("pseudo.ps", G))) :  object 'pseudo.ps' not found

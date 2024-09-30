@@ -11,12 +11,9 @@
 #' differences".
 #'
 #' @param data A data frame containing all required variables.
-#' @param y A character string specifying the name of the outcome variable
-#'   column.
-#' @param x A character string specifying the name of the running variable
-#'   column.
-#' @param c A character string specifying the name of the cutoff variable
-#'   column.
+#' @param y A character string specifying the name of column containing the outcome variable.
+#' @param x A character string specifying the name of column containing the running variable.
+#' @param c A character string specifying the name of column containing the cutoff variable.
 #' @param group_name A character string specifying the name of the column
 #'   containing group names (e.g., department names) for each cutoff. If not
 #'   provided, the groups are assigned names "Group 1", "Group 2", ... in
@@ -156,6 +153,12 @@ rdlearn <- function(
     trace = trace
   )
 
+  # Calculate the distance between original cutoffs and safe cutoffs
+  l2norm <- calculate_distance(
+    org_cut = c.vec,
+    safe_cut = safecut_all
+  )
+
   # Organize output
   out <- list(
     call = cl,
@@ -166,7 +169,8 @@ rdlearn <- function(
     num_group = q,
     group_name = group_name,
     cross_fit_output = cross_fit_output,
-    dif_lip_output = dif_lip_output
+    dif_lip_output = dif_lip_output,
+    l2norm = l2norm
   )
 
   class(out) <- "rdlearn"
@@ -175,3 +179,5 @@ rdlearn <- function(
 
 # Register global variables to avoid R CMD check notes
 utils::globalVariables(c('fold_id', 'D', 'X', 'G', 'Y', 'group', 'type', 'y_axis'))
+
+# ---------------------------------------------------------------------------- #

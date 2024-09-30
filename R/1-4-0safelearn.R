@@ -86,7 +86,7 @@ safelearn <- function(
           if (nrow(temp_df) > 0 && ncol(temp_df) > 0) {
             data_all[eval_cond, paste0("d", d)] <-
               apply(temp_df, 1, function(x) {
-                extrapolation(
+                temp_result <- extrapolation(
                   x.train = x[1],
                   treat = d,
                   g = g,
@@ -97,7 +97,8 @@ safelearn <- function(
                   dif_0 = dif_0,
                   G = G,
                   C = C
-                )$lower[[1]]
+                )
+                sum(temp_result)
               })
           }
         }

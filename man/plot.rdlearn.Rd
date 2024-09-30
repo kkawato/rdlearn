@@ -4,17 +4,16 @@
 \alias{plot}
 \title{Plot Cutoff Changes for rdlearn Objects}
 \usage{
-plot(result, xlab = "", ylab = "")
+plot(result, opt)
 }
 \arguments{
 \item{result}{An object of class \code{rdlearn} returned by the \code{\link{rdlearn}} function.}
 
-\item{xlab}{A character string specifying the label for the x-axis.}
-
-\item{ylab}{A character string specifying the label for the y-axis.}
+\item{opt}{"safe"と指定することによって、derived safe cutoffsとoriginal cutoffsを表示する。
+"dif"と指定することによって、change in cutoffsを表示する。}
 }
 \value{
-A \code{ggplot2} object representing the plot of cutoff changes.
+A \code{ggplot2} plot which also contains the.
 }
 \description{
 This function plots the changes in cutoff values relative to the baseline cutoffs
