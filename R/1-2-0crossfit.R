@@ -31,7 +31,7 @@
 #' @param trace A logical value that controls whether to display the progress.
 #'   If set to TRUE, the progress will be printed. The default value is TRUE.
 #'
-#' @return A dataframe containing the cross-fitted outcomes and other intermediate calculations.
+#' @return A data frame containing the cross-fitted outcomes and other intermediate calculations.
 #'
 #' @importFrom stats predict
 #' @importFrom dplyr %>% filter ungroup select arrange
@@ -49,8 +49,8 @@ crossfit <- function(
   cross_fit_output <- data.frame()
 
   for (k in 1:fold) {
-    if (trace == TRUE){
-      print(paste0("Cross fitting for fold ",k))
+    if (isTRUE(trace)){
+      cat(paste0("Cross fitting for fold ", k, "\n"))
     }
     data_train <- data_all %>% filter(fold_id != k)
     data_test <- data_all %>% filter(fold_id  == k)
