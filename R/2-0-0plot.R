@@ -1,14 +1,16 @@
 #' Plot Cutoff Changes for rdlearn Objects
 #'
-#' This function plots the changes in cutoff values relative to the baseline cutoffs
-#' for each group, under different combinations of the smoothness
+#' This function plots the changes in cutoff values relative to the baseline
+#' cutoffs for each group, under different combinations of the smoothness
 #' multiplier (M) and the cost of treatment (C).
 #'
-#' @param result An object of class \code{rdlearn} returned by the \code{\link{rdlearn}} function.
-#' @param opt "safe"と指定することによって、derived safe cutoffsとoriginal cutoffsを表示する。
-#' "dif"と指定することによって、change in cutoffsを表示する。
+#' @param result An object of class \code{rdlearn} returned by the
+#'   \code{\link{rdlearn}} function.
+#' @param opt When set to "safe", it displays the derived safe cutoffs and the
+#'   original cutoffs. When set to "dif", it displays the change in cutoffs.
 #'
-#' @return A \code{ggplot2} plot which also contains the distance measure between original cutoffs and safe cutoffs.
+#' @return A \code{ggplot2} plot which also contains the distance measure
+#'   between original cutoffs and safe cutoffs.
 #'
 #' @import ggplot2
 #'
@@ -31,7 +33,6 @@
 #'                   fold = 20, M = c(0, 1), cost = 0)
 #' plot(result)
 #' }
-#'
 #' @export
 plot <- function(result, opt){
   if (!inherits(result, "rdlearn")) {
@@ -48,7 +49,7 @@ plot <- function(result, opt){
   n <- result$sample
   q <- result$num_group
   org_cut <- result$org_cut
-  safe_cut <- select(result$safe_cut, -group)
+  safe_cut <- result$safe_cut
   l2norm <- result$l2norm
 
   if (opt == "safe") {
@@ -137,8 +138,7 @@ plot <- function(result, opt){
       )
  }
   plot + labs(caption = paste0("Outcome: ", y, "; Running Variable: ", x, "; Cutoff: ", c, "   ",
-                               "Sample Size: ", n, "; Number of Groups: ", q, "\n",
-                               "L2 Norms: ", paste(names(l2norm), round(l2norm, 2), sep = "=", collapse = ", ")))
+                               "Sample Size: ", n, "; Number of Groups: ", q))
 }
 
 
