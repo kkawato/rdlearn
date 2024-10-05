@@ -40,7 +40,7 @@ safelearn <- function(
     q,
     cost,
     M,
-    group_name,
+    group_name_list,
     dif_lip_output,
     cross_fit_output,
     trace) {
@@ -55,7 +55,7 @@ safelearn <- function(
   C <- data_all["C"]
   G <- data_all["G"]
 
-  safecut_all <- data.frame(group = group_name)
+  safecut_all <- data.frame(group = group_name_list)
   Lip_1temp <- Lip_1
   Lip_0temp <- Lip_0
 
@@ -128,10 +128,15 @@ safelearn <- function(
         }
         regret_sum <- c(regret_sum, max(regret))
       }
-      c.all_df <- data.frame(c.all, group = group_name)
+      c.all_df <- data.frame(c.all, group = group_name_list)
       names(c.all_df)[1] <- paste0("M=", temp_M, ",", "C=", temp_cost)
       safecut_all <- full_join(safecut_all, c.all_df, by = ("group" = "group"))
     }
   }
-  return(safecut_all)
+  rownames(safecut_all) <- safecut_all$group
+  safecut_all <- safecut_all[, -which(names(safecut_all) == "group")]
+  org_cut_matrix <- matrix(rep(c.vec, each = nrow(safecut_all)), nrow = nrow(safecut_all), byrow = FALSE)
+  dif_cut <- safecut_all - org_cut_matrix
+  out <- list(safe_cut = safecut_all, dif_cut = dif_cut)
+  return(out)
 }
