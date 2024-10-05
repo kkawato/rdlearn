@@ -21,7 +21,7 @@ containing group names (e.g., department names) for each cutoff. If not
 provided, the groups are assigned names "Group 1", "Group 2", ... in
 ascending order of cutoff values.}
 
-\item{data}{A data frame containing all required variables.}
+\item{data}{A data frame containing all the following required variables.}
 }
 \value{
 A data frame with the RD estimates for each group, including the

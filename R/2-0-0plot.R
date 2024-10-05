@@ -41,7 +41,6 @@ plot <- function(result, opt){
   if (missing(opt) || !opt %in% c("safe", "dif")) {
     stop("Please specify 'opt' as 'safe' or 'dif'.")
   }
-
   var_names <- result$var_names
   y <- var_names$outcome
   x <- var_names$run_var

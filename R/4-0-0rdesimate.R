@@ -2,7 +2,7 @@
 #'
 #' This function performs standard regression discontinuity (RD) estimation.
 #'
-#' @param data A data frame containing all required variables.
+#' @param data A data frame containing all the following required variables.
 #' @param y A character string specifying the name of column containing the
 #'   outcome variable.
 #' @param x A character string specifying the name of column containing the

@@ -3,7 +3,7 @@
 #' @param org_cut Numeric vector of original cutoffs.
 #' @param safe_cut Data frame of safe cutoffs. The first column should be the
 #'   group column, and subsequent columns the cutoffs.
-#' @return A numeric vector representing the distance between safe cutoffs and
+#' @return A numeric vector containing the distance between safe cutoffs and
 #'   original cutoffs, measured in terms of the L1 norm, L2 norm, and uniform
 #'   norm.
 #'
