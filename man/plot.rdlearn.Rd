@@ -7,19 +7,17 @@
 plot(result, opt)
 }
 \arguments{
-\item{result}{An object of class \code{rdlearn} returned by the
-\code{\link{rdlearn}} function.}
+\item{result}{An object of class \code{rdlearn} returned by the \code{\link{rdlearn}} function.}
 
-\item{opt}{When set to "safe", it displays the derived safe cutoffs and the
-original cutoffs. When set to "dif", it displays the change in cutoffs.}
+\item{opt}{"safe"と指定することによって、derived safe cutoffsとoriginal cutoffsを表示する。
+"dif"と指定することによって、change in cutoffsを表示する。}
 }
 \value{
-A \code{ggplot2} plot which also contains the distance measure
-  between original cutoffs and safe cutoffs.
+A \code{ggplot2} plot which also contains the.
 }
 \description{
-This function plots the changes in cutoff values relative to the baseline
-cutoffs for each group, under different combinations of the smoothness
+This function plots the changes in cutoff values relative to the baseline cutoffs
+for each group, under different combinations of the smoothness
 multiplier (M) and the cost of treatment (C).
 }
 \examples{
@@ -40,4 +38,5 @@ result <- rdlearn(y = "elig", x = "saber11", c = "cutoff",
                   fold = 20, M = c(0, 1), cost = 0)
 plot(result)
 }
+
 }

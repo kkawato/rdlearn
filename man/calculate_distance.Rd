@@ -9,13 +9,10 @@ calculate_distance(org_cut, safe_cut)
 \arguments{
 \item{org_cut}{Numeric vector of original cutoffs.}
 
-\item{safe_cut}{Data frame of safe cutoffs. The first column should be the
-group column, and subsequent columns the cutoffs.}
+\item{safe_cut}{Data frame of safe cutoffs. The first column should be the group column, and subsequent columns the cutoffs.}
 }
 \value{
-A numeric vector containing the distance between safe cutoffs and
-  original cutoffs, measured in terms of the L1 norm, L2 norm, and uniform
-  norm.
+A numeric vector containing the L2 norms for each column of safe cutoffs.
 }
 \description{
 Calculate distance measure between original cutoffs and safe cutoffs

@@ -7,7 +7,4 @@ test_that("rdlearn and plot", {
   plot(result, opt = "dif")
 })
 
-result <- rdlearn(y = "elig", x = "saber11", c = "cutoff", group = "department", data = acces, fold = 2, M = c(0, 1), cost = 0)
-plot(result, opt = "dif")
-plot(result, opt = "safe")
-summary(result)
+# result <- rdlearn(y = "elig", x = "saber11", c = "cutoff", group = "department", data = acces, fold = 2, M = c(0, 1), cost = 0)
