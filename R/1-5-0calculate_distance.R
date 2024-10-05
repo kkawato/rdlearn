@@ -1,36 +1,23 @@
 #' Calculate distance measure between original cutoffs and safe cutoffs
 #'
 #' @param org_cut Numeric vector of original cutoffs.
-#' @param safe_cut Data frame of safe cutoffs. The first column should be the
-#'   group column, and subsequent columns the cutoffs.
-#' @return A numeric vector representing the distance between safe cutoffs and
-#'   original cutoffs, measured in terms of the L1 norm, L2 norm, and uniform
-#'   norm.
+#' @param safe_cut Data frame of safe cutoffs. The first column should be the group column, and subsequent columns the cutoffs.
+#'
+#' @return A numeric vector containing the L2 norms for each column of safe cutoffs.
 #'
 #' @importFrom dplyr %>%
 #' @export
 calculate_distance <- function(org_cut, safe_cut) {
-  calculate_l1 <- function(safe_col, org_cut) {
-    sum(abs(safe_col - org_cut)) / length(org_cut)
-  }
-  calculate_l2 <- function(safe_col, org_cut) {
-    sum((safe_col - org_cut)^2) / length(org_cut)
-  }
-  calculate_max <- function(safe_col, org_cut) {
-    max(abs(safe_col - org_cut))
+  # Removing the group column
+  safe_cut_value <- safe_cut %>% select(-group)
+
+  # Function to calculate L2 norm
+  calculate_l2norm <- function(safe_col, org_cut) {
+    sqrt(sum((safe_col - org_cut)^2))
   }
 
-  l1_vector <- sapply(safe_cut, calculate_l1, org_cut = org_cut)
-  l2_vector <- sapply(safe_cut, calculate_l2, org_cut = org_cut)
-  max_vector <- sapply(safe_cut, calculate_max, org_cut = org_cut)
+  # Calculating L2 norms for each column
+  l2norm_vector <- sapply(safe_cut_value, calculate_l2norm, org_cut = org_cut)
 
-  out <- data.frame(
-    l1 = l1_vector,
-    l2 = l2_vector,
-    max = max_vector
-  )
-
-  out_t <- t(out)
-  return(out_t)
+  return(l2norm_vector)
 }
-
