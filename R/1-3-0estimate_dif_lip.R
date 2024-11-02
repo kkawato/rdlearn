@@ -32,6 +32,92 @@
 #' @importFrom dplyr %>% filter
 #' @keywords internal
 #' @noRd
+
+# estimate_dif_lip <- function(
+#     cross_fit_output,
+#     q,
+#     c.vec,
+#     trace
+# ) {
+#   dif0 <- matrix(0, nrow = q, ncol = q)
+#   dif1 <- matrix(0, nrow = q, ncol = q)
+#   Lip0 <- matrix(0, nrow = q, ncol = q)
+#   Lip1 <- matrix(0, nrow = q, ncol = q)
+#
+#   for (d in c(1, 0)) {
+#     if (isTRUE(trace)){
+#       cat(paste0("Estimating dif and Lip for d = ", d), "\n")
+#     }
+#     dif <- matrix(0, nrow = q, ncol = q)
+#     Lip <- matrix(0, nrow = q, ncol = q)
+#     for (g in seq(1, q - 1, 1)) {
+#       for (g.pr in seq(g + 1, q, 1)) {
+#         if (d == 1) {
+#           temp.dat <- cross_fit_output %>% filter(D == 1 & X >= max(c.vec[g.pr], c.vec[g]))
+#         } else {
+#           temp.dat <- cross_fit_output %>% filter(D == 0 & X < min(c.vec[g.pr], c.vec[g]))
+#         }
+#
+#         psout <- temp.dat[, paste0("pseudo.", g)] - temp.dat[, paste0("pseudo.", g.pr)] +
+#           with(temp.dat, I(G == g) *
+#                  (Y - eval(parse(text = paste0("pseudo.", g)))) /
+#                  eval(parse(text = paste0("pseudo.ps", g)))) -
+#           with(temp.dat, I(G == g.pr) *
+#                  (Y - eval(parse(text = paste0("pseudo.", g.pr)))) /
+#                  eval(parse(text = paste0("pseudo.ps", g.pr))))
+#
+#         temp.vc <- data.frame(psout, temp.dat$X, g, g.pr)
+#         names(temp.vc)[1:2] <- c("psout", "X")
+#
+#         if (d == 1) {
+#           eval_point <- max(c.vec[g], c.vec[g.pr])
+#         } else {
+#           eval_point <- min(c.vec[g], c.vec[g.pr])
+#         }
+#
+#         tryCatch({
+#           dif[g, g.pr] <- nprobust::lprobust(temp.vc[, "psout"],
+#                                              temp.vc[, "X"],
+#                                              eval = eval_point,
+#                                              # deriv = 0,
+#                                              # p = 1,
+#                                              bwselect = "mse-dpi")$Estimate[, 5]
+#         }, error = function(e) {
+#           dif[g, g.pr] <- 0
+#         })
+#
+#         tryCatch({
+#           Lip[g, g.pr] <- abs(nprobust::lprobust(temp.vc[, "psout"],
+#                                                  temp.vc[, "X"],
+#                                                  eval = eval_point,
+#                                                  deriv = 1,
+#                                                  p = 2,
+#                                                  bwselect = "mse-dpi")$Estimate[, 5])
+#         }, error = function(e) {
+#           Lip[g, g.pr] <- 0
+#         })
+#       }
+#     }
+#
+#     dif <- dif + t(-dif)
+#     Lip <- Lip + t(Lip)
+#
+#     if (d == 0) {
+#       dif_0 <- dif
+#       Lip_0 <- Lip
+#     } else {
+#       dif_1 <- dif
+#       Lip_1 <- Lip
+#     }
+#   }
+#
+#   out <- list(dif_0 = dif_0,
+#               dif_1 = dif_1,
+#               Lip_0 = Lip_0,
+#               Lip_1 = Lip_1)
+#   return(out)
+# }
+
 estimate_dif_lip <- function(
     cross_fit_output,
     q,
@@ -43,18 +129,22 @@ estimate_dif_lip <- function(
   Lip0 <- matrix(0, nrow = q, ncol = q)
   Lip1 <- matrix(0, nrow = q, ncol = q)
 
+  dif_list <- list()
+  Lip_list <- list()
+
   for (d in c(1, 0)) {
     if (isTRUE(trace)){
       cat(paste0("Estimating dif and Lip for d = ", d), "\n")
     }
     dif <- matrix(0, nrow = q, ncol = q)
-    Lip <- matrix(0, q, q)
+    Lip <- matrix(0, nrow = q, ncol = q)
+
     for (g in seq(1, q - 1, 1)) {
       for (g.pr in seq(g + 1, q, 1)) {
         if (d == 1) {
-          temp.dat <- cross_fit_output %>% filter(D == 1 & X >= c.vec[g.pr])
+          temp.dat <- cross_fit_output %>% filter(D == 1 & X >= max(c.vec[g], c.vec[g.pr]))
         } else {
-          temp.dat <- cross_fit_output %>% filter(D == 0 & X < c.vec[g])
+          temp.dat <- cross_fit_output %>% filter(D == 0 & X < min(c.vec[g], c.vec[g.pr]))
         }
 
         psout <- temp.dat[, paste0("pseudo.", g)] - temp.dat[, paste0("pseudo.", g.pr)] +
@@ -68,29 +158,40 @@ estimate_dif_lip <- function(
         temp.vc <- data.frame(psout, temp.dat$X, g, g.pr)
         names(temp.vc)[1:2] <- c("psout", "X")
 
-        eval_point <- c.vec[g.pr] * (d == 1) + c.vec[g] * (d == 0)
+        if (d == 1) {
+          eval_point <- max(c.vec[g], c.vec[g.pr])
+        } else {
+          eval_point <- min(c.vec[g], c.vec[g.pr])
+        }
+
+        # dif_value <- NA
+        # Lip_value <- NA
 
         tryCatch({
-          dif[g, g.pr] <- nprobust::lprobust(temp.vc[, "psout"],
-                                             temp.vc[, "X"],
-                                             eval = eval_point,
-                                             deriv = 0,
-                                             p = 1,
-                                             bwselect = "mse-dpi")$Estimate[, 5]
+          dif_value <- nprobust::lprobust(temp.vc[, "psout"],
+                                          temp.vc[, "X"],
+                                          eval = eval_point,
+                                          bwselect = "mse-dpi")$Estimate[, 5]
+          dif[g, g.pr] <- dif_value
         }, error = function(e) {
           dif[g, g.pr] <- 0
         })
+        # print(dif)
 
         tryCatch({
-          Lip[g, g.pr] <- abs(nprobust::lprobust(temp.vc[, "psout"],
-                                                 temp.vc[, "X"],
-                                                 eval = eval_point,
-                                                 deriv = 1,
-                                                 p = 2,
-                                                 bwselect = "mse-dpi")$Estimate[, 5])
+          Lip_value <- abs(nprobust::lprobust(temp.vc[, "psout"],
+                                              temp.vc[, "X"],
+                                              eval = eval_point,
+                                              deriv = 1,
+                                              p = 2,
+                                              bwselect = "mse-dpi")$Estimate[, 5])
+          Lip[g, g.pr] <- Lip_value
         }, error = function(e) {
           Lip[g, g.pr] <- 0
         })
+        # print(Lip)
+        # dif_list <- append(dif_list, list(list(d = d, g = g, g.pr = g.pr, dif = dif_value)))
+        # Lip_list <- append(Lip_list, list(list(d = d, g = g, g.pr = g.pr, Lip = Lip_value)))
       }
     }
 

@@ -101,21 +101,24 @@ rdlearn <- function(
     data = data)
 
   # --------------------------- Prepare data --------------------------------- #
+  # prepared_data <- prepare_data(y = y,
+  #                          x = x,
+  #                          c = c,
+  #                          data = data,
+  #                          group_name = group_name,
+  #                          fold = fold)
 
   # Prepare variables:
   # * Y: outcome variable
   # * X: running variable
   # * C: cutoff
-  Y <- data[[y]] ; X <- data[[x]] ; C <- data[[c]]
-
   # Sort cutoffs from min to max
   # Group index, from min cutoff to max cutoff
   # Treatment indicator
-  c.vec <- sort(unique(C)) ; G <- match(C, c.vec) ; D <- as.numeric(X >= C)
-
   # Sample size
   # Number of groups
-  n <- length(Y) ; q <- length(unique(C))
+
+  Y <- data[[y]] ; X <- data[[x]] ; C <- data[[c]] ; c.vec <- sort(unique(C)) ; G <- match(C, c.vec) ; D <- as.numeric(X >= C) ;n <- length(Y) ; q <- length(unique(C))
 
   # When group_name is not provided, assign a new name "Group k"
   if (is.null(group_name)) {
@@ -171,7 +174,6 @@ rdlearn <- function(
     safe_cut = safecut_all$safe_cut
   )
 
-
   # Organize output
   out <- list(
     call = call,
@@ -179,13 +181,14 @@ rdlearn <- function(
     org_cut = c.vec,
     safe_cut = safecut_all$safe_cut,
     dif_cut = safecut_all$dif_cut,
-    sample = n,
+    sample = length(Y),
     num_group = q,
     group_name = group_name_list,
     cross_fit_output = cross_fit_output,
     dif_lip_output = dif_lip_output,
     distance = distance,
-    rdestimates = rdestimates
+    rdestimates = rdestimates,
+    temp_reg_df = safecut_all$temp_reg_df
   )
 
   class(out) <- "rdlearn"

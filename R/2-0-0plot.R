@@ -34,7 +34,7 @@
 #' plot(result)
 #' }
 #' @export
-plot <- function(result, opt){
+plot.rdlearn <- function(result, opt){
   if (!inherits(result, "rdlearn")) {
     stop("The 'result' argument must be an object of class 'rdlearn'.")
   }
@@ -139,5 +139,3 @@ plot <- function(result, opt){
   plot + labs(caption = paste0("Outcome: ", y, "; Running Variable: ", x, "; Cutoff: ", c, "   ",
                                "Sample Size: ", n, "; Number of Groups: ", q))
 }
-
-

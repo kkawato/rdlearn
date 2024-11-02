@@ -9,7 +9,7 @@
 #'   cutoffs.
 #'
 #' @export
-summary <- function(result) {
+summary.rdlearn <- function(result) {
   # rdestimates
   cat("\n----------\n")
   cat("Basic Information\n")

@@ -34,6 +34,7 @@
 #' @importFrom purrr map
 #' @keywords internal
 #' @noRd
+
 safelearn <- function(
     c.vec,
     n,
@@ -44,6 +45,9 @@ safelearn <- function(
     dif_lip_output,
     cross_fit_output,
     trace) {
+
+  temp_reg_df <- data.frame(M = numeric(), C = numeric(), group = integer(), c_alt = numeric(), temp_reg = numeric(), stringsAsFactors = FALSE)
+
   dif_1 <- dif_lip_output$dif_1
   dif_0 <- dif_lip_output$dif_0
   Lip_1 <- dif_lip_output$Lip_1
@@ -119,6 +123,8 @@ safelearn <- function(
             n = n,
             temp_cost = temp_cost
           )
+
+          temp_reg_df <- rbind(temp_reg_df, data.frame(M = temp_M, C = temp_cost, group = g, c_alt = c.alt, temp_reg = temp_reg))
           regret <- c(regret, temp_reg)
         }
         if (max(regret) == 0) {
@@ -137,6 +143,8 @@ safelearn <- function(
   safecut_all <- safecut_all[, -which(names(safecut_all) == "group")]
   org_cut_matrix <- matrix(rep(c.vec, each = nrow(safecut_all)), nrow = nrow(safecut_all), byrow = FALSE)
   dif_cut <- safecut_all - org_cut_matrix
-  out <- list(safe_cut = safecut_all, dif_cut = dif_cut)
+
+  out <- list(safe_cut = safecut_all, dif_cut = dif_cut, temp_reg_df = temp_reg_df)
   return(out)
 }
+
