@@ -118,7 +118,9 @@ rdlearn <- function(
   # Sample size
   # Number of groups
 
-  Y <- data[[y]] ; X <- data[[x]] ; C <- data[[c]] ; c.vec <- sort(unique(C)) ; G <- match(C, c.vec) ; D <- as.numeric(X >= C) ;n <- length(Y) ; q <- length(unique(C))
+  Y <- data[[y]]; X <- data[[x]] ; C <- data[[c]] ; c.vec <- sort(unique(C))
+  G <- match(C, c.vec); D <- as.numeric(X >= C)
+  n <- length(Y); q <- length(unique(C))
 
   # When group_name is not provided, assign a new name "Group k"
   if (is.null(group_name)) {
