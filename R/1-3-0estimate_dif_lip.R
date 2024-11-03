@@ -179,13 +179,16 @@ estimate_dif_lip <- function(
         # print(dif)
 
         tryCatch({
-          Lip_value <- abs(nprobust::lprobust(temp.vc[, "psout"],
-                                              temp.vc[, "X"],
-                                              eval = eval_point,
-                                              deriv = 1,
-                                              p = 2,
-                                              bwselect = "mse-dpi")$Estimate[, 5])
-          Lip[g, g.pr] <- Lip_value
+          Lip_value <- 
+            nprobust::lprobust(
+              temp.vc[, "psout"],
+              temp.vc[, "X"],
+              eval = eval_point,
+              deriv = 1,
+              p = 2,
+              bwselect = "mse-dpi"
+            )$Estimate[, 5]
+          Lip[g, g.pr] <- abs(Lip_value)
         }, error = function(e) {
           Lip[g, g.pr] <- 0
         })
