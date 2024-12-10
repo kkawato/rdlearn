@@ -34,18 +34,16 @@
 #' @importFrom purrr map
 #' @keywords internal
 #' @noRd
-
 safelearn <- function(
     c.vec,
     n,
     q,
     cost,
     M,
-    group_name_list,
+    group_name_vec,
     dif_lip_output,
     cross_fit_output,
     trace) {
-
   temp_reg_df <- data.frame(M = numeric(), C = numeric(), group = integer(), c_alt = numeric(), temp_reg = numeric(), stringsAsFactors = FALSE)
 
   dif_1 <- dif_lip_output$dif_1
@@ -59,7 +57,7 @@ safelearn <- function(
   C <- data_all["C"]
   G <- data_all["G"]
 
-  safecut_all <- data.frame(group = group_name_list)
+  safecut_all <- data.frame(group = group_name_vec)
   Lip_1temp <- Lip_1
   Lip_0temp <- Lip_0
 
@@ -134,17 +132,23 @@ safelearn <- function(
         }
         regret_sum <- c(regret_sum, max(regret))
       }
-      c.all_df <- data.frame(c.all, group = group_name_list)
+      c.all_df <- data.frame(c.all, group = group_name_vec)
       names(c.all_df)[1] <- paste0("M=", temp_M, ",", "C=", temp_cost)
-      safecut_all <- full_join(safecut_all, c.all_df, by = ("group" = "group"))
+      safecut_all <- full_join(safecut_all, c.all_df, by = "group")
     }
   }
+
   rownames(safecut_all) <- safecut_all$group
   safecut_all <- safecut_all[, -which(names(safecut_all) == "group")]
-  org_cut_matrix <- matrix(rep(c.vec, each = nrow(safecut_all)), nrow = nrow(safecut_all), byrow = FALSE)
-  dif_cut <- safecut_all - org_cut_matrix
+
+  if (length(M) == 1 && length(cost) == 1) {
+    dif_cut <- safecut_all - c.vec
+  } else {
+    safecut_row <- nrow(safecut_all)
+    org_cut_matrix <- matrix(rep(c.vec, each = ), nrow = , byrow = FALSE)
+    dif_cut <- safecut_all - org_cut_matrix
+  }
 
   out <- list(safe_cut = safecut_all, dif_cut = dif_cut, temp_reg_df = temp_reg_df)
   return(out)
 }
-

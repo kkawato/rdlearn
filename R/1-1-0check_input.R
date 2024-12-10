@@ -23,8 +23,9 @@ check_input <- function(
     data,
     M,
     cost,
+    fold,
     var_names,
-    trace){
+    trace) {
   # Check argument missingness and type
   if (missing(y) || !is.character(y) || length(y) > 1) {
     stop("'y' must be a character string of length one.")
@@ -60,5 +61,10 @@ check_input <- function(
   # Check trace
   if (!is.logical(trace)) {
     stop("trace must be TRUE or FALSE.")
+  }
+
+  # Check fold
+  if (fold < 2) {
+    stop("fold must be an integer of 2 or greater.")
   }
 }

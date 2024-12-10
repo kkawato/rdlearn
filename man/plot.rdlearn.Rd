@@ -4,14 +4,16 @@
 \alias{plot.rdlearn}
 \title{Plot Cutoff Changes for rdlearn Objects}
 \usage{
-\method{plot}{rdlearn}(result, opt)
+\method{plot}{rdlearn}(x, opt, ...)
 }
 \arguments{
-\item{result}{An object of class \code{rdlearn} returned by the
+\item{x}{An object of class \code{rdlearn} returned by the
 \code{\link{rdlearn}} function.}
 
 \item{opt}{When set to "safe", it displays the derived safe cutoffs and the
 original cutoffs. When set to "dif", it displays the change in cutoffs.}
+
+\item{...}{additional arguments.}
 }
 \value{
 A \code{ggplot2} plot which also contains the distance measure
@@ -35,9 +37,11 @@ library(glue)
 library(purrr)
 library(tidyr)
 
-result <- rdlearn(y = "elig", x = "saber11", c = "cutoff",
-                  group_name = "department", data = acces,
-                  fold = 20, M = c(0, 1), cost = 0)
+result <- rdlearn(
+  y = "elig", x = "saber11", c = "cutoff",
+  group_name = "department", data = acces,
+  fold = 20, M = c(0, 1), cost = 0
+)
 plot(result)
 }
 }

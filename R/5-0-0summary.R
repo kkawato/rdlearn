@@ -1,34 +1,31 @@
 #' Summary function
 #'
-#' @param result An object of class \code{rdlearn} returned by the
+#' @param object An object of class \code{rdlearn} returned by the
 #'   \code{\link{rdlearn}} function.
+#' @param ... additional arguments.
 #' @return Displays key outputs from the \code{\link{rdlearn}} function. It
 #'   provides basic information and RD causal effect estimates from
-#'   \code{\link{rdesimate}}, as well as the safe cutoffs derived by
+#'   \code{\link{rdestimate}}, as well as the safe cutoffs derived by
 #'   \code{\link{rdlearn}} and the difference between them and the original
 #'   cutoffs.
-#'
+#' @importFrom cli cli_h1
 #' @export
-summary.rdlearn <- function(result) {
+summary.rdlearn <- function(object,...) {
   # rdestimates
-  cat("\n----------\n")
-  cat("Basic Information\n")
-  print(result$rdestimates)
+  cli_h1("Basic Information")
+  print(object$rdestimates)
 
   # safe and original cutoffs
-  cat("\n----------\n")
-  cat("Safe Cutoffs and Original Cutoff\n")
-  extended_safe_cut <- cbind(result$org_cut, result$safe_cut)
+  cli_h1("Safe Cutoffs and Original Cutoff")
+  extended_safe_cut <- cbind(object$org_cut, object$safe_cut)
   colnames(extended_safe_cut)[1] <- "original"
   print(extended_safe_cut)
 
   # difference of cutoffs
-  cat("\n----------\n")
-  cat("Numerical Difference of Cutoffs\n")
-  print(result$dif_cut)
+  cli_h1("Numerical Difference of Cutoffs")
+  print(object$dif_cut)
 
   # measures of differences
-  cat("\n----------\n")
-  cat("Measures of Difference\n")
-  print(result$distance)
+  cli_h1("Measures of Difference")
+  print(object$distance)
 }

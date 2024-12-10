@@ -37,30 +37,31 @@
 #' @importFrom dplyr %>% filter ungroup select arrange
 #' @importFrom tidyr unnest
 #' @importFrom nnet multinom
+#' @importFrom cli cli_progress_bar
+#' @importFrom cli cli_progress_update
 #' @keywords internal
 #' @noRd
 crossfit <- function(
-  c.vec,
-  q,
-  fold,
-  data_all,
-  trace)
-{
+    c.vec,
+    q,
+    fold,
+    data_all,
+    trace) {
   cross_fit_output <- data.frame()
-
   for (k in 1:fold) {
-    if (isTRUE(trace)){
+    if (isTRUE(trace)) {
       cat(paste0("Cross fitting for fold ", k, "\n"))
     }
+
     data_train <- data_all %>% filter(fold_id != k)
-    data_test <- data_all %>% filter(fold_id  == k)
+    data_test <- data_all %>% filter(fold_id == k)
 
     # conditional prob of group
     gamfit <- nnet::multinom(formula = G ~ X, data = data_train, trace = "FALSE")
     ps <- predict(gamfit, newdata = data_test, "probs")
     data_test[, paste0("pseudo.ps", seq(1, q, 1))] <- predict(gamfit, newdata = data_test, "probs")
 
-    for (g in seq(1, q, 1)){
+    for (g in seq(1, q, 1)) {
       mu_all <- estimate_mu(data_train, data_test, c.vec, k, g, q)
 
       pseudo1 <- (data_test$D == 1) & (data_test$X >= c.vec[g])
@@ -70,11 +71,11 @@ crossfit <- function(
       m0 <- (data_test$X >= c.vec[max(g - 1, 1)]) & (data_test$X < c.vec[g]) & (data_test$D == 1)
       aug0 <- (data_test$X >= c.vec[max(g - 1, 1)]) & (data_test$X < c.vec[g]) & (data_test$G == g)
 
-      if (nrow(data_test[pseudo1, ]) > 0 && !is.null(mu_all$pseudo1)){
+      if (nrow(data_test[pseudo1, ]) > 0 && !is.null(mu_all$pseudo1)) {
         data_test[pseudo1, paste0("pseudo.", g)] <- mu_all$pseudo1
       }
 
-      if (nrow(data_test[pseudo0, ]) > 0 && !is.null(mu_all$pseudo0)){
+      if (nrow(data_test[pseudo0, ]) > 0 && !is.null(mu_all$pseudo0)) {
         data_test[pseudo0, paste0("pseudo.", g)] <- mu_all$pseudo0
       }
 

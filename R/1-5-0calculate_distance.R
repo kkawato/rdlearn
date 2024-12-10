@@ -7,14 +7,13 @@
 #'   original cutoffs, measured in terms of the L1 norm, L2 norm, and uniform
 #'   norm.
 #'
-#' @importFrom dplyr %>%
 #' @export
 calculate_distance <- function(org_cut, safe_cut) {
   calculate_l1 <- function(safe_col, org_cut) {
-    sum(abs(safe_col - org_cut)) / length(org_cut)
+    mean(abs(safe_col - org_cut))
   }
   calculate_l2 <- function(safe_col, org_cut) {
-    sum((safe_col - org_cut)^2) / length(org_cut)
+    sqrt(mean((safe_col - org_cut)^2))
   }
   calculate_max <- function(safe_col, org_cut) {
     max(abs(safe_col - org_cut))
@@ -33,4 +32,3 @@ calculate_distance <- function(org_cut, safe_cut) {
   out_t <- t(out)
   return(out_t)
 }
-

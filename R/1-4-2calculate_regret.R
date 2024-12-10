@@ -32,9 +32,9 @@ calculate_regret <- function(data_mid,
 
   base_regret <- sum(data_mid[data_mid$G == g, "Y"])
   Iden_alt <- (sum(data_mid[data_mid$X >= c.vec[g] & data_mid$X >= c.alt & data_mid$G == g, "Y"]) +
-                 sum(data_mid[data_mid$X < c.vec[g] & data_mid$X < c.alt & data_mid$G == g, "Y"]))
+    sum(data_mid[data_mid$X < c.vec[g] & data_mid$X < c.alt & data_mid$G == g, "Y"]))
 
-  data_temp1 <- data_mid[range1,]
+  data_temp1 <- data_mid[range1, ]
 
   if (nrow(data_temp1) == 0) {
     DR_1 <- 0
@@ -47,16 +47,25 @@ calculate_regret <- function(data_mid,
 
   data_temp2 <- data_mid[range2, ]
 
-  DR_2_temp <- tryCatch({
-    sum(with(data_temp2,
-             eval(parse(text = paste0("pseudo.ps", g))) /
-               eval(parse(text = paste0("pseudo.ps", G))) *
-               (Y - eval(parse(text = "mu.aug")))))
-  }, error = function(e) {
-    DR_2_temp <- 0
-  })
+  DR_2_temp <- tryCatch(
+    {
+      sum(with(
+        data_temp2,
+        eval(parse(text = paste0("pseudo.ps", g))) /
+          eval(parse(text = paste0("pseudo.ps", G))) *
+          (Y - eval(parse(text = "mu.aug")))
+      ))
+    },
+    error = function(e) {
+      DR_2_temp <- 0
+    }
+  )
 
-  DR_2 <- if (is.na(DR_2_temp)) { 0 } else { DR_2_temp }
+  DR_2 <- if (is.na(DR_2_temp)) {
+    0
+  } else {
+    DR_2_temp
+  }
 
   # ------------------------------------------------------------------ #
   # trycatch to avoid the following error
@@ -79,6 +88,3 @@ calculate_regret <- function(data_mid,
   temp_reg <- ((Iden_alt + Xi_1 + Xi_2 + cost * (c.alt >= c.vec[g]) - cost * (c.alt < c.vec[g])) / n) - (base_regret / n)
   return(temp_reg)
 }
-
-
-

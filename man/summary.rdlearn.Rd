@@ -4,16 +4,18 @@
 \alias{summary.rdlearn}
 \title{Summary function}
 \usage{
-\method{summary}{rdlearn}(result)
+\method{summary}{rdlearn}(object, ...)
 }
 \arguments{
-\item{result}{An object of class \code{rdlearn} returned by the
+\item{object}{An object of class \code{rdlearn} returned by the
 \code{\link{rdlearn}} function.}
+
+\item{...}{additional arguments.}
 }
 \value{
 Displays key outputs from the \code{\link{rdlearn}} function. It
   provides basic information and RD causal effect estimates from
-  \code{\link{rdesimate}}, as well as the safe cutoffs derived by
+  \code{\link{rdestimate}}, as well as the safe cutoffs derived by
   \code{\link{rdlearn}} and the difference between them and the original
   cutoffs.
 }

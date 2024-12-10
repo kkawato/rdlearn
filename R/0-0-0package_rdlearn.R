@@ -41,9 +41,11 @@
 #' library(tidyr)
 #'
 #' # Learn new treatment assignment cutoffs
-#' result <- rdlearn(y = "elig", x = "saber11", c = "cutoff",
-#'                   group_name = "department", data = acces,
-#'                   fold = 20, M = c(0, 1), cost = 0)
+#' result <- rdlearn(
+#'   y = "elig", x = "saber11", c = "cutoff",
+#'   group_name = "department", data = acces,
+#'   fold = 20, M = c(0, 1), cost = 0
+#' )
 #'
 #' # Visualize the learned policies
 #' plot(result)

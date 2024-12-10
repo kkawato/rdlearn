@@ -56,9 +56,11 @@
 #' library(purrr)
 #' library(tidyr)
 #'
-#' result <- rdlearn(y = "elig", x = "saber11", c = "cutoff",
-#'                   group_name = "department", data = acces,
-#'                   fold = 20, M = c(0, 1), cost = 0)
+#' result <- rdlearn(
+#'   y = "elig", x = "saber11", c = "cutoff",
+#'   group_name = "department", data = acces,
+#'   fold = 20, M = c(0, 1), cost = 0
+#' )
 #' plot(result)
 #' }
 #'
@@ -78,19 +80,25 @@ rdlearn <- function(
     trace = TRUE) {
   # Get function call
   call <- match.call()
-  var_names <- list(outcome = y,
-                    run_var = x,
-                    cutoff = c)
+
+  var_names <- list(
+    outcome = y,
+    run_var = x,
+    cutoff = c
+  )
 
   # --------------------------- Check input ---------------------------------- #
-  check_input(y = y,
-              x = x,
-              c = c,
-              data = data,
-              M = M,
-              cost = cost,
-              var_names = var_names,
-              trace = trace)
+  check_input(
+    y = y,
+    x = x,
+    c = c,
+    data = data,
+    M = M,
+    cost = cost,
+    fold = fold,
+    var_names = var_names,
+    trace = trace
+  )
 
   # --------------------------- RDD esimation -------------------------------- #
   rdestimates <- rdestimate(
@@ -98,16 +106,10 @@ rdlearn <- function(
     x = x,
     c = c,
     group_name = group_name,
-    data = data)
+    data = data
+  )
 
   # --------------------------- Prepare data --------------------------------- #
-  # prepared_data <- prepare_data(y = y,
-  #                          x = x,
-  #                          c = c,
-  #                          data = data,
-  #                          group_name = group_name,
-  #                          fold = fold)
-
   # Prepare variables:
   # * Y: outcome variable
   # * X: running variable
@@ -118,20 +120,25 @@ rdlearn <- function(
   # Sample size
   # Number of groups
 
-  Y <- data[[y]]; X <- data[[x]] ; C <- data[[c]] ; c.vec <- sort(unique(C))
-  G <- match(C, c.vec); D <- as.numeric(X >= C)
-  n <- length(Y); q <- length(unique(C))
+  Y <- data[[y]]
+  X <- data[[x]]
+  C <- data[[c]]
+  c.vec <- sort(unique(C))
+  G <- match(C, c.vec)
+  D <- as.numeric(X >= C)
+  n <- length(Y)
+  q <- length(unique(C))
 
   # When group_name is not provided, assign a new name "Group k"
   if (is.null(group_name)) {
-    group_name_list <- character(q)
+    group_name_vec <- character(q)
     for (k in 1:q) {
-      group_name_list[k] <- paste0("Group", k)
+      group_name_vec[k] <- paste0("Group", k)
     }
   } else {
-    grouplist <- data[[group_name]]
-    dict <- setNames(grouplist, C)
-    group_name_list <- sapply(c.vec, function(x) dict[[as.character(x)]])
+    group_name_df <- data[[group_name]]
+    dict <- setNames(group_name_df, C)
+    group_name_vec <- sapply(c.vec, function(x) dict[[as.character(x)]])
   }
 
   # Add fold_id to data used for cross-fitting
@@ -164,7 +171,7 @@ rdlearn <- function(
     q = q,
     cost = cost,
     M = M,
-    group_name_list = group_name_list,
+    group_name_vec = group_name_vec,
     dif_lip_output = dif_lip_output,
     cross_fit_output = cross_fit_output,
     trace = trace
@@ -185,7 +192,7 @@ rdlearn <- function(
     dif_cut = safecut_all$dif_cut,
     sample = length(Y),
     num_group = q,
-    group_name = group_name_list,
+    group_name = group_name_vec,
     cross_fit_output = cross_fit_output,
     dif_lip_output = dif_lip_output,
     distance = distance,
@@ -198,4 +205,4 @@ rdlearn <- function(
 }
 
 # Register global variables to avoid R CMD check notes
-utils::globalVariables(c('fold_id', 'D', 'X', 'G', 'Y', 'group', 'type', 'y_axis'))
+utils::globalVariables(c("fold_id", "D", "X", "G", "Y", "group", "type", "y_axis"))

@@ -1,6 +1,7 @@
 #' RD Estimate Function
 #'
-#' This function performs standard regression discontinuity (RD) estimation.
+#' This function estimates local causal effect of treatment under standard
+#' regression discontinuity (RD) setting.
 #'
 #' @param data A data frame containing all the following required variables.
 #' @param y A character string specifying the name of column containing the
@@ -9,7 +10,7 @@
 #'   running variable.
 #' @param c A character string specifying the name of column containing the
 #'   cutoff variable.
-#' @param group_name A character string specifying the name of the column
+#' @param group_name A character ctring specifying the name of the column
 #'   containing group names (e.g., department names) for each cutoff. If not
 #'   provided, the groups are assigned names "Group 1", "Group 2", ... in
 #'   ascending order of cutoff values.
@@ -19,7 +20,10 @@
 #'   and p-value.
 #' @importFrom rdrobust rdrobust
 #' @examples
-#' results <- rdestimate(y = "elig", x = "saber11", c = "cutoff", group_name = "department", data = acces)
+#' results <- rdestimate(
+#'   y = "elig", x = "saber11", c = "cutoff",
+#'   group_name = "department", data = acces
+#' )
 #' print(results)
 #' @export
 rdestimate <- function(
@@ -27,15 +31,49 @@ rdestimate <- function(
     x,
     c,
     group_name = NULL,
-    data){
+    data) {
+  # Check argument missingness and type
+  if (missing(y) || !is.character(y) || length(y) > 1) {
+    stop("'y' must be a character string of length one.")
+  }
+  if (missing(x) || !is.character(x) || length(x) > 1) {
+    stop("'x' must be a character string of length one.")
+  }
+  if (missing(c) || !is.character(c) || length(c) > 1) {
+    stop("'c' must be a character string of length one.")
+  }
 
-  results <- data.frame(Group = character(),
-                        Sample_size = integer(),
-                        Baseline_cutoff = numeric(),
-                        RD_Estimate = numeric(),
-                        se = numeric(),
-                        p_value = numeric(),
-                        stringsAsFactors = FALSE)
+  var_names <- list(
+    outcome = y,
+    run_var = x,
+    cutoff = c
+  )
+
+  # Check if all variables are in 'data'
+  if (!all(var_names %in% names(data))) {
+    stop("all variables must be in 'data'.")
+  }
+
+  # Check NA
+  if (anyNA(data[[y]])) {
+    stop("the column 'y' contains NA.")
+  }
+  if (anyNA(data[[x]])) {
+    stop("the column 'x' contains NA.")
+  }
+  if (anyNA(data[[c]])) {
+    stop("the column 'c' contains NA.")
+  }
+
+  results <- data.frame(
+    Group = character(),
+    Sample_size = integer(),
+    Baseline_cutoff = numeric(),
+    RD_Estimate = numeric(),
+    se = numeric(),
+    p_value = numeric(),
+    stringsAsFactors = FALSE
+  )
 
   Y <- data[[y]]
   X <- data[[x]]
@@ -59,7 +97,6 @@ rdestimate <- function(
 
   for (g in 1:q) {
     subdata <- subset(data_all, G == g)
-
     n <- nrow(subdata)
     cutoff_value <- unique(subdata$C)
     y_value <- subdata$Y
@@ -70,12 +107,14 @@ rdestimate <- function(
     se_conventional <- round(result$se["Conventional", "Std. Err."], 2)
     pv_conventional <- round(result$pv["Conventional", "P>|z|"], 3)
 
-    results <- rbind(results, data.frame(Group = group_names[g],
-                                         Sample_size = n,
-                                         Baseline_cutoff = cutoff_value,
-                                         RD_Estimate = coef_conventional,
-                                         se = se_conventional,
-                                         p_value = pv_conventional))
+    results <- rbind(results, data.frame(
+      Group = group_names[g],
+      Sample_size = n,
+      Baseline_cutoff = cutoff_value,
+      RD_Estimate = coef_conventional,
+      se = se_conventional,
+      p_value = pv_conventional
+    ))
   }
   return(results)
 }

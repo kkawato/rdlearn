@@ -26,7 +26,6 @@ extrapolation <- function(x.train,
                           dif_0,
                           G = G,
                           C = C) {
-
   if (treat == 1) {
     Lip <- Lip_1[g, g.pr]
     dif <- dif_1[g, g.pr]

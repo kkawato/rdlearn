@@ -43,7 +43,7 @@ library(nnet)
 library(ggplot2)
 
 ## load example data
-data('acces')
+data("acces")
 
 ## set seed for replication
 # set.seed(12345)
@@ -60,7 +60,7 @@ plot(result)
 ```{r example2, message = FALSE, warning=FALSE}
 # "sens" is for sensitivity analysis.
 # This function inherits the cross-fitting data.
-sens_result <- sens(result, M = 1, cost=c(0, 0.2, 0.4, 0.6, 0.8, 1), trace = FALSE)
+sens_result <- sens(result, M = 1, cost = c(0, 0.2, 0.4, 0.6, 0.8, 1), trace = FALSE)
 # Figure 3
 plot(sens_result)
 ```
