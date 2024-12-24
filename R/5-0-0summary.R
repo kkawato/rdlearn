@@ -9,6 +9,15 @@
 #'   \code{\link{rdlearn}} and the difference between them and the original
 #'   cutoffs.
 #' @importFrom cli cli_h1
+#' @examples
+#' data(acces)
+#' rdlearn_result <- rdlearn(
+#'   y = "elig", x = "saber11", c = "cutoff",
+#'   group_name = "department", data = acces,
+#'   fold = 5, M = c(0, 1), cost = 0
+#' )
+#' summary(rdlearn_result)
+#'
 #' @export
 summary.rdlearn <- function(object,...) {
   # rdestimates

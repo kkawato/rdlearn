@@ -5,7 +5,7 @@
 #' regression discontinuity designs with multiple cutoffs.
 #'
 #' @section Package Functions:
-#' The \code{rdlearn} package offers three main functions:
+#' The \code{rdlearn} package offers the following main functions:
 #'
 #' \bold{Policy Learning}
 #' \itemize{
@@ -22,38 +22,37 @@
 #'   \item \code{\link{sens}}: Perform sensitivity analysis
 #' }
 #'
+#' \bold{RD Estimate}
+#' \itemize{
+#'  \item \code{\link{rdestimate}}: Estimate RD treatment effects
+#' }
+#'
+#' \bold{Summary}
+#' \itemize{
+#' \item \code{\link{summary}}: Summarize the result of \code{\link{rdlearn}} and \code{\link{rdestimate}}
+#' }
+#'
+#'
 #' @references
-#' Zhang, Yi, Eli Ben-Michael, and Kosuke Imai. 2023. "Safe Policy Learning
-#' under Regression Discontinuity Designs with Multiple Cutoffs."
-#' \url{http://arxiv.org/abs/2208.13323}.
+#' Zhang, Y., Ben-Michael, E. and Imai, K. (2022) ‘Safe Policy Learning under Regression Discontinuity Designs with Multiple Cutoffs’, arXiv [stat.ME]. Available at: \url{http://arxiv.org/abs/2208.13323}.
 #'
 #' @examples
-#' \dontrun{
-#' # Load example data
 #' data(acces)
 #'
-#' library(nprobust)
-#' library(nnet)
-#' library(ggplot2)
-#' library(dplyr)
-#' library(glue)
-#' library(purrr)
-#' library(tidyr)
-#'
 #' # Learn new treatment assignment cutoffs
-#' result <- rdlearn(
+#' rdlearn_result <- rdlearn(
 #'   y = "elig", x = "saber11", c = "cutoff",
 #'   group_name = "department", data = acces,
-#'   fold = 20, M = c(0, 1), cost = 0
+#'   fold = 20, M = c(0, 1, 2, 4), cost = 0
 #' )
 #'
 #' # Visualize the learned policies
-#' plot(result)
+#' plot(rdlearn_result, opt = "dif")
 #'
-#' # Perform sensitivity analysis
-#' sens_result <- sens(result, M = 1, cost = c(0, 0.2, 0.4, 0.6, 0.8, 1))
-#' plot(sens_result)
-#' }
+#' # Implement sensitivity analysis
+#' sens_result <- sens(rdlearn_result, M = 1, cost = c(0, 0.2, 0.4, 0.6, 0.8, 1))
+#' plot(sens_result, opt = "dif")
+#' @name package_rdlearn
 #' @keywords internal
 "_PACKAGE"
 

@@ -22,3 +22,13 @@ Displays key outputs from the \code{\link{rdlearn}} function. It
 \description{
 Summary function
 }
+\examples{
+data(acces)
+rdlearn_result <- rdlearn(
+  y = "elig", x = "saber11", c = "cutoff",
+  group_name = "department", data = acces,
+  fold = 5, M = c(0, 1), cost = 0
+)
+summary(rdlearn_result)
+
+}

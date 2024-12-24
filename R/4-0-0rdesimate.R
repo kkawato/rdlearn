@@ -20,11 +20,11 @@
 #'   and p-value.
 #' @importFrom rdrobust rdrobust
 #' @examples
-#' results <- rdestimate(
+#' rdestimate_result <- rdestimate(
 #'   y = "elig", x = "saber11", c = "cutoff",
 #'   group_name = "department", data = acces
 #' )
-#' print(results)
+#' print(rdestimate_result)
 #' @export
 rdestimate <- function(
     y,

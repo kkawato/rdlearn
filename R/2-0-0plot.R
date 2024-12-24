@@ -14,45 +14,33 @@
 #'   between original cutoffs and safe cutoffs.
 #'
 #' @import ggplot2
-#'
-#' @rdname plot.rdlearn
 #' @examples
-#' \dontrun{
-#' # Load example data
-#' data(acces)
-#' library(rdlearn)
-#' library(nprobust)
-#' library(nnet)
-#' library(ggplot2)
-#' library(dplyr)
-#' library(glue)
-#' library(purrr)
-#' library(tidyr)
-#'
-#' result <- rdlearn(
+#' rdlearn_result <- rdlearn(
 #'   y = "elig", x = "saber11", c = "cutoff",
 #'   group_name = "department", data = acces,
-#'   fold = 20, M = c(0, 1), cost = 0
+#'   fold = 5, M = c(0, 1), cost = 0
 #' )
-#' plot(result)
-#' }
+#' plot(rdlearn_result, opt = "dif")
+#'
 #' @export
-plot.rdlearn <- function(x, opt,...) {
+plot.rdlearn <- function(x, opt, ...) {
   if (!inherits(x, "rdlearn")) {
     stop("The 'result' argument must be an object of class 'rdlearn'.")
   }
   if (missing(opt) || !opt %in% c("safe", "dif")) {
     stop("Please specify 'opt' as 'safe' or 'dif'.")
   }
+
   var_names <- x$var_names
   y <- var_names$outcome
-  x <- var_names$run_var
+  runvar <- var_names$run_var
   c <- var_names$cutoff
   n <- x$sample
   q <- x$num_group
   org_cut <- x$org_cut
   safe_cut <- x$safe_cut
   l2norm <- x$l2norm
+  group_name <- x$group_name
 
   if (opt == "safe") {
     extended_safe_cut <- cbind(org_cut, safe_cut)
@@ -62,7 +50,7 @@ plot.rdlearn <- function(x, opt,...) {
       y_axis = rep(rev(1:q), ncol(extended_safe_cut)),
       org_cut = rep(org_cut, ncol(extended_safe_cut)),
       safe_cut = unlist(extended_safe_cut),
-      type = rep(names(extended_safe_cut), each = q)
+      type = rep(colnames(extended_safe_cut), each = q)
     )
 
     plot <- ggplot(data = plotdata, aes(type, y_axis)) +
@@ -82,7 +70,7 @@ plot.rdlearn <- function(x, opt,...) {
       ) +
       scale_y_continuous(
         breaks = seq(1, q, 1),
-        labels = rev(x$safe_cut$group)
+        labels = rev(group_name)
       ) +
       xlab("") +
       ylab("") +
@@ -98,12 +86,13 @@ plot.rdlearn <- function(x, opt,...) {
         plot.caption = element_text(hjust = 0, size = 8, face = "plain")
       )
   }
+
   if (opt == "dif") {
     plotdata <- data.frame(
       y_axis = rep(rev(1:q), ncol(safe_cut)),
       org_cut = rep(org_cut, ncol(safe_cut)),
       safe_cut = unlist(safe_cut),
-      type = rep(names(safe_cut), each = q)
+      type = rep(colnames(safe_cut), each = q)
     )
 
     plot <- ggplot(data = plotdata, aes(type, y_axis)) +
@@ -123,7 +112,7 @@ plot.rdlearn <- function(x, opt,...) {
       ) +
       scale_y_continuous(
         breaks = seq(1, q, 1),
-        labels = rev(x$safe_cut$group)
+        labels = rev(group_name)
       ) +
       xlab("") +
       ylab("") +
@@ -140,7 +129,7 @@ plot.rdlearn <- function(x, opt,...) {
       )
   }
   plot + labs(caption = paste0(
-    "Outcome: ", y, "; Running Variable: ", x, "; Cutoff: ", c, "   ",
+    "Outcome: ", y, "; Running Variable: ", runvar, "; Cutoff: ", c, "   ",
     "Sample Size: ", n, "; Number of Groups: ", q
   ))
 }

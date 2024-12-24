@@ -1,24 +1,47 @@
 test_that("rdlearn check NA", {
-  # -------------------------------------------------------------------------- #
-  # 　"acces" data with half sample size for testing
-  # -------------------------------------------------------------------------- #
-  c.vec <- sort(unique(acces_half$C))
-  q <- length(unique(acces_half$C))
-  n <- nrow(acces_half)
+  y = "elig"
+  x = "saber11"
+  c = "cutoff"
+  group_name = NULL
+  data(acces)
+  data <- acces
   fold <- 2
   trace <- TRUE
   M <- 1
   cost <- 0
 
-  acces_half <- acces_half %>%
+  Y <- data[[y]]
+  X <- data[[x]]
+  C <- data[[c]]
+  c.vec <- sort(unique(C))
+  G <- match(C, c.vec)
+  D <- as.numeric(X >= C)
+  n <- length(Y)
+  q <- length(unique(C))
+
+  # When group_name is not provided, assign a new name "Group k"
+  if (is.null(group_name)) {
+    group_name_vec <- character(q)
+    for (k in 1:q) {
+      group_name_vec[k] <- paste0("Group", k)
+    }
+  } else {
+    group_name_df <- data[[group_name]]
+    dict <- setNames(group_name_df, C)
+    group_name_vec <- sapply(c.vec, function(x) dict[[as.character(x)]])
+  }
+
+  # Add fold_id to data used for cross-fitting
+  data_all <- data.frame(Y = Y, X = X, C = C, D = D, G = G) %>%
     dplyr::mutate(fold_id = sample(1:fold, size = n, replace = TRUE)) %>%
     arrange(fold_id)
+
 
   cross_fit_output <- crossfit(
     c.vec = c.vec,
     q = q,
     fold = fold,
-    data_all = acces_half,
+    data_all = data_all,
     trace = trace
   )
 

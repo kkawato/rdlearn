@@ -33,9 +33,9 @@ This function estimates local causal effect of treatment under standard
 regression discontinuity (RD) setting.
 }
 \examples{
-results <- rdestimate(
+rdestimate_result <- rdestimate(
   y = "elig", x = "saber11", c = "cutoff",
   group_name = "department", data = acces
 )
-print(results)
+print(rdestimate_result)
 }

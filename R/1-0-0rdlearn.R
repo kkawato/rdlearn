@@ -6,7 +6,7 @@
 #' treatment assignment rules (cutoffs) are guaranteed to yield no worse overall
 #' outcomes than the existing cutoffs.
 #'
-#' Regarding the detail of the algorithm, please refer to "4 Empirical policy
+#' Regarding the detail of the algorithm, please refer to Zhang et al. (2022) "4 Empirical policy
 #' learning" and "A.2 A double robust estimator for heterogeneous cross-group
 #' differences".
 #'
@@ -41,32 +41,23 @@
 #'     \item{dif_lip_output}{The intermediate output of the cross-group differences and the smoothness parameters}
 #'     \item{distance}{A numeric vector containing the measures of difference between safe cutoffs and original cutoffs}
 #'     \item{rdestimates}{A data frame containing the result of \code{rdesimate} such as causal effect estimates.}
+#'     \item{temp_reg_df}{A data frame containing the regrets of every alternative cutoff.}
 #'   }
-#'
-#' @examples
-#' \dontrun{
-#' # Load example data
-#' data(acces)
-#' library(rdlearn)
-#' library(nprobust)
-#' library(nnet)
-#' library(ggplot2)
-#' library(dplyr)
-#' library(glue)
-#' library(purrr)
-#' library(tidyr)
-#'
-#' result <- rdlearn(
-#'   y = "elig", x = "saber11", c = "cutoff",
-#'   group_name = "department", data = acces,
-#'   fold = 20, M = c(0, 1), cost = 0
-#' )
-#' plot(result)
-#' }
 #'
 #' @importFrom stats setNames
 #' @importFrom dplyr mutate arrange
 #' @importFrom utils globalVariables
+#'
+#' @examples
+#' data(acces)
+#' rdlearn_result <- rdlearn(
+#'   y = "elig", x = "saber11", c = "cutoff",
+#'   group_name = "department", data = acces,
+#'   fold = 5, M = c(0, 1), cost = 0
+#' )
+#' summary(rdlearn_result)
+#' plot(rdlearn_result, opt = "dif")
+#'
 #' @export
 rdlearn <- function(
     y,

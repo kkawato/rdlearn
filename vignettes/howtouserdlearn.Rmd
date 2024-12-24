@@ -1,0 +1,105 @@
+---
+title: "How to use rdlearn"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{my-vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(eval = TRUE)
+```
+
+## Introduction
+The R package `rdlearn` implements the safe policy learning under regression discontinuity designs with multiple cutoffs of Zhang et al. (2022). It provides functionality to learn treatment assignment rules (cutoffs) which are guaranteed to yield no worse overall outcomes than the existing cutoffs.
+
+In this vignette, we replicate the empirical application results from Chapter 6 of Zhang et al. (2022).
+
+## Installation
+The `rdlearn` package for R can be downloaded using (requires previous installation of the [`remotes` package](https://remotes.r-lib.org/index.html)).
+
+```{r, eval = FALSE}
+remotes::install_github("kkawato/rdlearn")
+```
+
+Load the package after completed installation. 
+
+```{r, message=FALSE, warning=FALSE}
+library(rdlearn)
+```
+
+
+## Data
+For our case study, we download the `acces` dataset and apply the proposed methodology to the ACCES (Access with Quality to Higher Education) program, a national-level subsidized loan initiative in Colombia. To qualify for the ACCES program, students must achieve a high score on the SABER 11, the national high school exit exam. Each student is assigned a position score ranging from 1 to 1,000, based on each student’s position in terms of 1,000 quantiles.
+
+To select ACCES beneficiaries, the Colombian Institute for Educational Loans and Studies Abroad establishes an eligibility cutoff such that students whose position scores are higher than the cutoff become eligible for the ACCES program. The eligibility cutoff is defined separately for each department (or region) of Colombia, and it has changed over time (see Melguizo et al. (2016) for more details).
+
+The `acces` dataset includes four columns. The `elig` column contains eligibility for the ACCES program (1: eligible; 0: not eligible). The `saber11` column contains position scores from the SABER 11 exam, multiplied by −1 so that the values of the running variable above a cutoff lead to the program eligibility. The `cutoff` column contains the eligibility cutoff for each department, and the `department` column contains the names of the departments.
+
+```{r}
+library(rdlearn)
+
+# Load acces data
+data(acces)
+head(acces)
+```
+
+## Main Analysis: Cutoff change relative to the baseline for each department under different smoothness multiplicative factors
+
+First, we demonstrate how to output a summary of Table 1 in Zhang et al. (2022), which includes treatment effect estimates. This can be done as follows:
+
+```{r}
+rdestimate_result <- rdestimate(y = "elig", x = "saber11", c = "cutoff", group_name = "department", data = acces)
+print(rdestimate_result)
+```
+
+This provides basic information, including the sample size and baseline cutoff for each group, as well as the RD treatment effect and standard error. RD treatment effects marked with an asterisk (*) are significant at the 5% level.
+
+Next, we show how to obtain the results of Figure 2, which displays the cutoff change relative to the baseline for each department under different smoothness multiplicative factors (M). This can be done as follows:
+
+```{r, warning=FALSE, fig.width = 8, fig.height = 6}
+set.seed(12345)
+
+rdlearn_result <- rdlearn(data = acces, y = "elig", x = "saber11", c = "cutoff", group_name = "department", fold = 20, M = c(0, 1, 2, 4), cost = 0, trace = FALSE)
+
+summary(rdlearn_result)
+plot(rdlearn_result, opt = "dif")
+```
+
+The main function here is `rdlearn`. The arguments include `data` for the dataset, `y` for the outcome, `x` for the running variable, `c` for the cutoff, and `group_name` for the group variable. These arguments specify the data we analyze. The `fold` argument specifies the number of folds for cross-fitting. 
+For sensitivity analysis, the `M` argument specifies the multiplicative smoothness factor and `cost` specifies the treatment cost.
+
+For the `rdlearn_result` object obtained by `rdlearn`, we can use `summary` to display the RD estimates, the obtained safe cutoffs, and the measures of difference between safe cutoffs and the original cutoffs. 
+
+The `plot` function visually represents safe cutoffs as Figure 2 in Zhang et al.(2022). Setting `opt = "safe"` displays the obtained safe cutoffs, while `opt = "dif"` shows the differences between the safe and original cutoffs.
+
+The `trace` argument can be set to `TRUE` when we want to display progress during the learning process.
+
+As shown in the first column (M = 0), for most departments, the learned cutoffs are lower than the baseline cutoffs (highlighted by purple). Thus, lowering the cutoff, which increases the number of eligible students, is likely to result in a higher overall enrollment rate. This is not surprising, as financial aid typically should help students attend post-secondary institutions.
+
+However, the learned cutoffs in La Cuarjira, Cordoba, Norte De Santander, and Huila are much greater than the actual baseline cutoffs used. Referring to the summary results, only Cordoba showed a significant negative treatment effect at the cutoff, while the treatment effect of the other three departments were ambiguous. Therefore, we find that the parallel-trend assumption may be too aggressive and lead to unnecessary policy changes.
+
+## Sensitivity Analysis: Cutoff change relative to the baseline for each department with varying cost of treatment
+
+Next, we display results for another sensitivity analysis, as shown in Figure 3 in Zhang et al.(2022).
+
+We assume the utility function \( u(y, w) = y - C \times w \), where \( y \) is a binary outcome (representing the utility gain from enrollment), \( C \) is a cost parameter ranging from 0 to 1, and \( w \) is a binary treatment indicator (representing the offering of a loan). To explore the trade-off between cost and utility, we implement sensitivity analysis for \( C \).
+
+We use the `sens` function with the `rdlearn_result` object as follows:
+
+```{r, warning=FALSE, fig.width = 8, fig.height = 6}
+sens_result <- sens(rdlearn_result, M = 1, cost = c(0, 0.2, 0.4, 0.6, 0.8, 1), trace = FALSE)
+plot(sens_result, opt = "dif")
+```
+
+If we have already implemented the learning process and have the `rdlearn_result` object, the `sens` function can modify only the parameters for sensitivity analysis.
+
+The overall trend suggests that the learned policy will generally lower the cutoffs relative to the baseline for most departments when the cost is low to moderate. However, when the cost becomes high relative to the utility gain from enrollment—i.e., when \( C \geq 0.6 \)—the cutoffs start to increase significantly, resulting in more students being excluded from the program compared to the baseline. Notably, in the Distrito Capital, where the baseline cutoff is the highest, the learned cutoff eventually stabilizes and remains unchanged. This is due to the restriction that the learned cutoffs cannot exceed the maximum baseline cutoff.
+
+
+## References
+Zhang, Y., Ben-Michael, E. and Imai, K. (2022) ‘Safe Policy Learning under Regression Discontinuity Designs with Multiple Cutoffs’, arXiv [stat.ME]. Available at: [http://arxiv.org/abs/2208.13323](http://arxiv.org/abs/2208.13323).
+
+Melguizo, T., F. Sanchez, and T. Velasco (2016). Credit for low-income students and access to and academic performance in higher education in Colombia: A regression discontinuity approach. World Development, 80, 61–77.

@@ -29,23 +29,19 @@ This function performs sensitivity analysis for the \code{rdlearn} object
 under different smoothness multiplier (M) and the cost of treatment (cost).
 }
 \examples{
-\dontrun{
-# Load example data
 data(acces)
-library(rdlearn)
-library(nprobust)
-library(nnet)
-library(ggplot2)
-library(dplyr)
-library(glue)
-library(purrr)
-library(tidyr)
-result <- rdlearn(
+
+# Learn new treatment assignment cutoffs
+rdlearn_result <- rdlearn(
   y = "elig", x = "saber11", c = "cutoff",
   group_name = "department", data = acces,
-  fold = 20, M = c(0, 1), cost = 0
+  fold = 20, M = c(0, 1, 2, 4), cost = 0
 )
-sens_result <- sens(result, M = 1, cost = c(0, 0.2, 0.4, 0.6, 0.8, 1))
-plot(sens_result)
-}
+
+# Visualize the learned policies
+plot(rdlearn_result, opt = "dif")
+
+# Implement sensitivity analysis
+sens_result <- sens(rdlearn_result, M = 1, cost = c(0, 0.2, 0.4, 0.6, 0.8, 1))
+plot(sens_result, opt = "dif")
 }

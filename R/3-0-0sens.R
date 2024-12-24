@@ -14,26 +14,8 @@
 #'   printed. The default value is TRUE.
 #' @return An updated \code{rdlearn} object with the new cutoffs based on the
 #'   provided values of M and cost.
-#' @examples
-#' \dontrun{
-#' # Load example data
-#' data(acces)
-#' library(rdlearn)
-#' library(nprobust)
-#' library(nnet)
-#' library(ggplot2)
-#' library(dplyr)
-#' library(glue)
-#' library(purrr)
-#' library(tidyr)
-#' result <- rdlearn(
-#'   y = "elig", x = "saber11", c = "cutoff",
-#'   group_name = "department", data = acces,
-#'   fold = 20, M = c(0, 1), cost = 0
-#' )
-#' sens_result <- sens(result, M = 1, cost = c(0, 0.2, 0.4, 0.6, 0.8, 1))
-#' plot(sens_result)
-#' }
+#' @inherit package_rdlearn examples
+#'
 #' @export
 sens <- function(
     object,
@@ -57,16 +39,21 @@ sens <- function(
     stop("Both M and cost are vectors.")
   }
 
-  result$safe_cut <- safelearn(
-    c.vec = result$org_cut,
-    n = result$sample,
-    q = result$num_group,
+  new_result <- safelearn(
+    c.vec = object$org_cut,
+    n = object$sample,
+    q = object$num_group,
     cost = cost,
     M = M,
-    group_name_vec = result$group_name_vec,
-    dif_lip_output = result$dif_lip_output,
-    cross_fit_output = result$cross_fit_output,
+    group_name_vec = object$group_name,
+    dif_lip_output = object$dif_lip_output,
+    cross_fit_output = object$cross_fit_output,
     trace = trace
   )
-  result
+
+  object$safe_cut <- new_result$safe_cut
+  object$dif_cut <- new_result$dif_cut
+  object$temp_reg_df <- new_result$temp_reg_df
+
+  object
 }
