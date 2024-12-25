@@ -33,12 +33,8 @@
 #'
 #' @return A data frame containing the cross-fitted outcomes and other intermediate calculations.
 #'
-#' @importFrom stats predict
-#' @importFrom dplyr %>% filter ungroup select arrange
-#' @importFrom tidyr unnest
+#' @importFrom dplyr filter
 #' @importFrom nnet multinom
-#' @importFrom cli cli_progress_bar
-#' @importFrom cli cli_progress_update
 #' @keywords internal
 #' @noRd
 crossfit <- function(
@@ -53,8 +49,8 @@ crossfit <- function(
       cat(paste0("Cross fitting for fold ", k, "\n"))
     }
 
-    data_train <- data_all %>% filter(fold_id != k)
-    data_test <- data_all %>% filter(fold_id == k)
+    data_train <- filter(data_all, fold_id != k)
+    data_test <- filter(data_all, fold_id == k)
 
     # conditional prob of group
     gamfit <- nnet::multinom(formula = G ~ X, data = data_train, trace = "FALSE")
@@ -131,7 +127,6 @@ estimate_mu <- function(data_train,
                         data_test,
                         c.vec,
                         fold,
-                        g,
                         q) {
   data_test1 <- data_test %>% filter(D == 1)
   data_test0 <- data_test %>% filter(D == 0)

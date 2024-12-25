@@ -2,7 +2,6 @@
 
 S3method(plot,rdlearn)
 S3method(summary,rdlearn)
-export(calculate_distance)
 export(rdestimate)
 export(rdlearn)
 export(sens)

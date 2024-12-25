@@ -72,7 +72,7 @@ Useful links:
 
 Authors:
 \itemize{
-  \item Zhang Yi
+  \item Yi Zhang
 }
 
 }

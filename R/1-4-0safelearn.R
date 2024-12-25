@@ -30,8 +30,7 @@
 #'   combination of M and cost. The columns represent different combinations of
 #'   M and cost, and the rows correspond to the groups.
 #'
-#' @importFrom dplyr %>% filter full_join
-#' @importFrom purrr map
+#' @importFrom dplyr filter full_join
 #' @keywords internal
 #' @noRd
 safelearn <- function(
@@ -106,7 +105,7 @@ safelearn <- function(
         }
       }
 
-      data_mid <- data_all %>% filter(X >= min(c.vec), X < max(c.vec))
+      data_mid <- dplyr::filter(data_all, X >= min(c.vec), X < max(c.vec))
       regret_sum <- NULL
 
       for (g in seq(1, q, 1)) {
@@ -133,7 +132,7 @@ safelearn <- function(
       }
       c.all_df <- data.frame(c.all, group = group_name_vec)
       names(c.all_df)[1] <- paste0("M=", temp_M, ",", "C=", temp_cost)
-      safecut_all <- full_join(safecut_all, c.all_df, by = "group")
+      safecut_all <- dplyr::full_join(safecut_all, c.all_df, by = "group")
     }
   }
 

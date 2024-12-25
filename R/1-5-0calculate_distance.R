@@ -6,8 +6,8 @@
 #' @return A numeric vector containing the distance between safe cutoffs and
 #'   original cutoffs, measured in terms of the L1 norm, L2 norm, and uniform
 #'   norm.
-#'
-#' @export
+#' @keywords internal
+#' @noRd
 calculate_distance <- function(org_cut, safe_cut) {
   calculate_l1 <- function(safe_col, org_cut) {
     mean(abs(safe_col - org_cut))

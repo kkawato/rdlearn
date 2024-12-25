@@ -1,18 +1,20 @@
 Package: rdlearn
 Type: Package
-Title: Safe policy learning under RD design with multiple cutoffs
+Title: Safe Policy Learning under RD Design with Multiple Cutoffs
 Version: 0.1.0
 Authors@R:
     c(person(given = "Kentaro",
            family = "Kawato",
            role = c("cre"),
            email = "kentaro1358nohe@gmail.com"),
-    person(given = "Zhang",
-           family = "Yi",
+    person(given = "Yi",
+           family = "Zhang",
            role = c("aut")))
-Description: The rdlearn package offers tools for safe policy learning under regression discontinuity designs with multiple cutoffs. 
-    The learned cutoffs are guaranteed to perform no worse than the existing cutoffs in terms of overall outcomes.
-    Additionally, this package allows you to visualize the learned cutoffs relative to the baseline and perform sensitivity analysis on the learned policies.
+Description: The rdlearn offers tools for safe policy learning under regression 
+    discontinuity designs with multiple cutoffs. The learned cutoffs are 
+    guaranteed to perform no worse than the existing cutoffs in terms of overall 
+    outcomes.Additionally, this package allows you to visualize the learned 
+    cutoffs relative to the baseline and perform sensitivity analysis.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -22,12 +24,11 @@ BugReports: https://github.com/kkawato/rdlearn/issues
 Imports:
     nprobust,
     nnet,
+    rdrobust,
     ggplot2,
     dplyr,
     glue,
-    purrr,
     tidyr,
-    rdrobust,
     cli
 Suggests: 
     knitr,
