@@ -19,7 +19,7 @@
 #' summary(rdlearn_result)
 #'
 #' @export
-summary.rdlearn <- function(object,...) {
+summary.rdlearn <- function(object, ...) {
   # rdestimates
   cli_h1("Basic Information")
   print(object$rdestimates)

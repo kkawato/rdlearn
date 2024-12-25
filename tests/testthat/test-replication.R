@@ -143,6 +143,3 @@ test_that("replicate the result of the original code", {
     )
   )
 })
-
-
-

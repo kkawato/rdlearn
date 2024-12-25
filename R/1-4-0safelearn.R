@@ -240,7 +240,7 @@ calculate_regret <- function(data_mid,
 
   base_regret <- sum(data_mid[data_mid$G == g, "Y"])
   Iden_alt <- (sum(data_mid[data_mid$X >= c.vec[g] & data_mid$X >= c.alt & data_mid$G == g, "Y"]) +
-                 sum(data_mid[data_mid$X < c.vec[g] & data_mid$X < c.alt & data_mid$G == g, "Y"]))
+    sum(data_mid[data_mid$X < c.vec[g] & data_mid$X < c.alt & data_mid$G == g, "Y"]))
 
   data_temp1 <- data_mid[range1, ]
 
@@ -296,4 +296,3 @@ calculate_regret <- function(data_mid,
   temp_reg <- ((Iden_alt + Xi_1 + Xi_2 + cost * (c.alt >= c.vec[g]) - cost * (c.alt < c.vec[g])) / n) - (base_regret / n)
   return(temp_reg)
 }
-

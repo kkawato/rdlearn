@@ -26,5 +26,5 @@ test_that("rdlearn learns oracle policy", {
   # test
   # ---------------------------------------------------------------------------- #
   result <- rdlearn(y = "Y", x = "X", c = "C", data = simdata_A, fold = 2, M = 1, cost = 0)
-  expect_equal(result$safe_cut[1,1], -850, tolerance = 10)
+  expect_equal(result$safe_cut[1, 1], -850, tolerance = 10)
 })

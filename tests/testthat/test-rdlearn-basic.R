@@ -1,8 +1,8 @@
 test_that("rdlearn check NA", {
-  y = "elig"
-  x = "saber11"
-  c = "cutoff"
-  group_name = NULL
+  y <- "elig"
+  x <- "saber11"
+  c <- "cutoff"
+  group_name <- NULL
   data(acces)
   data <- acces
   fold <- 2

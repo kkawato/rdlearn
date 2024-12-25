@@ -199,11 +199,12 @@ estimate_mu <- function(data_train,
 
     if (length(eval_dat) > 0) {
       tryCatch(
-        {suppressWarnings({
-          estimate <- nprobust::lprobust(y, x, eval = eval_dat, bwselect = "imse-dpi")$Estimate[, 5]
-          estimate[is.na(estimate)] <- 0
-          mu_all[[name]] <- estimate
-        })
+        {
+          suppressWarnings({
+            estimate <- nprobust::lprobust(y, x, eval = eval_dat, bwselect = "imse-dpi")$Estimate[, 5]
+            estimate[is.na(estimate)] <- 0
+            mu_all[[name]] <- estimate
+          })
         },
         error = function(e) {
           mu_all[[name]] <- 0

@@ -81,13 +81,13 @@ estimate_dif_lip <- function(
         tryCatch(
           {
             suppressWarnings({
-            dif[g, g.pr] <- nprobust::lprobust(temp.vc[, "psout"],
-              temp.vc[, "X"],
-              eval = eval_point,
-              deriv = 0,
-              p = 1,
-              bwselect = "mse-dpi"
-            )$Estimate[, 5]
+              dif[g, g.pr] <- nprobust::lprobust(temp.vc[, "psout"],
+                temp.vc[, "X"],
+                eval = eval_point,
+                deriv = 0,
+                p = 1,
+                bwselect = "mse-dpi"
+              )$Estimate[, 5]
             })
           },
           error = function(e) {
@@ -98,13 +98,13 @@ estimate_dif_lip <- function(
         tryCatch(
           {
             suppressWarnings({
-            Lip[g, g.pr] <- abs(nprobust::lprobust(temp.vc[, "psout"],
-              temp.vc[, "X"],
-              eval = eval_point,
-              deriv = 1,
-              p = 2,
-              bwselect = "mse-dpi"
-            )$Estimate[, 5])
+              Lip[g, g.pr] <- abs(nprobust::lprobust(temp.vc[, "psout"],
+                temp.vc[, "X"],
+                eval = eval_point,
+                deriv = 1,
+                p = 2,
+                bwselect = "mse-dpi"
+              )$Estimate[, 5])
             })
           },
           error = function(e) {
