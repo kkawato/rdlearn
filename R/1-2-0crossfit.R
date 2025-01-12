@@ -58,7 +58,12 @@ crossfit <- function(
     data_test[, paste0("pseudo.ps", seq(1, q, 1))] <- predict(gamfit, newdata = data_test, "probs")
 
     for (g in seq(1, q, 1)) {
-      mu_all <- estimate_mu(data_train, data_test, c.vec, k, g, q)
+      mu_all <- estimate_mu(data_train,
+                            data_test,
+                            c.vec,
+                            k,
+                            g,
+                            q)
 
       pseudo1 <- (data_test$D == 1) & (data_test$X >= c.vec[g])
       pseudo0 <- (data_test$D == 0) & (data_test$X < c.vec[g])
@@ -127,6 +132,7 @@ estimate_mu <- function(data_train,
                         data_test,
                         c.vec,
                         fold,
+                        g,
                         q) {
   data_test1 <- data_test %>% filter(D == 1)
   data_test0 <- data_test %>% filter(D == 0)

@@ -29,7 +29,7 @@
 #'   \item{Lip_0}{A matrix of estimated Lipschitz constants for the control
 #'   group (D = 0).}
 #' @importFrom nprobust lprobust
-#' @importFrom dplyr %>% filter
+#' @importFrom dplyr filter
 #' @keywords internal
 #' @noRd
 
@@ -56,9 +56,9 @@ estimate_dif_lip <- function(
     for (g in seq(1, q - 1, 1)) {
       for (g.pr in seq(g + 1, q, 1)) {
         if (d == 1) {
-          temp.dat <- cross_fit_output %>% filter(D == 1 & X >= max(c.vec[g], c.vec[g.pr]))
+          temp.dat <- filter(cross_fit_output, D == 1 & X >= max(c.vec[g], c.vec[g.pr]))
         } else {
-          temp.dat <- cross_fit_output %>% filter(D == 0 & X < min(c.vec[g], c.vec[g.pr]))
+          temp.dat <- filter(cross_fit_output, D == 0 & X < min(c.vec[g], c.vec[g.pr]))
         }
 
         psout <- temp.dat[, paste0("pseudo.", g)] - temp.dat[, paste0("pseudo.", g.pr)] +

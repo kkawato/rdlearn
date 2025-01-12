@@ -32,7 +32,7 @@ library(rdlearn)
 
 
 ## Data
-For our case study, we download the `acces` dataset and apply the proposed methodology to t*he ACCES (Access with Quality to Higher Education) program*, a national-level subsidized loan initiative in Colombia. To qualify for the ACCES program, students must achieve a high score on *the SABER 11*, the national high school exit exam. Each student is assigned a position score ranging from 1 to 1,000, based on each student’s position in terms of 1,000 quantiles.
+For our case study, we download the `acces` dataset and apply the proposed methodology to *the ACCES (Access with Quality to Higher Education) program*, a national-level subsidized loan initiative in Colombia. To qualify for the ACCES program, students must achieve a high score on *the SABER 11*, the national high school exit exam. Each student is assigned a position score ranging from 1 to 1,000, based on each student’s position in terms of 1,000 quantiles.
 
 To select ACCES beneficiaries, the Colombian Institute for Educational Loans and Studies Abroad establishes an *eligibility cutoff* such that students whose position scores are higher than the cutoff become eligible for the ACCES program. The eligibility cutoff is defined separately for each department (or region) of Colombia, and it has changed over time (see Melguizo et al. (2016) for more details).
 

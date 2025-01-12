@@ -49,7 +49,7 @@ test_that("check_input fails with missing or incorrect 'y'", {
 })
 
 test_that("check_input fails when variables are missing in 'data'", {
-  acces_modified <- acces %>% select(-saber11)
+  acces_modified <- acces %>% dplyr::select(-saber11)
   expect_error(check_input(
     y = "elig",
     x = "saber11",

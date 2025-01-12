@@ -1,7 +1,12 @@
 # The origianl data and the original code
+# you need to download the original data `puntos_corte_2000_2014` and `ACCES_credit_WD_data`
+library("dataverse")
+library("tibble") # to see dataframes in tidyverse-form
+puntos_corte_2000_2014 <- get_dataframe_by_name()
+ACCES_credit_WD_data <- get_dataframe_by_name()
+
 
 ########## clean the data #############
-# the original data `puntos_corte_2000_2014` and `ACCES_credit_WD_data` are saved in rdleran/inst/extdata
 cut.v <- puntos_corte_2000_2014 %>%
   filter(anho_corte == 2010) %>%
   select(icfes_departamento = cod_depto, corte_univ) %>%
