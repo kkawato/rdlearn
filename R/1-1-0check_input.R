@@ -15,6 +15,8 @@
 #'   cutoff variables.
 #' @param trace A logical value that controls whether to display the progress of
 #'   cross-fitting and regret calculation.
+#'
+#' @return \value{None}
 #' @keywords internal
 #' @noRd
 check_input <- function(

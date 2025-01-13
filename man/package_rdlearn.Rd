@@ -75,7 +75,7 @@ Colombia: A Regression Discontinuity Approach’, World Development, 80(1):
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/kkawato/rdleran}
+  \item \url{https://github.com/kkawato/rdlearn}
   \item Report bugs at \url{https://github.com/kkawato/rdlearn/issues}
 }
 
