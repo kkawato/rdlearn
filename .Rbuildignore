@@ -4,3 +4,4 @@
 ^LICENSE\.md$
 ^\.devcontainer$
 ^data-raw$
+^cran-comments\.md$

@@ -30,5 +30,6 @@ rdlearn_result <- rdlearn(
   fold = 5, M = c(0, 1), cost = 0
 )
 summary(rdlearn_result)
+plot(rdlearn_result, opt = "dif")
 
 }

@@ -1,4 +1,5 @@
 # The origianl data and the original code
+
 # you need to download the original data `puntos_corte_2000_2014` and `ACCES_credit_WD_data`
 library("dataverse")
 library("tibble") # to see dataframes in tidyverse-form

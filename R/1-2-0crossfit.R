@@ -35,6 +35,7 @@
 #'
 #' @importFrom dplyr filter
 #' @importFrom nnet multinom
+#' @importFrom stats predict
 #' @keywords internal
 #' @noRd
 crossfit <- function(
@@ -54,7 +55,7 @@ crossfit <- function(
 
     # conditional prob of group
     gamfit <- nnet::multinom(formula = G ~ X, data = data_train, trace = "FALSE")
-    ps <- predict(gamfit, newdata = data_test, "probs")
+    ps <- stats::predict(gamfit, newdata = data_test, "probs")
     data_test[, paste0("pseudo.ps", seq(1, q, 1))] <- predict(gamfit, newdata = data_test, "probs")
 
     for (g in seq(1, q, 1)) {

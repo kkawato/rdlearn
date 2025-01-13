@@ -6,6 +6,12 @@ output: github_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(eval = TRUE)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
 ```
 
 # rdlearn
@@ -25,12 +31,17 @@ The R package `rdlearn` implements the *safe policy learning under regression di
 ## Installation
 The `rdlearn` package for R can be downloaded using (requires previous installation of the [`remotes` package](https://remotes.r-lib.org/index.html)).
 
+Install the latest release from CRAN:
+```{r, eval = FALSE}
+remotes::packages("DoubleML")
+```
+
+Install the development version from GitHub:
 ```{r, eval = FALSE}
 remotes::install_github("kkawato/rdlearn")
 ```
 
 Load the package after completed installation. 
-
 ```{r, message=FALSE, warning=FALSE}
 library(rdlearn)
 ```

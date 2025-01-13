@@ -50,14 +50,16 @@ data(acces)
 rdlearn_result <- rdlearn(
   y = "elig", x = "saber11", c = "cutoff",
   group_name = "department", data = acces,
-  fold = 20, M = c(0, 1, 2, 4), cost = 0
+  fold = 5, M = c(0, 1), cost = 0
 )
 
+# Summarise the learned policies
+summary(rdlearn_result)
 # Visualize the learned policies
 plot(rdlearn_result, opt = "dif")
 
 # Implement sensitivity analysis
-sens_result <- sens(rdlearn_result, M = 1, cost = c(0, 0.2, 0.4, 0.6, 0.8, 1))
+sens_result <- sens(rdlearn_result, M = 1, cost = c(0,1))
 plot(sens_result, opt = "dif")
 }
 \references{
@@ -79,7 +81,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Kentaro Kawato \email{kentaro1358nohe@gmail.com}
+\strong{Maintainer}: Kentaro Kawato \email{kentaro1358nohe@gmail.com} [copyright holder]
 
 Authors:
 \itemize{
