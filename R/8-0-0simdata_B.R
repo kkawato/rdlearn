@@ -10,7 +10,7 @@
 #'   \item{X}{running variable}
 #'   \item{C}{cutoff value}
 #'   }
-#' @references Zhang, Y., Ben-Michael, E. and Imai, K. (2022) ‘Safe Policy
-#'   Learning under Regression Discontinuity Designs with Multiple Cutoffs’,
+#' @references Zhang, Y., Ben-Michael, E. and Imai, K. (2022) 'Safe Policy
+#'   Learning under Regression Discontinuity Designs with Multiple Cutoffs',
 #'   arXiv [stat.ME]. Available at: \url{http://arxiv.org/abs/2208.13323}.
 "simdata_B"

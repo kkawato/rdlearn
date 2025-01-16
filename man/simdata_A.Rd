@@ -21,8 +21,8 @@ scenario A described in Appendix D of Zhang et al. (2022). In this scenario,
 the baseline policy (cutoff) is set equal to the oracle policy.
 }
 \references{
-Zhang, Y., Ben-Michael, E. and Imai, K. (2022) ‘Safe Policy
-  Learning under Regression Discontinuity Designs with Multiple Cutoffs’,
+Zhang, Y., Ben-Michael, E. and Imai, K. (2022) 'Safe Policy
+  Learning under Regression Discontinuity Designs with Multiple Cutoffs',
   arXiv [stat.ME]. Available at: \url{http://arxiv.org/abs/2208.13323}.
 }
 \keyword{datasets}
