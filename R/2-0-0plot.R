@@ -14,13 +14,7 @@
 #'   between original cutoffs and safe cutoffs.
 #'
 #' @import ggplot2
-#' @examples
-#' rdlearn_result <- rdlearn(
-#'   y = "elig", x = "saber11", c = "cutoff",
-#'   group_name = "department", data = acces,
-#'   fold = 5, M = c(0, 1), cost = 0
-#' )
-#' plot(rdlearn_result, opt = "dif")
+#' @inherit package_rdlearn examples
 #'
 #' @export
 plot.rdlearn <- function(x, opt, ...) {

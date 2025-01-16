@@ -199,8 +199,9 @@ extrapolation <- function(x.train,
     dif <- dif_0[g, g.pr]
     eval.main <- unique(C[G == min(g, g.pr)])
   }
-
+  suppressWarnings({
   lower <- sapply(x.train, function(x) max(-1, max(dif - Lip * abs(x - eval.main))))
+  })
   return(lower)
 }
 

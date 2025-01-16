@@ -1,7 +1,7 @@
 #' @title Safe Policy Learning for Regression Discontinuity Designs
 #'
 #' @description The \code{rdlearn} package provides tools for safe policy
-#' learning under regression discontinuity designs with multiple cutoffs.
+#'   learning under regression discontinuity designs with multiple cutoffs.
 #'
 #' @section Package Functions: The \code{rdlearn} package offers the following
 #'   main functions:
@@ -36,26 +36,44 @@
 #'   and her co-authors for sharing the dataset (Melguizo et al. (2016)).
 #'
 #' @references Zhang, Y., Ben-Michael, E. and Imai, K. (2022) ‘Safe Policy
-#' Learning under Regression Discontinuity Designs with Multiple Cutoffs’, arXiv
-#' [stat.ME]. Available at: \url{http://arxiv.org/abs/2208.13323}.
+#'   Learning under Regression Discontinuity Designs with Multiple Cutoffs’,
+#'   arXiv [stat.ME]. Available at: \url{http://arxiv.org/abs/2208.13323}.
 #'
-#' Melguizo, F., Sanchez, F., and Velasco, T. (2016) ‘Credit for Low-Income
-#' Students and Access to and Academic Performance in Higher Education in
-#' Colombia: A Regression Discontinuity Approach’, World Development, 80(1):
-#' 61–77.
+#'   Melguizo, F., Sanchez, F., and Velasco, T. (2016) ‘Credit for Low-Income
+#'   Students and Access to and Academic Performance in Higher Education in
+#'   Colombia: A Regression Discontinuity Approach’, World Development, 80(1):
+#'   61–77.
 #'
 #' @examples
-#' data(acces)
+#' # This dataset can also be accessed with data(simdata_A).
+#' n <- 500
+#' X <- runif(n, -1000, -1)
+#' G <- 2 * as.numeric(I(0.01 * X + 5 + rnorm(n, sd = 10) > 0)) +
+#' as.numeric(I(0.01 * X + 5 + rnorm(n, sd = 10) <= 0))
+#' c1 <- -850
+#' c0 <- -571
+#' C <- ifelse(G == 1, c1, c0)
+#' D <- as.numeric(X >= C)
+#' coef0 <- c(-1.992230e+00, -1.004582e-02, -1.203897e-05, -4.587072e-09)
+#' coef1 <- c(9.584361e-01, 5.308251e-04, 1.103375e-06, 1.146033e-09)
+#' Px <- poly(X - 735.4334 - c1, degree = 3, raw = TRUE)
+#' # In the scenario B, Px = poly(X,degree=3,raw=TRUE)
+#' Px <- cbind(rep(1, nrow(Px)), Px)
+#' EY0 <- Px %*% coef0
+#' EY1 <- Px %*% coef1
+#' d <- 0.2 + exp(0.01 * X) * (1 - G) + 0.3 * (1 - D)
+#' Y <- EY0 * (1 - D) + EY1 * D - d * as.numeric(I(G == 1)) + rnorm(n, sd = 0.3)
+#' simdata_A <- data.frame(Y = Y, X = X, C = C)
 #'
 #' # Learn new treatment assignment cutoffs
 #' rdlearn_result <- rdlearn(
-#'   y = "elig", x = "saber11", c = "cutoff",
-#'   group_name = "department", data = acces,
-#'   fold = 5, M = c(0, 1), cost = 0
+#'   y = "Y", x = "X", c = "C", data = simdata_A,
+#'   fold = 2, M = c(0, 1), cost = 0
 #' )
 #'
 #' # Summarise the learned policies
 #' summary(rdlearn_result)
+#'
 #' # Visualize the learned policies
 #' plot(rdlearn_result, opt = "dif")
 #'

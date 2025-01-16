@@ -9,7 +9,7 @@
 #'   \code{\link{rdlearn}} and the difference between them and the original
 #'   cutoffs.
 #' @importFrom cli cli_h1
-#' @inherit rdlearn examples
+#' @inherit package_rdlearn examples
 #'
 #' @export
 summary.rdlearn <- function(object, ...) {

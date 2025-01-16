@@ -48,15 +48,7 @@
 #' @importFrom dplyr mutate arrange
 #' @importFrom utils globalVariables
 #'
-#' @examples
-#' data(acces)
-#' rdlearn_result <- rdlearn(
-#'   y = "elig", x = "saber11", c = "cutoff",
-#'   group_name = "department", data = acces,
-#'   fold = 5, M = c(0, 1), cost = 0
-#' )
-#' summary(rdlearn_result)
-#' plot(rdlearn_result, opt = "dif")
+#' @inherit package_rdlearn examples
 #'
 #' @export
 rdlearn <- function(

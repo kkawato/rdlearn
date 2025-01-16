@@ -1,10 +1,12 @@
 test_that("rdlearn check NA", {
-  y <- "elig"
-  x <- "saber11"
-  c <- "cutoff"
+  y <- "Y"
+  x <- "X"
+  c <- "C"
   group_name <- NULL
-  data(acces)
-  data <- acces
+
+  data("simdata_A")
+
+  data <- simdata_A
   fold <- 2
   trace <- TRUE
   M <- 1
@@ -19,7 +21,7 @@ test_that("rdlearn check NA", {
   n <- length(Y)
   q <- length(unique(C))
 
-  # When group_name is not provided, assign a new name "Group k"
+
   if (is.null(group_name)) {
     group_name_vec <- character(q)
     for (k in 1:q) {
@@ -31,11 +33,9 @@ test_that("rdlearn check NA", {
     group_name_vec <- sapply(c.vec, function(x) dict[[as.character(x)]])
   }
 
-  # Add fold_id to data used for cross-fitting
   data_all <- data.frame(Y = Y, X = X, C = C, D = D, G = G) %>%
     dplyr::mutate(fold_id = sample(1:fold, size = n, replace = TRUE)) %>%
     arrange(fold_id)
-
 
   cross_fit_output <- crossfit(
     c.vec = c.vec,
@@ -121,5 +121,12 @@ test_that("rdlearn check NA", {
   for (el in expected_elements) {
     expect_true(el %in% names(safelearn_out), info = paste("Missing element:", el))
   }
-  expect_false(all(is.na(safelearn_out$safe_cut)), info = "All values in safe_cut are NA")
+  expect_false(any(is.na(safelearn_out$safe_cut)), info = "safe_cut contains NA values")
 })
+
+
+
+
+
+
+
