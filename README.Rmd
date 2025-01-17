@@ -20,38 +20,43 @@ knitr::opts_chunk$set(
 
 <!-- badges: end -->
 
--   Author: Kentaro Kawato, Zhang Yi
--   Reference: Zhang Yi, Eli Ben-Michael, and Kosuke Imai. 2023. “Safe Policy Learning under Regression Discontinuity Designs with Multiple Cutoffs.” arXiv [stat.ME].<http://arxiv.org/abs/2208.13323>.
--   Package manual: pdf file
+- Author: Kentaro Kawato, Zhang Yi
+- Reference: Zhang Yi, Eli Ben-Michael, and Kosuke Imai. 2023. “Safe Policy Learning under Regression Discontinuity Designs with Multiple Cutoffs.” arXiv [stat.ME].<http://arxiv.org/abs/2208.13323>.
+- Package manual: pdf file
 
 ## Introduction
+
 The R package `rdlearn` implements the *safe policy learning under regression discontinuity designs with multiple cutoffs* of Zhang et al. (2022). It provides functions to learn treatment assignment rules (cutoffs) which are guaranteed to yield no worse overall outcomes than the existing cutoffs.
 
-This document demonstrates how to use the main functions of `rdlearn.` For the replication of the empirical results of Zhang et al, please refer to vignette.
+This document demonstrates how to use the main functions of `rdlearn.` For the replication of the empirical results of Zhang et al., please refer to the vignette.
 
 ## Installation
+
 The `rdlearn` package for R can be downloaded using (requires previous installation of the [`remotes` package](https://remotes.r-lib.org/index.html)).
 
 Install the latest release from CRAN:
+
 ```{r, eval = FALSE}
 remotes::packages("DoubleML")
 ```
 
 Install the development version from GitHub:
+
 ```{r, eval = FALSE}
 remotes::install_github("kkawato/rdlearn")
 ```
 
-Load the package after completed installation. 
+Load the package after the installation is complete.
+
 ```{r, message=FALSE, warning=FALSE}
 library(rdlearn)
 ```
 
-
 ## Data
-We can download the `acces` dataset and apply the proposed methodology to the ACCES (Access with Quality to Higher Education) program, a national-level subsidized loan initiative in Colombia. 
 
-The `acces` data set includes four columns. The `elig` column contains *outcome* (eligibility for the ACCES program (1: eligible; 0: not eligible). The `saber11` column contains *running variable* (position scores from the SABER 11 exam). The `cutoff` column contains the eligibility *cutoff* for each department, and the `department` column contains the names of the departments.
+We can download the `acces` dataset and apply the proposed methodology to the ACCES (Access with Quality to Higher Education) program, a national-level subsidized loan initiative in Colombia.
+
+The `acces` dataset includes four columns. The `elig` column contains the *outcome* (eligibility for the ACCES program (1: eligible; 0: not eligible). The `saber11` column contains *running variable* (position scores from the SABER 11 exam). The `cutoff` column contains the eligibility *cutoff* for each department, and the `department` column contains the names of the departments.
 
 ```{r}
 library(rdlearn)
@@ -72,9 +77,9 @@ print(rdestimate_result)
 
 This provides basic information, including the sample size and baseline cutoff for each group, as well as the RD treatment effect and standard error. RD treatment effects marked with an asterisk (*) are significant at the 5% level.
 
-Next, we show how to obtain the safe cutoffs by the proposed algorithm. We use the simulation data B in the Appendix D of Zhang et al. (2022). For the replication of the paper, please refer to the vignette. 
+Next, we show how to obtain the safe cutoffs by the proposed algorithm. We use the simulation data B in the Appendix D of Zhang et al. (2022). For the replication of the paper, please refer to the vignette.
 
-Learning safe cutoffs can be done as follows:
+Safe cutoffs can be learned as follows:
 
 ```{r, warning=FALSE, fig.width = 8, fig.height = 6}
 data(simdata_B)
@@ -87,13 +92,13 @@ summary(rdlearn_result)
 plot(rdlearn_result, opt = "dif")
 ```
 
-This plot shows the cutoff change relative to the baseline for each department under different smoothness multiplicative factors (`M`). 
+This plot shows the cutoff change relative to the baseline for each department under different smoothness multiplicative factors (`M`).
 
 The main function here is `rdlearn`. The arguments include `data` for the *data set*, `y` for the column name of *outcome*, `x` for the column name of *running variable*, `c` for the column name of *cutoff*, and `group_name` for the column name of *group*. These arguments specify the data we analyze. The `fold` argument specifies *the number of folds for cross-fitting*.
 
 For sensitivity analysis, the `M` argument specifies *the multiplicative smoothness factor* and `cost` specifies *the treatment cost*.
 
-For the `rdlearn_result` object obtained by `rdlearn`, we can use `summary` to display the RD estimates, the obtained safe cutoffs, and the measures of difference between safe cutoffs and the original cutoffs. 
+For the `rdlearn_result` object obtained by `rdlearn`, we can use `summary` to display the RD estimates, the obtained safe cutoffs, and the measures of difference between safe cutoffs and the original cutoffs.
 
 The `plot` function displays safe cutoffs in a visually clear way. Setting `plot(result, opt = "safe")` shows *the obtained safe cutoffs*, while `plot(result,opt = "dif")` shows *the differences between the safe and original cutoffs*.
 
@@ -112,11 +117,12 @@ sens_result <- sens(rdlearn_result, M = 1, cost = c(0, 1), trace = FALSE)
 plot(sens_result, opt = "dif")
 ```
 
-This plot shows the cutoff change relative to the baseline for each department under different `cost`. 
+This plot shows the cutoff change relative to the baseline for each department under different `cost`.
 
 When we have already implemented the learning process and have the `rdlearn_result` object, the `sens` function can modify only the parameters for sensitivity analysis.
 
 ## References
+
 Zhang, Y., Ben-Michael, E. and Imai, K. (2022) ‘Safe Policy Learning under Regression Discontinuity Designs with Multiple Cutoffs’, arXiv [stat.ME]. Available at: [http://arxiv.org/abs/2208.13323](http://arxiv.org/abs/2208.13323).
 
 Melguizo, T., F. Sanchez, and T. Velasco (2016). Credit for low-income students and access to and academic performance in higher education in Colombia: A regression discontinuity approach. World Development, 80, 61–77.
