@@ -21,7 +21,9 @@ knitr::opts_chunk$set(
 <!-- badges: end -->
 
 - Author: Kentaro Kawato, Zhang Yi
-- Reference: Zhang Yi, Eli Ben-Michael, and Kosuke Imai. 2023. “Safe Policy Learning under Regression Discontinuity Designs with Multiple Cutoffs.” arXiv [stat.ME].<http://arxiv.org/abs/2208.13323>.
+- Reference: Zhang Yi, Eli Ben-Michael, and Kosuke Imai. 2023. [“Safe Policy
+  Learning under Regression Discontinuity Designs with Multiple Cutoffs.”](http://arxiv.org/abs/2208.13323) 
+  arXiv: 2208.13323.
 - Package manual: pdf file
 
 ## Introduction
@@ -71,7 +73,13 @@ head(acces)
 First, we demonstrate how to output *a summary of the data set*, which includes treatment effect estimates (such as Table 1 in Zhang et al. (2022)). This can be done as follows:
 
 ```{r}
-rdestimate_result <- rdestimate(y = "elig", x = "saber11", c = "cutoff", group_name = "department", data = acces)
+rdestimate_result <- rdestimate(
+  y = "elig",
+  x = "saber11",
+  c = "cutoff",
+  group_name = "department",
+  data = acces
+)
 print(rdestimate_result)
 ```
 
@@ -82,6 +90,7 @@ Next, we show how to obtain the safe cutoffs by the proposed algorithm. We use t
 Safe cutoffs can be learned as follows:
 
 ```{r, warning=FALSE, fig.width = 8, fig.height = 6}
+set.seed(1234)
 data(simdata_B)
 head(simdata_B)
 
