@@ -39,7 +39,7 @@ The `rdlearn` package for R can be downloaded using (requires previous installat
 Install the latest release from CRAN:
 
 ```{r, eval = FALSE}
-remotes::packages("DoubleML")
+remotes::packages("rdlearn")
 ```
 
 Install the development version from GitHub:

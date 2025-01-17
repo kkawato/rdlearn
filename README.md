@@ -34,7 +34,7 @@ package](https://remotes.r-lib.org/index.html)).
 Install the latest release from CRAN:
 
 ``` r
-remotes::packages("DoubleML")
+remotes::packages("rdlearn")
 ```
 
 Install the development version from GitHub:
