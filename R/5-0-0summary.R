@@ -30,4 +30,6 @@ summary.rdlearn <- function(object, ...) {
   # measures of differences
   cli_h1("Measures of Difference")
   print(object$distance)
+
+  return(invisible(object))
 }
