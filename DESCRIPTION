@@ -13,7 +13,7 @@ Authors@R:
 Description: Implements safe policy learning under regression discontinuity designs 
     with multiple cutoffs, based on Zhang et al. (2022) <doi:10.48550/arXiv.2208.13323>. 
     The learned cutoffs are guaranteed  to perform no worse than the existing 
-    cutoffs in terms of overall outcomes. The 'rdlearn 'package also includes 
+    cutoffs in terms of overall outcomes. The 'rdlearn' package also includes 
     features for visualizing the learned cutoffs relative to the baseline and 
     conducting sensitivity analyses.
 License: MIT + file LICENSE
