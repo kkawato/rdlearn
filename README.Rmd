@@ -94,8 +94,10 @@ set.seed(1234)
 data(simdata_B)
 head(simdata_B)
 
-rdlearn_result <- rdlearn(data = simdata_B, y = "Y", x = "X", c = "C", 
-                          fold = 2, M = c(0, 1), cost = 0, trace = FALSE)
+rdlearn_result <- rdlearn(
+  data = simdata_B, y = "Y", x = "X", c = "C",
+  fold = 2, M = c(0, 1), cost = 0, trace = FALSE
+)
 
 summary(rdlearn_result)
 plot(rdlearn_result, opt = "dif")

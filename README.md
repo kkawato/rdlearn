@@ -4,7 +4,6 @@
 # rdlearn
 
 <!-- badges: start -->
-
 <!-- badges: end -->
 
 - Author: Kentaro Kawato, Zhang Yi
@@ -17,11 +16,11 @@
 
 The R package `rdlearn` implements the *safe policy learning under
 regression discontinuity designs with multiple cutoffs* of Zhang et
-al. (2022). It provides functions to learn treatment assignment rules
-(cutoffs) which are guaranteed to yield no worse overall outcomes than
-the existing cutoffs.
+al. (2022). It provides functions to learn improved treatment assignment
+rules (cutoffs) which are guaranteed to yield no worse overall outcomes
+than the existing cutoffs.
 
-This document demonstrates how to use the main functions of `rdlearn.`
+This document demonstrates how to use the main functions of `rdlearn`.
 For the replication of the empirical results of Zhang et al., please
 refer to the vignette.
 
@@ -81,9 +80,9 @@ head(acces)
 
 ## Main Analysis: Cutoff change relative to the baseline for each department under different smoothness multiplicative factors
 
-First, we demonstrate how to output *a summary of the data set*, which
-includes treatment effect estimates (such as Table 1 in Zhang et
-al. (2022)). This can be done as follows:
+First, we demonstrate how to output *a summary of the dataset*, which
+includes local treatment effect estimates at the baseline cutoffs (such
+as Table 1 in Zhang et al. (2022)). This can be done as follows:
 
 ``` r
 rdestimate_result <- rdestimate(
@@ -142,6 +141,9 @@ head(simdata_B)
 #> 4 0.5288705 -613.2297 -571
 #> 5 0.3053146 -124.8751 -571
 #> 6 1.0728329 -410.1478 -571
+```
+
+``` r
 
 rdlearn_result <- rdlearn(data = simdata_B, y = "Y", x = "X", c = "C", 
                           fold = 2, M = c(0, 1), cost = 0, trace = FALSE)
@@ -168,16 +170,19 @@ summary(rdlearn_result)
 #> l1  106.1026 32.52869
 #> l2  148.4340 44.40571
 #> max 209.9048 62.75702
+```
+
+``` r
 plot(rdlearn_result, opt = "dif")
 ```
 
 <img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
 
-This plot shows the cutoff change relative to the baseline for each
+This plot shows the cutoff changes relative to the baseline for each
 department under different smoothness multiplicative factors (`M`).
 
 The main function here is `rdlearn`. The arguments include `data` for
-the *data set*, `y` for the column name of *outcome*, `x` for the column
+the *dataset*, `y` for the column name of *outcome*, `x` for the column
 name of *running variable*, `c` for the column name of *cutoff*, and
 `group_name` for the column name of *group*. These arguments specify the
 data we analyze. The `fold` argument specifies *the number of folds for
@@ -186,29 +191,28 @@ cross-fitting*.
 For sensitivity analysis, the `M` argument specifies *the multiplicative
 smoothness factor* and `cost` specifies *the treatment cost*.
 
-For the `rdlearn_result` object obtained by `rdlearn`, we can use
+For an `rdlearn_result` object obtained by `rdlearn`, we can use
 `summary` to display the RD estimates, the obtained safe cutoffs, and
-the measures of difference between safe cutoffs and the original
-cutoffs.
+the differences between the safe and original cutoffs.
 
-The `plot` function displays safe cutoffs in a visually clear way.
-Setting `plot(result, opt = "safe")` shows *the obtained safe cutoffs*,
+The `plot` function provides a clear visualization of the safe cutoffs.
+Using `plot(result, opt = "safe")` shows *the obtained safe cutoffs*,
 while `plot(result,opt = "dif")` shows *the differences between the safe
 and original cutoffs*.
 
-The `trace` argument can be set to `TRUE` when we want to display
-progress during the learning process.
+The `trace` argument can be set to `TRUE` to show progress during the
+learning process.
 
-## Sensitivity Analysis: Cutoff change relative to the baseline for each department with varying cost of treatment
+## Sensitivity Analysis: Cutoff changes relative to the baseline for each department with varying treatment costs
 
 Next, we implement another *sensitivity analysis*.
 
 In the case of Zhang et al.(2022), we assume the utility function
-$`u(y, w) = y - C \times w`$, where $`y`$ is a binary outcome
-(representing the utility gain from enrollment), $`C`$ is a cost
-parameter ranging from 0 to 1, and $`w`$ is a binary treatment indicator
-(representing the offering of a loan). To explore the trade-off between
-cost and utility, we implement sensitivity analysis for cost: $`C`$.
+$u(y, w) = y - C \times w$, where $y$ is a binary outcome (representing
+the utility gain from enrollment), $C$ is a cost parameter ranging from
+0 to 1, and $w$ is a binary treatment indicator (representing the
+offering of a loan). To explore the trade-off between cost and utility,
+we conduct a sensitivity analysis for the cost parameter: $C$.
 
 We use the `sens` function with the `rdlearn_result` object as follows:
 
@@ -220,11 +224,11 @@ plot(sens_result, opt = "dif")
 <img src="man/figures/README-unnamed-chunk-7-1.png" width="100%" />
 
 This plot shows the cutoff change relative to the baseline for each
-department under different `cost`.
+department under different values of `cost`.
 
-When we have already implemented the learning process and have the
-`rdlearn_result` object, the `sens` function can modify only the
-parameters for sensitivity analysis.
+If the learning process has already been implemented and the
+`rdlearn_result` object is available, the `sens` function can be used to
+modify parameters specifically for sensitivity analysis.
 
 ## References
 
