@@ -55,8 +55,8 @@ crossfit <- function(
 
     # conditional prob of group
     gamfit <- nnet::multinom(formula = G ~ X, data = data_train, trace = "FALSE")
-    ps <- stats::predict(gamfit, newdata = data_test, "probs")
-    data_test[, paste0("pseudo.ps", seq(1, q, 1))] <- predict(gamfit, newdata = data_test, "probs")
+    # ps <- stats::predict(gamfit, newdata = data_test, "probs")
+    data_test[, paste0("pseudo.ps", seq(1, q, 1))] <- stats::predict(gamfit, newdata = data_test, "probs")
 
     for (g in seq(1, q, 1)) {
       mu_all <- estimate_mu(
