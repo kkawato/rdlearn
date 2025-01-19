@@ -200,7 +200,7 @@ extrapolation <- function(x.train,
     eval.main <- unique(C[G == min(g, g.pr)])
   }
   suppressWarnings({
-  lower <- sapply(x.train, function(x) max(-1, max(dif - Lip * abs(x - eval.main))))
+    lower <- sapply(x.train, function(x) max(-1, max(dif - Lip * abs(x - eval.main))))
   })
   return(lower)
 }

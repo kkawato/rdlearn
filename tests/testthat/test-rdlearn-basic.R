@@ -123,10 +123,3 @@ test_that("rdlearn check NA", {
   }
   expect_false(any(is.na(safelearn_out$safe_cut)), info = "safe_cut contains NA values")
 })
-
-
-
-
-
-
-
