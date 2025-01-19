@@ -43,9 +43,6 @@ estimate_dif_lip <- function(
   Lip0 <- matrix(0, nrow = q, ncol = q)
   Lip1 <- matrix(0, nrow = q, ncol = q)
 
-  dif_list <- list()
-  Lip_list <- list()
-
   for (d in c(1, 0)) {
     if (isTRUE(trace)) {
       cat(paste0("Estimating dif and Lip for d = ", d), "\n")
