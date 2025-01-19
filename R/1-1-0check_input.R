@@ -2,8 +2,7 @@
 #'
 #' This function checks the input arguments for the \code{rdlearn} function.
 #'
-#' @inheritParams
-#' y A character string representing the name of the outcome variable.
+#' @param y A character string representing the name of the outcome variable.
 #' @param x A character string representing the name of the running variable.
 #' @param c A character string representing the name of the cutoff variable.
 #' @param data A data frame containing all the required variables.
