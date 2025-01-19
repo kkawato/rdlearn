@@ -33,7 +33,6 @@ plot.rdlearn <- function(x, opt, ...) {
   q <- x$num_group
   org_cut <- x$org_cut
   safe_cut <- x$safe_cut
-  l2norm <- x$l2norm
   group_name <- x$group_name
 
   if (opt == "safe") {
