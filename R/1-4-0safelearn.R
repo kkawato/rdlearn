@@ -67,7 +67,6 @@ safelearn <- function(
       }
       Lip_1 <- temp_M * Lip_1temp
       Lip_0 <- temp_M * Lip_0temp
-      Lip_list <- list(Lip_1, Lip_0)
       c.all <- rep(0, length(c.vec))
 
       for (g in seq(1, q, 1)) {
@@ -139,6 +138,7 @@ safelearn <- function(
   rownames(safecut_all) <- safecut_all$group
   safecut_all <- safecut_all[, -which(names(safecut_all) == "group")]
 
+
   if (length(M) == 1 && length(cost) == 1) {
     dif_cut <- safecut_all - c.vec
     dif_cut <- as.data.frame(dif_cut)
@@ -148,17 +148,12 @@ safelearn <- function(
     colnames(safecut_all) <- paste0("M=", M, ",", "C=", cost)
     rownames(safecut_all) <- group_name_vec
   } else {
-    safecut_row <- nrow(safecut_all)
-    org_cut_matrix <- matrix(rep(c.vec, each = ), nrow = , byrow = FALSE)
-    dif_cut <- safecut_all - org_cut_matrix
+    dif_cut <- safecut_all - matrix(c.vec)
   }
 
   out <- list(safe_cut = safecut_all, dif_cut = dif_cut, temp_reg_df = temp_reg_df)
   return(out)
 }
-
-
-
 
 #' Estimating the bounds of cross-group differences
 #'
