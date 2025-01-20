@@ -5,3 +5,5 @@
 ^\.devcontainer$
 ^data-raw$
 ^cran-comments\.md$
+^doc$
+^Meta$

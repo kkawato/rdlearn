@@ -16,7 +16,7 @@
 
 The R package `rdlearn` implements the *safe policy learning under
 regression discontinuity designs with multiple cutoffs* of Zhang et
-al. (2022). It provides functions to learn improved treatment assignment
+al.(2022). It provides functions to learn improved treatment assignment
 rules (cutoffs) which are guaranteed to yield no worse overall outcomes
 than the existing cutoffs.
 
@@ -82,7 +82,7 @@ head(acces)
 
 First, we demonstrate how to output *a summary of the dataset*, which
 includes local treatment effect estimates at the baseline cutoffs (such
-as Table 1 in Zhang et al. (2022)). This can be done as follows:
+as Table 1 in Zhang et al.(2022)). This can be done as follows:
 
 ``` r
 rdestimate_result <- rdestimate(
@@ -145,8 +145,16 @@ head(simdata_B)
 
 ``` r
 
-rdlearn_result <- rdlearn(data = simdata_B, y = "Y", x = "X", c = "C", 
-                          fold = 2, M = c(0, 1), cost = 0, trace = FALSE)
+rdlearn_result <- rdlearn(
+  data = simdata_B,
+  y = "Y",
+  x = "X",
+  c = "C",
+  fold = 2,
+  M = c(0, 1),
+  cost = 0,
+  trace = FALSE
+)
 
 summary(rdlearn_result)
 #> 
@@ -217,7 +225,11 @@ we conduct a sensitivity analysis for the cost parameter: $C$.
 We use the `sens` function with the `rdlearn_result` object as follows:
 
 ``` r
-sens_result <- sens(rdlearn_result, M = 1, cost = c(0, 1), trace = FALSE)
+sens_result <- sens(
+  rdlearn_result,
+  M = 1,
+  cost = c(0, 1),
+  trace = FALSE)
 plot(sens_result, opt = "dif")
 ```
 

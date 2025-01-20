@@ -28,7 +28,7 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-The R package `rdlearn` implements the *safe policy learning under regression discontinuity designs with multiple cutoffs* of Zhang et al. (2022). It provides functions to learn improved treatment assignment rules (cutoffs) which are guaranteed to yield no worse overall outcomes than the existing cutoffs.
+The R package `rdlearn` implements the *safe policy learning under regression discontinuity designs with multiple cutoffs* of Zhang et al.(2022). It provides functions to learn improved treatment assignment rules (cutoffs) which are guaranteed to yield no worse overall outcomes than the existing cutoffs.
 
 This document demonstrates how to use the main functions of `rdlearn`. For the replication of the empirical results of Zhang et al., please refer to the vignette.
 
@@ -70,7 +70,7 @@ head(acces)
 
 ## Main Analysis: Cutoff change relative to the baseline for each department under different smoothness multiplicative factors
 
-First, we demonstrate how to output *a summary of the dataset*, which includes local treatment effect estimates at the baseline cutoffs (such as Table 1 in Zhang et al. (2022)). This can be done as follows:
+First, we demonstrate how to output *a summary of the dataset*, which includes local treatment effect estimates at the baseline cutoffs (such as Table 1 in Zhang et al.(2022)). This can be done as follows:
  
 ```{r}
 rdestimate_result <- rdestimate(
@@ -95,8 +95,14 @@ data(simdata_B)
 head(simdata_B)
 
 rdlearn_result <- rdlearn(
-  data = simdata_B, y = "Y", x = "X", c = "C",
-  fold = 2, M = c(0, 1), cost = 0, trace = FALSE
+  data = simdata_B,
+  y = "Y",
+  x = "X",
+  c = "C",
+  fold = 2,
+  M = c(0, 1),
+  cost = 0,
+  trace = FALSE
 )
 
 summary(rdlearn_result)
@@ -124,7 +130,11 @@ In the case of Zhang et al.(2022), we assume the utility function \( u(y, w) = y
 We use the `sens` function with the `rdlearn_result` object as follows:
 
 ```{r, warning=FALSE, fig.width = 8, fig.height = 6}
-sens_result <- sens(rdlearn_result, M = 1, cost = c(0, 1), trace = FALSE)
+sens_result <- sens(
+  rdlearn_result,
+  M = 1,
+  cost = c(0, 1),
+  trace = FALSE)
 plot(sens_result, opt = "dif")
 ```
 
