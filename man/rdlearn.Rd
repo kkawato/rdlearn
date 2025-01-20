@@ -90,6 +90,6 @@ summary(rdlearn_result)
 plot(rdlearn_result, opt = "dif")
 
 # Implement sensitivity analysis
-sens_result <- sens(rdlearn_result, M = 1, cost = c(0,1))
+sens_result <- sens(rdlearn_result, M = 1, cost = c(0, 1))
 plot(sens_result, opt = "dif")
 }
