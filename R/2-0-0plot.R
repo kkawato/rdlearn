@@ -15,7 +15,11 @@
 #'
 #' @import ggplot2
 #' @inherit package_rdlearn examples
-#'
+#' @export
+plot <- function(x, opt, ...) {
+  UseMethod("plot")
+}
+
 #' @export
 plot.rdlearn <- function(x, opt, ...) {
   if (!inherits(x, "rdlearn")) {

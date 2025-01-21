@@ -1,5 +1,7 @@
 #' Summary function
 #'
+#' This function summarizes the key results returned by \code{rdlearn}.
+#'
 #' @param object An object of class \code{rdlearn} returned by the
 #'   \code{\link{rdlearn}} function.
 #' @param ... additional arguments.
@@ -10,7 +12,11 @@
 #'   cutoffs.
 #' @importFrom cli cli_h1
 #' @inherit package_rdlearn examples
-#'
+#' @export
+summary <- function(object, ...) {
+  UseMethod("summary")
+}
+
 #' @export
 summary.rdlearn <- function(object, ...) {
   # rdestimates
