@@ -53,7 +53,7 @@ crossfit <- function(
     data_train <- filter(data_all, fold_id != k)
     data_test <- filter(data_all, fold_id == k)
 
-    # conditional prob of group
+    # stats::predict produces the same result as the nnet::predict.multinom
     gamfit <- nnet::multinom(formula = G ~ X, data = data_train, trace = "FALSE")
     data_test[, paste0("pseudo.ps", seq(1, q, 1))] <- stats::predict(gamfit, newdata = data_test, "probs")
 
