@@ -14,7 +14,7 @@ test_that("plot works with any M or cost", {
     plot(result2, opt = "safe")
   )
   expect_silent(
-    plot(result2, opt = "safe")
+    plot(result2, opt = "dif")
   )
 
   result3 <- rdlearn(y = "Y", x = "X", c = "C", data = simdata_A, fold = 2, M = 1, cost = c(0, 0.2, 0.4, 0.6, 0.8, 1))
