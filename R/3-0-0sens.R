@@ -14,55 +14,46 @@
 #'   printed. The default value is TRUE.
 #' @return An updated \code{rdlearn} object with the new cutoffs based on the
 #'   provided values of M and cost.
-#' @examples
-#' \dontrun{
-#' # Load example data
-#' data(acces)
-#' library(rdlearn)
-#' library(nprobust)
-#' library(nnet)
-#' library(ggplot2)
-#' library(dplyr)
-#' library(glue)
-#' library(purrr)
-#' library(tidyr)
-#' result <- rdlearn(y = "elig", x = "saber11", c = "cutoff",
-#'                   group_name = "department", data = acces,
-#'                   fold = 20, M = c(0, 1), cost = 0)
-#' sens_result <- sens(result, M = 1, cost = c(0, 0.2, 0.4, 0.6, 0.8, 1))
-#' plot(sens_result)
-#' }
+#' @inherit package_rdlearn examples
+#'
 #' @export
-sens <- function (
+sens <- function(
     object,
     M = NULL,
     cost = NULL,
-    trace = TRUE
-){
+    trace = TRUE) {
   # check arguments
-  if(missing(object) || !inherits(object, "rdlearn"))
+  if (missing(object) || !inherits(object, "rdlearn")) {
     stop("'object' must be of class 'rdlearn'.")
+  }
 
-  if(missing(M))
+  if (missing(M)) {
     stop("M is missing")
+  }
 
-  if(missing(cost))
+  if (missing(cost)) {
     stop("cost is missing")
+  }
 
   if (length(M) > 1 && length(cost) > 1) {
     stop("Both M and cost are vectors.")
   }
 
-  result$safe_cut <- safelearn(
-      c.vec = result$org_cut,
-      n = result$sample,
-      q = result$num_group,
-      cost = cost,
-      M = M,
-      group_name = result$group_name,
-      dif_lip_output = result$dif_lip_output,
-      cross_fit_output = result$cross_fit_output,
-      trace = trace
-    )
-  result
+  new_result <- safelearn(
+    c.vec = object$org_cut,
+    n = object$sample,
+    q = object$num_group,
+    cost = cost,
+    M = M,
+    group_name_vec = object$group_name,
+    dif_lip_output = object$dif_lip_output,
+    cross_fit_output = object$cross_fit_output,
+    trace = trace
+  )
+
+  object$safe_cut <- new_result$safe_cut
+  object$dif_cut <- new_result$dif_cut
+  object$temp_reg_df <- new_result$temp_reg_df
+
+  object
 }

@@ -16,12 +16,12 @@ running variable.}
 \item{c}{A character string specifying the name of column containing the
 cutoff variable.}
 
-\item{group_name}{A character string specifying the name of the column
+\item{group_name}{A character ctring specifying the name of the column
 containing group names (e.g., department names) for each cutoff. If not
 provided, the groups are assigned names "Group 1", "Group 2", ... in
 ascending order of cutoff values.}
 
-\item{data}{A data frame containing all required variables.}
+\item{data}{A data frame containing all the following required variables.}
 }
 \value{
 A data frame with the RD estimates for each group, including the
@@ -29,9 +29,13 @@ A data frame with the RD estimates for each group, including the
   and p-value.
 }
 \description{
-This function performs standard regression discontinuity (RD) estimation.
+This function estimates local causal effect of treatment under standard
+regression discontinuity (RD) setting.
 }
 \examples{
-results <- rdestimate(y = "elig", x = "saber11", c = "cutoff", group_name = "department", data = acces)
-print(results)
+rdestimate_result <- rdestimate(
+  y = "elig", x = "saber11", c = "cutoff",
+  group_name = "department", data = acces
+)
+print(rdestimate_result)
 }

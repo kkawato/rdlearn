@@ -1,36 +1,39 @@
 Package: rdlearn
 Type: Package
-Title: Safe policy learning under RD design with multiple cutoffs
+Title: Safe Policy Learning under Regression Discontinuity Design with Multiple Cutoffs
 Version: 0.1.0
 Authors@R:
     c(person(given = "Kentaro",
            family = "Kawato",
-           role = c("cre"),
+           role = c("cre","cph"),
            email = "kentaro1358nohe@gmail.com"),
-    person(given = "Zhang",
-           family = "Yi",
+    person(given = "Yi",
+           family = "Zhang",
            role = c("aut")))
-Description: The rdlearn package offers tools for safe policy learning under regression discontinuity designs with multiple cutoffs. 
-    The learned cutoffs are guaranteed to perform no worse than the existing cutoffs in terms of overall outcomes.
-    Additionally, this package allows you to visualize the learned cutoffs relative to the baseline and perform sensitivity analysis on the learned policies.
+Description: Implements safe policy learning under regression discontinuity designs
+    with multiple cutoffs, based on Zhang et al. (2022) <doi:10.48550/arXiv.2208.13323>.
+    The learned cutoffs are guaranteed  to perform no worse than the existing
+    cutoffs in terms of overall outcomes. The 'rdlearn' package also includes
+    features for visualizing the learned cutoffs relative to the baseline and
+    conducting sensitivity analyses.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.1
-URL: https://github.com/kkawato/rdleran
+URL: https://github.com/kkawato/rdlearn
 BugReports: https://github.com/kkawato/rdlearn/issues
 Imports:
     nprobust,
     nnet,
+    rdrobust,
     ggplot2,
     dplyr,
     glue,
-    purrr,
-    tidyr
-Suggests: 
+    cli
+Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
-Depends: R (>= 2.10)
+Depends: R (>= 3.5.0)
 VignetteBuilder: knitr
