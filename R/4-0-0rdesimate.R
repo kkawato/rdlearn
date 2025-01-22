@@ -3,7 +3,7 @@
 #' This function estimates local causal effect of treatment under standard
 #' regression discontinuity (RD) setting.
 #'
-#' @param data A data frame containing all the following required variables.
+#' @param data A data frame containing all required variables.
 #' @param y A character string specifying the name of column containing the
 #'   outcome variable.
 #' @param x A character string specifying the name of column containing the

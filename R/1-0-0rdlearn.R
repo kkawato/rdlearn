@@ -33,7 +33,6 @@
 #'     \item{var_names}{A list of variable names for the outcome, running variable, and cutoff.}
 #'     \item{org_cut}{A vector of original cutoff values.}
 #'     \item{safe_cut}{A data frame containing the obtained new treatment assignment cutoffs.}
-#'     \item{dif_cut}{A data frame containing the difference bertween safe cutoffs and original cutoffs}
 #'     \item{sample}{The total sample size.}
 #'     \item{num_group}{The number of groups.}
 #'     \item{group_name}{A vector of group names.}
@@ -161,14 +160,14 @@ rdlearn <- function(
   )
 
   # Calculate the distance between original cutoffs and safe cutoffs
-  distance <- calculate_distance(
+  l2norm <- calculate_distance(
     org_cut = c.vec,
-    safe_cut = safecut_all$safe_cut
+    safe_cut = safecut_all
   )
 
   # Organize output
   out <- list(
-    call = call,
+    call = cl,
     var_names = var_names,
     org_cut = c.vec,
     safe_cut = safecut_all$safe_cut,

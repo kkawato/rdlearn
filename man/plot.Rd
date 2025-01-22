@@ -16,12 +16,11 @@ original cutoffs. When set to "dif", it displays the change in cutoffs.}
 \item{...}{additional arguments.}
 }
 \value{
-A \code{ggplot2} plot which also contains the distance measure
-  between original cutoffs and safe cutoffs.
+A \code{ggplot2} plot which also contains the distance measure between original cutoffs and safe cutoffs.
 }
 \description{
-This function plots the changes in cutoff values relative to the baseline
-cutoffs for each group, under different combinations of the smoothness
+This function plots the changes in cutoff values relative to the baseline cutoffs
+for each group, under different combinations of the smoothness
 multiplier (M) and the cost of treatment (C).
 }
 \examples{

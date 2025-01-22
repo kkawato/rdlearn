@@ -138,7 +138,6 @@ safelearn <- function(
   rownames(safecut_all) <- safecut_all$group
   safecut_all <- safecut_all[, -which(names(safecut_all) == "group")]
 
-
   if (length(M) == 1 && length(cost) == 1) {
     dif_cut <- safecut_all - c.vec
     dif_cut <- as.data.frame(dif_cut)

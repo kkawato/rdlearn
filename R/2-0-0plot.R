@@ -1,7 +1,7 @@
 #' Plot Cutoff Changes for rdlearn Objects
 #'
-#' This function plots the changes in cutoff values relative to the baseline
-#' cutoffs for each group, under different combinations of the smoothness
+#' This function plots the changes in cutoff values relative to the baseline cutoffs
+#' for each group, under different combinations of the smoothness
 #' multiplier (M) and the cost of treatment (C).
 #'
 #' @param x An object of class \code{rdlearn} returned by the
@@ -10,8 +10,7 @@
 #'   original cutoffs. When set to "dif", it displays the change in cutoffs.
 #' @param ... additional arguments.
 #'
-#' @return A \code{ggplot2} plot which also contains the distance measure
-#'   between original cutoffs and safe cutoffs.
+#' @return A \code{ggplot2} plot which also contains the distance measure between original cutoffs and safe cutoffs.
 #'
 #' @import ggplot2
 #' @inherit package_rdlearn examples

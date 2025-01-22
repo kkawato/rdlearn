@@ -51,7 +51,6 @@ An object of class \code{rdlearn}, which is a list containing the
     \item{var_names}{A list of variable names for the outcome, running variable, and cutoff.}
     \item{org_cut}{A vector of original cutoff values.}
     \item{safe_cut}{A data frame containing the obtained new treatment assignment cutoffs.}
-    \item{dif_cut}{A data frame containing the difference bertween safe cutoffs and original cutoffs}
     \item{sample}{The total sample size.}
     \item{num_group}{The number of groups.}
     \item{group_name}{A vector of group names.}
