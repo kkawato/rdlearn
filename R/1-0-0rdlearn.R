@@ -6,7 +6,7 @@
 #' treatment assignment rules (cutoffs) are guaranteed to yield no worse overall
 #' outcomes than the existing cutoffs.
 #'
-#' Regarding the detail of the algorithm, please refer to "4 Empirical policy
+#' Regarding the detail of the algorithm, please refer to Zhang et al. (2022) "4 Empirical policy
 #' learning" and "A.2 A double robust estimator for heterogeneous cross-group
 #' differences".
 #'
@@ -38,30 +38,17 @@
 #'     \item{group_name}{A vector of group names.}
 #'     \item{cross_fit_output}{The intermediate output of the cross-fitting procedure.}
 #'     \item{dif_lip_output}{The intermediate output of the cross-group differences and the smoothness parameters}
+#'     \item{distance}{A numeric vector containing the measures of difference between safe cutoffs and original cutoffs}
+#'     \item{rdestimates}{A data frame containing the result of \code{rdesimate} such as causal effect estimates.}
+#'     \item{temp_reg_df}{A data frame containing the regrets of every alternative cutoff.}
 #'   }
-#'
-#' @examples
-#' \dontrun{
-#' # Load example data
-#' data(acces)
-#' library(rdlearn)
-#' library(nprobust)
-#' library(nnet)
-#' library(ggplot2)
-#' library(dplyr)
-#' library(glue)
-#' library(purrr)
-#' library(tidyr)
-#'
-#' result <- rdlearn(y = "elig", x = "saber11", c = "cutoff",
-#'                   group_name = "department", data = acces,
-#'                   fold = 20, M = c(0, 1), cost = 0)
-#' plot(result)
-#' }
 #'
 #' @importFrom stats setNames
 #' @importFrom dplyr mutate arrange
 #' @importFrom utils globalVariables
+#'
+#' @inherit package_rdlearn examples
+#'
 #' @export
 rdlearn <- function(
     y,
@@ -74,47 +61,66 @@ rdlearn <- function(
     cost = 0,
     trace = TRUE) {
   # Get function call
-  cl <- match.call()
-  var_names <- list(outcome = y,
-                    run_var = x,
-                    cutoff = c)
+  call <- match.call()
+
+  var_names <- list(
+    outcome = y,
+    run_var = x,
+    cutoff = c
+  )
+
   # --------------------------- Check input ---------------------------------- #
-  check_input(y = y,
-              x = x,
-              c = c,
-              data = data,
-              M = M,
-              cost = cost,
-              var_names = var_names,
-              trace = trace)
+  check_input(
+    y = y,
+    x = x,
+    c = c,
+    data = data,
+    M = M,
+    cost = cost,
+    fold = fold,
+    var_names = var_names,
+    trace = trace
+  )
+
+  # --------------------------- RDD esimation -------------------------------- #
+  rdestimates <- rdestimate(
+    y = y,
+    x = x,
+    c = c,
+    group_name = group_name,
+    data = data
+  )
 
   # --------------------------- Prepare data --------------------------------- #
-
   # Prepare variables:
   # * Y: outcome variable
   # * X: running variable
   # * C: cutoff
-  Y <- data[[y]] ; X <- data[[x]] ; C <- data[[c]]
-
   # Sort cutoffs from min to max
   # Group index, from min cutoff to max cutoff
   # Treatment indicator
-  c.vec <- sort(unique(C)) ; G <- match(C, c.vec) ; D <- as.numeric(X >= C)
-
   # Sample size
   # Number of groups
-  n <- length(Y) ; q <- length(unique(C))
+
+  Y <- data[[y]]
+  X <- data[[x]]
+  C <- data[[c]]
+  c.vec <- sort(unique(C))
+  G <- match(C, c.vec)
+  D <- as.numeric(X >= C)
+  n <- length(Y)
+  q <- length(unique(C))
 
   # When group_name is not provided, assign a new name "Group k"
   if (is.null(group_name)) {
-    group_name <- character(q)
+    group_name_vec <- character(q)
     for (k in 1:q) {
-      group_name[k] <- paste0("Group", k)
+      group_name_vec[k] <- paste0("Group", k)
     }
   } else {
-    grouplist <- data[[group_name]]
-    dict <- setNames(grouplist, C)
-    group_name <- sapply(c.vec, function(x) dict[[as.character(x)]])
+    group_name_df <- data[[group_name]]
+    dict <- setNames(group_name_df, C)
+    group_name_vec <- sapply(c.vec, function(x) dict[[as.character(x)]])
   }
 
   # Add fold_id to data used for cross-fitting
@@ -147,7 +153,7 @@ rdlearn <- function(
     q = q,
     cost = cost,
     M = M,
-    group_name = group_name,
+    group_name_vec = group_name_vec,
     dif_lip_output = dif_lip_output,
     cross_fit_output = cross_fit_output,
     trace = trace
@@ -164,13 +170,16 @@ rdlearn <- function(
     call = cl,
     var_names = var_names,
     org_cut = c.vec,
-    safe_cut = safecut_all,
-    sample = n,
+    safe_cut = safecut_all$safe_cut,
+    dif_cut = safecut_all$dif_cut,
+    sample = length(Y),
     num_group = q,
-    group_name = group_name,
+    group_name = group_name_vec,
     cross_fit_output = cross_fit_output,
     dif_lip_output = dif_lip_output,
-    l2norm = l2norm
+    distance = distance,
+    rdestimates = rdestimates,
+    temp_reg_df = safecut_all$temp_reg_df
   )
 
   class(out) <- "rdlearn"
@@ -178,6 +187,4 @@ rdlearn <- function(
 }
 
 # Register global variables to avoid R CMD check notes
-utils::globalVariables(c('fold_id', 'D', 'X', 'G', 'Y', 'group', 'type', 'y_axis'))
-
-# ---------------------------------------------------------------------------- #
+utils::globalVariables(c("fold_id", "D", "X", "G", "Y", "group", "type", "y_axis"))

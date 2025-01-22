@@ -1,4 +1,9 @@
 Version: 1.0
+<<<<<<< HEAD
+ProjectId: 6cc00bf8-4fed-4664-b7ba-ccd1622e5680
+=======
+ProjectId: 9fb2d007-bb7d-48ae-98e5-ecc7db495e12
+>>>>>>> main
 
 RestoreWorkspace: Default
 SaveWorkspace: Default
@@ -9,7 +14,7 @@ UseSpacesForTab: Yes
 NumSpacesForTab: 2
 Encoding: UTF-8
 
-RnwWeave: Sweave
+RnwWeave: knitr
 LaTeX: pdfLaTeX
 
 AutoAppendNewline: Yes
@@ -18,5 +23,8 @@ StripTrailingWhitespace: Yes
 BuildType: Package
 PackageUseDevtools: Yes
 PackageInstallArgs: --no-multiarch --with-keep.source
+PackageRoxygenize: rd,collate,namespace
+
+SpellingDictionary: en_US
 
 ProjectName: rdlearn
