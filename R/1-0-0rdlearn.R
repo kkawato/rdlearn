@@ -160,14 +160,14 @@ rdlearn <- function(
   )
 
   # Calculate the distance between original cutoffs and safe cutoffs
-  l2norm <- calculate_distance(
+  distance <- calculate_distance(
     org_cut = c.vec,
-    safe_cut = safecut_all
+    safe_cut = safecut_all$safe_cut
   )
 
   # Organize output
   out <- list(
-    call = cl,
+    call = call,
     var_names = var_names,
     org_cut = c.vec,
     safe_cut = safecut_all$safe_cut,
