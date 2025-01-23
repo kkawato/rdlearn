@@ -87,6 +87,9 @@ Useful links:
 Authors:
 \itemize{
   \item Yi Zhang
+  \item Soichiro Yamauchi
+  \item Eli Ben-Michael
+  \item Kosuke Imai
 }
 
 }

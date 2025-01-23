@@ -7,8 +7,17 @@ Authors@R:
            family = "Kawato",
            role = c("cre","cph"),
            email = "kentaro1358nohe@gmail.com"),
-    person(given = "Yi",
+      person(given = "Yi",
            family = "Zhang",
+           role = c("aut")),
+      person(given = "Soichiro",
+           family = "Yamauchi",
+           role = c("aut")),
+      person(given = "Eli",
+           family = "Ben-Michael",
+           role = c("aut")),
+      person(given = "Kosuke",
+           family = "Imai",
            role = c("aut")))
 Description: Implements safe policy learning under regression discontinuity designs
     with multiple cutoffs, based on Zhang et al. (2022) <doi:10.48550/arXiv.2208.13323>.
