@@ -1,7 +1,7 @@
 Package: rdlearn
 Type: Package
 Title: Safe Policy Learning under Regression Discontinuity Design with Multiple Cutoffs
-Version: 0.1.1
+Version: 0.1.0
 Authors@R:
     c(person(given = "Kentaro",
            family = "Kawato",
