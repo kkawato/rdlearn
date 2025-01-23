@@ -14,15 +14,15 @@
 
 ## Introduction
 
-The R package `rdlearn` implements the *safe policy learning under
-regression discontinuity designs with multiple cutoffs* of Zhang et
-al.(2022). It provides functions to learn improved treatment assignment
+The R package `rdlearn` implements the **safe policy learning under
+regression discontinuity designs with multiple cutoffs** of Zhang et
+al. (2022). It provides functions to learn improved treatment assignment
 rules (cutoffs) which are guaranteed to yield no worse overall outcomes
 than the existing cutoffs.
 
 This document demonstrates how to use the main functions of `rdlearn`.
-For the replication of the empirical results of Zhang et al., please
-refer to the vignette.
+For the replication of the empirical results of Zhang et al. (2022),
+please refer to the vignette.
 
 ## Installation
 
@@ -55,10 +55,10 @@ to the ACCES (Access with Quality to Higher Education) program, a
 national-level subsidized loan initiative in Colombia.
 
 The `acces` dataset includes four columns. The `elig` column contains
-the *outcome* (eligibility for the ACCES program (1: eligible; 0: not
-eligible). The `saber11` column contains *running variable* (position
+the **outcome** (eligibility for the ACCES program (1: eligible; 0: not
+eligible). The `saber11` column contains **running variable** (position
 scores from the SABER 11 exam). The `cutoff` column contains the
-eligibility *cutoff* for each department, and the `department` column
+eligibility **cutoff** for each department, and the `department` column
 contains the names of the departments.
 
 ``` r
@@ -80,9 +80,9 @@ head(acces)
 
 ## Main Analysis: Cutoff change relative to the baseline for each department under different smoothness multiplicative factors
 
-First, we demonstrate how to output *a summary of the dataset*, which
+First, we demonstrate how to output **a summary of the dataset**, which
 includes local treatment effect estimates at the baseline cutoffs (such
-as Table 1 in Zhang et al.(2022)). This can be done as follows:
+as Table 1 in Zhang et al. (2022)). This can be done as follows:
 
 ``` r
 rdestimate_result <- rdestimate(
@@ -121,8 +121,8 @@ print(rdestimate_result)
 
 This provides basic information, including the sample size and baseline
 cutoff for each group, as well as the RD treatment effect and standard
-error. RD treatment effects marked with an asterisk (\*) are significant
-at the 5% level.
+error. RD treatment effects marked with an asterisk (\*\*) are
+significant at the 5% level.
 
 Next, we show how to obtain the safe cutoffs by the proposed algorithm.
 We use the simulation data B in the Appendix D of Zhang et al. (2022).
@@ -190,32 +190,33 @@ This plot shows the cutoff changes relative to the baseline for each
 department under different smoothness multiplicative factors (`M`).
 
 The main function here is `rdlearn`. The arguments include `data` for
-the *dataset*, `y` for the column name of *outcome*, `x` for the column
-name of *running variable*, `c` for the column name of *cutoff*, and
-`group_name` for the column name of *group*. These arguments specify the
-data we analyze. The `fold` argument specifies *the number of folds for
-cross-fitting*.
+the **dataset**, `y` for the column name of **outcome**, `x` for the
+column name of **running variable**, `c` for the column name of
+**cutoff**, and `group_name` for the column name of **group**. These
+arguments specify the data we analyze. The `fold` argument specifies
+**the number of folds for cross-fitting**.
 
-For sensitivity analysis, the `M` argument specifies *the multiplicative
-smoothness factor* and `cost` specifies *the treatment cost*.
+For sensitivity analysis, the `M` argument specifies **the
+multiplicative smoothness factor** and `cost` specifies **the treatment
+cost**.
 
 For an `rdlearn_result` object obtained by `rdlearn`, we can use
 `summary` to display the RD estimates, the obtained safe cutoffs, and
 the differences between the safe and original cutoffs.
 
 The `plot` function provides a clear visualization of the safe cutoffs.
-Using `plot(result, opt = "safe")` shows *the obtained safe cutoffs*,
-while `plot(result,opt = "dif")` shows *the differences between the safe
-and original cutoffs*.
+Using `plot(result, opt = "safe")` shows **the obtained safe cutoffs**,
+while `plot(result,opt = "dif")` shows **the differences between the
+safe and original cutoffs**.
 
 The `trace` argument can be set to `TRUE` to show progress during the
 learning process.
 
 ## Sensitivity Analysis: Cutoff changes relative to the baseline for each department with varying treatment costs
 
-Next, we implement another *sensitivity analysis*.
+Next, we implement another **sensitivity analysis**.
 
-In the case of Zhang et al.(2022), we assume the utility function
+In the case of Zhang et al. (2022), we assume the utility function
 $u(y, w) = y - C \times w$, where $y$ is a binary outcome (representing
 the utility gain from enrollment), $C$ is a cost parameter ranging from
 0 to 1, and $w$ is a binary treatment indicator (representing the
