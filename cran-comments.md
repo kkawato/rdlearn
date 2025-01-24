@@ -1,3 +1,12 @@
+# Second Submission
+## Changes Made
+### Addressing Example and Vignette Runtime
+We have reduced the runtime of examples in the package by:
+- Using smaller simulation data for demonstrations in the example.
+- Changing hyperparameters in the vignette.
+- Precomputing results for the most computationally intensive parts of examples in the vignette.
+
+# First Submission
 ## R CMD Check Results 
 
 ### Testing Environments 
