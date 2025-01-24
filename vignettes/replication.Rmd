@@ -67,7 +67,7 @@ This provides basic information, including the sample size and baseline cutoff f
 
 Next, we demonstrate how to obtain **the results of Figure 2**, which shows the cutoff change relative to the baseline for each department under different **smoothness multiplicative factors** (`M`). Due to the computational time required, we are presenting only the first two columns of Figure 2. Learning safe cutoffs can be done as follows:
 
-```{r, warning=FALSE, fig.width = 8, fig.height = 6}
+```{r, warning=FALSE, fig.width = 8, fig.height = 6, cache=TRUE}
 set.seed(12345)
 
 # To replicate exactly, set fold = 20 and M = c(0, 1, 2, 4)
@@ -77,7 +77,7 @@ rdlearn_result <- rdlearn(
   x = "saber11",
   c = "cutoff",
   group_name = "department",
-  fold = 3,
+  fold = 2,
   M = c(0, 1),
   cost = 0,
   trace = FALSE
@@ -106,12 +106,12 @@ In the case of Zhang et al.(2022), we assume the utility function \( u(y, w) = y
 
 We use the `sens` function with the `rdlearn_result` object as follows:
 
-```{r, warning=FALSE, fig.width = 8, fig.height = 6}
+```{r, warning=FALSE, fig.width = 8, fig.height = 6, cache=TRUE}
 # To replicate exactly, set cost = c(0, 0.2, 0.4, 0.6, 0.8, 1)
 sens_result <- sens(
   rdlearn_result,
   M = 1,
-  cost = c(0, 0.6, 1),
+  cost = c(0, 1),
   trace = FALSE)
 plot(sens_result, opt = "dif")
 ```
