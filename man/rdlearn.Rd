@@ -73,10 +73,9 @@ learning" and "A.2 A double robust estimator for heterogeneous cross-group
 differences".
 }
 \examples{
-# Load the simulation data
-
 # Simulation Data A from Appendix D of Zhang et al. (2022)
-n <- 200
+set.seed(1)
+n <- 300
 X <- runif(n, -1000, -1)
 G <- 2 * as.numeric(
 I(0.01 * X + 5 + rnorm(n, sd = 10) > 0)
@@ -97,10 +96,12 @@ EY1 <- Px \%*\% coef1
 d <- 0.2 + exp(0.01 * X) * (1 - G) + 0.3 * (1 - D)
 Y <- EY0 * (1 - D) + EY1 * D - d * as.numeric(I(G == 1)) + rnorm(n, sd = 0.3)
 
+simdata_A_demo <- data.frame(Y,X,C)
+
 # Learn new treatment assignment cutoffs
 rdlearn_result <- rdlearn(
-  y = "Y", x = "X", c = "C", data = simdata_A,
-  fold = 2, M = c(0, 1), cost = 0
+  y = "Y", x = "X", c = "C", data = simdata_A_demo,
+  fold = 2, M = 0, cost = 0
 )
 
 # Summarise the learned policies
@@ -112,6 +113,6 @@ plot(rdlearn_result, opt = "dif")
 # the baseline cutoff is set to equal to oracle cutoff in this simulation.
 
 # Implement sensitivity analysis
-sens_result <- sens(rdlearn_result, M = 1, cost = c(0, 1))
+sens_result <- sens(rdlearn_result, M = 1, cost = 0)
 plot(sens_result, opt = "dif")
 }
