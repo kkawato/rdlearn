@@ -29,7 +29,7 @@ This function performs sensitivity analysis for the \code{rdlearn} object
 under different smoothness multiplier (M) and the cost of treatment (cost).
 }
 \examples{
-# Simulation Data A from Appendix D of Zhang et al. (2022)
+# Simulation Data B from Appendix D of Zhang et al. (2022)
 set.seed(1)
 n <- 300
 X <- runif(n, -1000, -1)
@@ -45,18 +45,19 @@ C <- ifelse(G == 1, c1, c0)
 D <- as.numeric(X >= C)
 coef0 <- c(-1.992230e+00, -1.004582e-02, -1.203897e-05, -4.587072e-09)
 coef1 <- c(9.584361e-01, 5.308251e-04, 1.103375e-06, 1.146033e-09)
-Px <- poly(X - 735.4334 - c1, degree = 3, raw = TRUE) # -735.4334-c1 = 164.43
+Px <- poly(X, degree = 3, raw = TRUE)
+# Px = poly(X-735.4334-c1,degree=3,raw=TRUE) for Simulation A
 Px <- cbind(rep(1, nrow(Px)), Px)
 EY0 <- Px \%*\% coef0
 EY1 <- Px \%*\% coef1
 d <- 0.2 + exp(0.01 * X) * (1 - G) + 0.3 * (1 - D)
 Y <- EY0 * (1 - D) + EY1 * D - d * as.numeric(I(G == 1)) + rnorm(n, sd = 0.3)
 
-simdata_A_demo <- data.frame(Y,X,C)
+simdata_B_demo <- data.frame(Y,X,C)
 
 # Learn new treatment assignment cutoffs
 rdlearn_result <- rdlearn(
-  y = "Y", x = "X", c = "C", data = simdata_A_demo,
+  y = "Y", x = "X", c = "C", data = simdata_B_demo,
   fold = 2, M = 0, cost = 0
 )
 
