@@ -28,12 +28,8 @@ multiplier (M) and the cost of treatment (C).
 set.seed(1)
 n <- 300
 X <- runif(n, -1000, -1)
-G <- 2 * as.numeric(
-I(0.01 * X + 5 + rnorm(n, sd = 10) > 0)
-) +
-as.numeric(
-I(0.01 * X + 5 + rnorm(n, sd = 10) <= 0)
-)
+G <- 2 * as.numeric(I(0.01 * X + 5 + rnorm(n, sd = 10) > 0)) +
+  as.numeric(I(0.01 * X + 5 + rnorm(n, sd = 10) <= 0))
 c1 <- -850
 c0 <- -571
 C <- ifelse(G == 1, c1, c0)
@@ -48,21 +44,27 @@ EY1 <- Px \%*\% coef1
 d <- 0.2 + exp(0.01 * X) * (1 - G) + 0.3 * (1 - D)
 Y <- EY0 * (1 - D) + EY1 * D - d * as.numeric(I(G == 1)) + rnorm(n, sd = 0.3)
 
-simdata_B_demo <- data.frame(Y,X,C)
+simdata_B_demo <- data.frame(Y, X, C)
 
 # Learn new treatment assignment cutoffs
 rdlearn_result <- rdlearn(
-  y = "Y", x = "X", c = "C", data = simdata_B_demo,
-  fold = 2, M = 0, cost = 0
+  y = "Y",
+  x = "X",
+  c = "C",
+  data = simdata_B_demo,
+  fold = 2,
+  M = 0,
+  cost = 0
 )
 
-# Summarise the learned policies
+# Summarize the learned policies
 summary(rdlearn_result)
 
 # Visualize the learned policies
-plot(rdlearn_result, opt = "dif")
+#
 # The learned cutoff for Group 1 is the same as the baseline cutoff, because
 # the baseline cutoff is set to equal to oracle cutoff in this simulation.
+plot(rdlearn_result, opt = "dif")
 
 # Implement sensitivity analysis
 sens_result <- sens(rdlearn_result, M = 1, cost = 0)
